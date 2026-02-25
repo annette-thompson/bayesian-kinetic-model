@@ -1,0 +1,21 @@
+{
+    "nominal_params": {
+        "k_f": 1.0e-1,
+        "k_r": 2.5e-2,
+        "k_cat": 1.0
+    },
+    "init_conds": {
+        "S": 0.195, 
+        "E": 1.0, 
+        "ES": 0.0,
+        "P": 0.0
+    },
+    "sub_prod_states": [
+        "S",
+        "ES",
+        "P"
+    ],
+    "prod_states": [
+        "P"
+    ]
+}

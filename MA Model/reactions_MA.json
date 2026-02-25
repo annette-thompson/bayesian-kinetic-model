@@ -1,0 +1,19 @@
+{
+  "reactions": [
+    {
+      "name": "binding",
+      "reactants": {"S": 1, "E": 1},
+      "products": {"ES": 1},
+      "rate_constant": "k_f",
+      "reversible": true,
+      "reverse_rate": "k_r"
+    },
+    {
+      "name": "catalysis",
+      "reactants": {"ES": 1},
+      "products": {"E": 1, "P": 1},
+      "rate_constant": "k_cat",
+      "reversible": false
+    }
+  ]
+}
