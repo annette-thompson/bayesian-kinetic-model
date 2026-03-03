@@ -1,0 +1,17 @@
+{
+    "nominal_params": {
+        "V_max": 0.01,
+        "K_m": 2.5e-3
+    },
+    "init_conds": {
+        "S": 0.195, 
+        "P": 0.0
+    },
+    "sub_prod_states": [
+        "S",
+        "P"
+    ],
+    "prod_states": [
+        "P"
+    ]
+}

@@ -65,7 +65,7 @@ class VJPSolOp(Op):
 ###############################################################################
 #### PyMC Inference Utils ####
 ###############################################################################
-def set_prior_params(param_names, free_params, nominal_params_dict,upper_mult, lower_mult, prior_family="[['Gamma()',['alpha', 'beta']]]", prob_mass_bounds=0.95, log_transform_bounds=False):
+def set_prior_params(param_names, free_params, nominal_params_dict, upper_mult, lower_mult, prior_family="[['Gamma()',['alpha', 'beta']]]", prob_mass_bounds=0.95, log_transform_bounds=False):
     """ Sets the prior parameters by finding parameters of the specified prior such that the specified probability mass is between the upper and lower bound.
 
     Uses the preliz maximum entropy function.
