@@ -1,0 +1,86 @@
+{
+    "unknown_kinetic_params": [
+    {
+        "rxn_name": "binding",
+        "param_name": "k_f",
+        "prior_dist_params": 
+        {
+            "distribution": "Gamma",
+            "lower":1.0e-2, 
+            "upper":2.0e-1, 
+            "mass": 0.95,
+            "fixed_stat": null
+        }
+    },
+    {
+        "rxn_name": "binding",
+        "param_name": "k_r",
+        "prior_dist_params": {
+            "distribution": "Gamma",
+            "lower":2.5e-3, 
+            "upper":5.0e-2, 
+            "mass": 0.95,
+            "fixed_stat": null
+        }
+    },
+    {
+        "rxn_name": "catalysis",
+        "param_name": "k_cat",
+        "prior_dist_params": 
+        {
+            "distribution": "Gamma",
+            "lower":1.0e-1, 
+            "upper":2.0, 
+            "mass": 0.95,
+            "fixed_stat": null
+        }
+    }
+    ],
+
+    "prior_sampling": 
+    {
+        "draws": 10000,
+        "random_seed": 0,
+        "idata_kwargs": null,
+        "compile_kwargs": null
+    },
+
+    "posterior_sampling": 
+    {
+        "draws": 200,
+        "tune": 300,
+        "chains": 4,
+        "cores": "None",
+        "random_seed": 0,
+        "step": null,
+        "nuts_sampler": "nutpie",
+        "blas_cores": "auto",
+        "init": null,
+        "nuts_sampler_kwargs": null,
+        "mp_ctx": null,
+        "compile_kwargs": null
+    },
+
+    "ODE_solver":
+    {
+        "solver_name": "Kvaerno5",
+        "dt0": 1e-12,
+        "max_steps": 10000000,
+        "stepsize_controller": "PIDController"
+    },
+
+    "ODE_stepsize_controller":
+    {
+        "rtol": 1.0e-9,
+        "atol": 1.0e-9,
+        "pcoeff": 0.3,
+        "icoeff": 0.4,
+        "dcoeff": 0.0
+    },
+
+    "init_conds": 
+    {
+        "S": 0.195, 
+        "E": 1.0
+    }
+}

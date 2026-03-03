@@ -1,0 +1,22 @@
+{
+  "reactions": [
+    {
+      "rxn_name": "binding",
+      "reactants": {"S": 1, "E": 1},
+      "products": {"ES": 1},
+      "rate_const_key": "k_f",
+      "rate_const_value": 1.0e-1,
+      "reversible": true,
+      "rvs_rate_const_key": "k_r",
+      "rvs_rate_const_value": 2.5e-2
+    },
+    {
+      "rxn_name": "catalysis",
+      "reactants": {"ES": 1},
+      "products": {"E": 1, "P": 1},
+      "rate_const_key": "k_cat",
+      "rate_const_value": 1.0,
+      "reversible": false
+    }
+  ]
+}
