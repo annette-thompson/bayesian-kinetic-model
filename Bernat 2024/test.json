@@ -1,0 +1,14 @@
+{
+    "reactants": [
+        "A",
+        "B_1"
+    ],
+    "products": [
+        "C_12",
+        "D"
+    ],
+    "rate_const_value": 3.14e-05,
+    "rate_const_key": "k_12_FabG",
+    "name": "",
+    "scaling_group_id": null
+}
