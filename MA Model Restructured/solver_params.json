@@ -1,5 +1,5 @@
 {
-    "unknown_kinetic_params": [
+    "free_kinetic_params": [
     {
         "rxn_name": "binding",
         "param_name": "k_f",

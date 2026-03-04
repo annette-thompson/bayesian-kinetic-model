@@ -24,29 +24,30 @@ rng = np.random.default_rng(seed=1234)
 ###############################################################################
 class SolOp(Op):
     """ Pytensor Op for the solution of an ODE system 
-    using Diffrax with an associated pytensor gradient Op. See VJPSOLOp below. """
+    using Diffrax with an associated pytensor gradient Op. See VJPSOLOp below.
+    """
     def __init__(self, sol_op_jax_jitted, vjp_sol_op):
         self.sol_op_jax_jitted = sol_op_jax_jitted
         self.vjp_sol_op = vjp_sol_op
 
     def make_node(self, *inputs):
-        # Convert our inputs to symbolic variables
         inputs = [pt.as_tensor_variable(inp) for inp in inputs]
-        # Assume the output to always be a float64 matrix
         outputs = [pt.matrix()]
+
         return Apply(self, inputs, outputs)
 
     def perform(self, node, inputs, outputs):
         result = self.sol_op_jax_jitted(*inputs)
         outputs[0][0] = np.asarray(result, dtype="float64")
-        
+  
     def grad(self, inputs, output_grads):
         (gz,) = output_grads
         return self.vjp_sol_op(inputs, gz)
     
 class VJPSolOp(Op):
     """ Pytensor Op for the gradient of the solution of an ODE system 
-    using Diffrax """
+    using Diffrax.
+    """
     def __init__(self, vjp_sol_op_jax_jitted):
         self.vjp_sol_op_jax_jitted = vjp_sol_op_jax_jitted
 
@@ -112,9 +113,7 @@ def set_prior_params(param_names, free_params, nominal_params_dict, upper_mult, 
             prior_fam = prior_family_list[free_param_idxs.index(i)]
 
             if "Truncated" in prior_fam[0]:
-                print('as', prior_fam)
                 tmp = prior_fam[0].strip(')').split('(')[1].split(',')
-                print(tmp)
                 for item in tmp:
                     if 'lower' in item:
                         lower = float(item.split('=')[1])
@@ -138,7 +137,7 @@ def set_prior_params(param_names, free_params, nominal_params_dict, upper_mult, 
                     tmp += (fixed_param + ', ')
                         
             prior_param_dict[param] = tmp + ')'
-            print(prior_param_dict[param])
+
         else: # fixed parameter
             # set the prior parameters to the nominal value
             prior_param_dict[param] = 'pm.ConstantData("' + param + '", ' + str(nominal_params_dict[param]) + ')'
