@@ -1,0 +1,5 @@
+condition,S_init,final_product_concentration
+condition_1,0.50,0.18
+condition_2,0.80,0.34
+condition_3,1.10,0.50
+condition_4,1.40,0.66

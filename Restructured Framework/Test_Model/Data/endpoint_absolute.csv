@@ -1,0 +1,5 @@
+condition,S_init,E_init,final_product_concentration
+low_substrate,0.60,0.10,0.22
+mid_substrate,0.90,0.10,0.39
+high_substrate,1.20,0.10,0.56
+very_high_substrate,1.50,0.10,0.68

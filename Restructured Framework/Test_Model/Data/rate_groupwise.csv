@@ -1,0 +1,11 @@
+time,batch,product_formation_rate
+0.0,batch_A,0.10
+0.0,batch_B,0.13
+1.0,batch_A,0.18
+1.0,batch_B,0.21
+2.0,batch_A,0.24
+2.0,batch_B,0.27
+3.0,batch_A,0.17
+3.0,batch_B,0.20
+4.0,batch_A,0.10
+4.0,batch_B,0.12

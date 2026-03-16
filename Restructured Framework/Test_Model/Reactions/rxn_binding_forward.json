@@ -1,0 +1,12 @@
+{
+  "reactions": [
+    {
+      "rxn_name": "binding_forward",
+      "reactants": {"S": 1, "E": 1},
+      "products": {"ES": 1},
+      "rate_const_key": "k_f",
+      "rate_const_value": 0.1,
+      "reversible": false
+    }
+  ]
+}

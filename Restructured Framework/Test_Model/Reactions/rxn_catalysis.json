@@ -1,0 +1,12 @@
+{
+  "reactions": [
+    {
+      "rxn_name": "catalysis",
+      "reactants": {"ES": 1},
+      "products": {"E": 1, "P": 1},
+      "rate_const_key": "k_cat",
+      "rate_const_value": 1.0,
+      "reversible": false
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+dataset_name,dataset_type,noise_model,data_file,observable
+ts_rel_mean,timeseries,relative_mean,Data/ts_relative_mean.csv,product_fraction
+ts_rel_pointwise,timeseries,relative_pointwise,Data/ts_relative_pointwise.csv,product_concentration
+ts_rel_plus_floor,timeseries,relative_plus_floor,Data/ts_relative_plus_floor.csv,total_substrate_pool
+ts_absolute,timeseries,absolute,Data/ts_absolute_total_pool.csv,total_product_pool
+ts_column,timeseries,column,Data/ts_column_sigma.csv,product_fraction
+replicate_groupwise,replicate_timeseries,groupwise,Data/replicate_groupwise.csv,product_fraction
+endpoint_absolute,endpoint,absolute,Data/endpoint_absolute.csv,final_product_concentration
+endpoint_rel_mean,endpoint,relative_mean,Data/endpoint_relative_mean.csv,final_product_concentration
+rate_column,rate,column,Data/rate_column_sigma.csv,product_formation_rate
+rate_groupwise,rate,groupwise,Data/rate_groupwise.csv,product_formation_rate

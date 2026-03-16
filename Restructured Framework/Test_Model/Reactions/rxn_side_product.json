@@ -1,0 +1,12 @@
+{
+  "reactions": [
+    {
+      "rxn_name": "side_product",
+      "reactants": {"P": 1},
+      "products": {"Q": 1},
+      "rate_const_key": "k_side",
+      "rate_const_value": 0.05,
+      "reversible": false
+    }
+  ]
+}
