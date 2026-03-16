@@ -6,6 +6,7 @@ import jax.numpy as jnp
 import equinox as eqx
 import json
 import numpy as np
+from pathlib import Path
 
 
 def build_ode_system_from_reactions(reactions_json):
@@ -33,10 +34,7 @@ def build_ode_system_from_reactions(reactions_json):
         Dictionary of nominal parameter values
     """
     
-    with open(reactions_json, 'r') as f:
-        reaction_spec = json.load(f)
-    
-    reactions = reaction_spec['reactions']
+    reactions = _load_reactions(reactions_json)
     
     # Infer species/parameters in encounter order to preserve JSON-defined semantics.
     species = []
@@ -167,4 +165,101 @@ def build_ode_system_from_reactions(reactions_json):
             return self.stoich_matrix @ rates
     
     return ReactionNetwork(), species, params, param_values
+
+
+def _load_reactions(reactions_json):
+    """Load reactions from a single JSON file or merge all JSON files in a directory."""
+    source_path = Path(reactions_json).expanduser().resolve()
+    if not source_path.exists():
+        raise FileNotFoundError(f"Reaction source not found: {source_path}")
+
+    file_reaction_specs = []
+    if source_path.is_dir():
+        json_files = sorted(source_path.glob("*.json"))
+        if not json_files:
+            raise ValueError(f"No JSON reaction files found in directory: {source_path}")
+        for file_path in json_files:
+            with open(file_path, "r") as f:
+                spec = json.load(f)
+            file_reaction_specs.append((str(file_path), spec))
+    else:
+        with open(source_path, "r") as f:
+            spec = json.load(f)
+        file_reaction_specs.append((str(source_path), spec))
+
+    reactions = []
+    seen_param_values = {}
+    required_keys = {
+        "rxn_name",
+        "reactants",
+        "products",
+        "rate_const_key",
+        "rate_const_value",
+        "reversible",
+    }
+
+    for source_file, reaction_spec in file_reaction_specs:
+        if "reactions" not in reaction_spec:
+            raise KeyError(f"Missing 'reactions' key in {source_file}")
+        if not isinstance(reaction_spec["reactions"], list):
+            raise TypeError(f"'reactions' must be a list in {source_file}")
+
+        for idx, reaction in enumerate(reaction_spec["reactions"]):
+            if not isinstance(reaction, dict):
+                raise TypeError(
+                    f"Reaction index {idx} in {source_file} must be a mapping/dict."
+                )
+
+            missing_keys = sorted(required_keys.difference(reaction.keys()))
+            if missing_keys:
+                raise KeyError(
+                    f"Reaction index {idx} in {source_file} missing keys: {missing_keys}"
+                )
+
+            if not isinstance(reaction["reactants"], dict) or not isinstance(reaction["products"], dict):
+                raise TypeError(
+                    f"Reaction '{reaction.get('rxn_name', idx)}' in {source_file} must use dict stoichiometry for reactants/products."
+                )
+
+            _validate_param_conflict(
+                seen_param_values=seen_param_values,
+                param_key=reaction["rate_const_key"],
+                param_value=float(reaction["rate_const_value"]),
+                source_file=source_file,
+                reaction_name=reaction.get("rxn_name", f"reaction_{idx}"),
+            )
+
+            if reaction.get("reversible", False):
+                if "rvs_rate_const_key" not in reaction or "rvs_rate_const_value" not in reaction:
+                    raise KeyError(
+                        f"Reversible reaction '{reaction.get('rxn_name', idx)}' in {source_file} is missing reverse-rate keys."
+                    )
+                _validate_param_conflict(
+                    seen_param_values=seen_param_values,
+                    param_key=reaction["rvs_rate_const_key"],
+                    param_value=float(reaction["rvs_rate_const_value"]),
+                    source_file=source_file,
+                    reaction_name=reaction.get("rxn_name", f"reaction_{idx}"),
+                )
+
+            reactions.append(reaction)
+
+    if not reactions:
+        raise ValueError(f"No reactions loaded from source: {source_path}")
+    return reactions
+
+
+def _validate_param_conflict(seen_param_values, param_key, param_value, source_file, reaction_name):
+    """Reject conflicting nominal values when the same kinetic key appears more than once."""
+    if param_key not in seen_param_values:
+        seen_param_values[param_key] = (param_value, source_file, reaction_name)
+        return
+
+    previous_value, previous_file, previous_reaction = seen_param_values[param_key]
+    if not np.isclose(previous_value, param_value):
+        raise ValueError(
+            "Conflicting nominal values for parameter "
+            f"'{param_key}': {previous_value} ({previous_reaction} in {previous_file}) vs "
+            f"{param_value} ({reaction_name} in {source_file})."
+        )
 
