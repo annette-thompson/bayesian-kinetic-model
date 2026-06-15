@@ -1,0 +1,94 @@
+{
+    "free_kinetic_params": [
+        {
+            "rxn_name": "FabD_binding_MalCoA",
+            "param_name": "k2_1f",
+            "prior_dist_params": {
+                "distribution": "LogNormal",
+                "lower": 0.0081,
+                "upper": 8.8,
+                "mass": 0.95,
+                "fixed_stat": null
+            }
+        },
+        {
+            "rxn_name": "FabD_binding_ACP",
+            "param_name": "k2_3f",
+            "prior_dist_params": {
+                "distribution": "LogNormal",
+                "lower": 0.00088,
+                "upper": 0.28,
+                "mass": 0.95,
+                "fixed_stat": null
+            }
+        }
+    ],
+    "prior_sampling": {
+        "draws": 1000,
+        "random_seed": 0
+    },
+    "posterior_sampling": {
+        "draws": 200,
+        "tune": 300,
+        "chains": 4,
+        "random_seed": 0,
+        "target_accept": 0.95,
+        "nuts_sampler": "nutpie"
+    },
+    "ODE_solver": {
+        "solver_name": "Kvaerno5",
+        "max_steps": 10000000,
+        "dt0": 1e-12,
+        "stepsize_controller": "PIDController"
+    },
+    "ODE_stepsize_controller": {
+        "rtol": 1e-06,
+        "atol": 1e-08,
+        "pcoeff": 0.3,
+        "icoeff": 0.4,
+        "dcoeff": 0.0
+    },
+    "calculation_module": "./FabD_calculations.py",
+    "datasets": [
+        {
+            "name": "conc_vs_final_MalACP",
+            "dataset_type": "endpoint",
+            "data_file": "./Data/conc_vs_final_MalACP.csv",
+            "observable": "MalACP (uM)",
+            "column_mapping": {
+                "MalACP (uM)": "MalACP (uM)"
+            },
+            "noise_model": "relative_mean",
+            "noise_params": {
+                "frac": 0.05
+            },
+            "time_values": [
+                150
+            ],
+            "init_cond_columns": {
+                "FabD": "FabD (uM)",
+                "C3_MalCoA": "MalCoA (uM)",
+                "ACP": "ACP (uM)"
+            }
+        },
+        {
+            "name": "time_vs_MalACP",
+            "dataset_type": "timeseries",
+            "data_file": "./Data/time_vs_MalACP.csv",
+            "observable": "MalACP (uM)",
+            "column_mapping": {
+                "MalACP (uM)": "MalACP (uM)"
+            },
+            "noise_model": "relative_mean",
+            "noise_params": {
+                "frac": 0.05
+            },
+            "time_column": "Time (ms)"
+        }
+    ],
+    "init_conds": {
+        "FabD": 1,
+        "C3_MalCoA": 1000,
+        "ACP": 10
+    }
+}

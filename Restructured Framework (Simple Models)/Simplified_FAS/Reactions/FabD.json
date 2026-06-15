@@ -1,0 +1,44 @@
+{
+  "reactions": [
+    {
+      "rxn_name": "FabD_binding_MalCoA",
+      "reactants": {"FabD": 1, "C3_MalCoA": 1},
+      "products": {"C3_FabD_MalCoA": 1},
+      "rate_const_key": "k2_1f",
+      "rate_const_value": 0.1900,
+      "reversible": true,
+      "rvs_rate_const_key": "k2_1r",
+      "rvs_rate_const_value": 11.40
+    },
+    {
+      "rxn_name": "FabD_activation",
+      "reactants": {"C3_FabD_MalCoA": 1},
+      "products": {"C3_FabD_Act": 1, "CoA": 1},
+      "rate_const_key": "k2_2f",
+      "rate_const_value": 60.22,
+      "reversible": true,
+      "rvs_rate_const_key": "k2_2r",
+      "rvs_rate_const_value": 0.4021
+    },
+    {
+      "rxn_name": "FabD_binding_ACP",
+      "reactants": {"C3_FabD_Act": 1, "ACP": 1},
+      "products": {"C3_FabD_Act_ACP": 1},
+      "rate_const_key": "k2_3f",
+      "rate_const_value": 0.07729,
+      "reversible": true,
+      "rvs_rate_const_key": "k2_3r",
+      "rvs_rate_const_value": 3.092
+    },
+    {
+      "rxn_name": "FabD_catalysis",
+      "reactants": {"C3_FabD_Act_ACP": 1},
+      "products": {"FabD": 1, "C3_MalACP": 1},
+      "rate_const_key": "k2_4f",
+      "rate_const_value": 1.411,
+      "reversible": true,
+      "rvs_rate_const_key": "k2_4r",
+      "rvs_rate_const_value": 0.4021
+    }
+  ]
+}

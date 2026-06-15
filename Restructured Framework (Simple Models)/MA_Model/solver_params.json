@@ -1,0 +1,72 @@
+{
+    "free_kinetic_params": [
+        {
+            "rxn_name": "binding",
+            "param_name": "k_f",
+            "prior_dist_params": {
+                "distribution": "Gamma",
+                "lower": 0.01,
+                "upper": 0.2,
+                "mass": 0.95,
+                "fixed_stat": null
+            }
+        },
+        {
+            "rxn_name": "catalysis",
+            "param_name": "k_cat",
+            "prior_dist_params": {
+                "distribution": "Gamma",
+                "lower": 0.1,
+                "upper": 2.0,
+                "mass": 0.95,
+                "fixed_stat": null
+            }
+        }
+    ],
+    "prior_sampling": {
+        "draws": 10000,
+        "random_seed": 0
+    },
+    "posterior_sampling": {
+        "draws": 100,
+        "tune": 100,
+        "chains": 4,
+        "cores": "None",
+        "random_seed": 0,
+        "nuts_sampler": "nutpie"
+    },
+    "ODE_solver": {
+        "solver_name": "Kvaerno5",
+        "dt0": 1e-12,
+        "max_steps": 10000000,
+        "stepsize_controller": "PIDController"
+    },
+    "ODE_stepsize_controller": {
+        "rtol": 1e-09,
+        "atol": 1e-09,
+        "pcoeff": 0.3,
+        "icoeff": 0.4,
+        "dcoeff": 0.0
+    },
+    "calculation_module": "./pyruvate_kinase_calculations.py",
+    "datasets": [
+        {
+            "name": "pyruvate_kinase_product_fraction",
+            "dataset_type": "timeseries",
+            "data_file": "./Data/Duggleby_Clarke_1991_Fig2.csv",
+            "observable": "product_fraction",
+            "column_mapping": {
+                "product_fraction": "[P]/[S_tot]"
+            },
+            "noise_model": "relative_mean",
+            "noise_params": {
+                "frac": 0.05
+            },
+            "time_column": "time"
+        }
+    ],
+    "init_conds": {
+        "S": 0.195,
+        "E": 1.0
+    }
+}

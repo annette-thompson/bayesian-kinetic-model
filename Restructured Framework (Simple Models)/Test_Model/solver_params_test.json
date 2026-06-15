@@ -1,0 +1,212 @@
+{
+    "free_kinetic_params": [
+        {
+            "rxn_name": "binding_forward",
+            "param_name": "k_f",
+            "prior_dist_params": {
+                "distribution": "LogNormal",
+                "lower": 0.001,
+                "upper": 1.0,
+                "mass": 0.95,
+                "fixed_stat": [
+                    "mean",
+                    0.1
+                ]
+            }
+        },
+        {
+            "rxn_name": "catalysis",
+            "param_name": "k_cat",
+            "prior_dist_params": {
+                "distribution": "LogNormal",
+                "lower": 0.01,
+                "upper": 10.0,
+                "mass": 0.95,
+                "fixed_stat": null
+            }
+        },
+        {
+            "rxn_name": "side_product",
+            "param_name": "k_side",
+            "prior_dist_params": {
+                "distribution": "LogNormal",
+                "lower": 0.0005,
+                "upper": 2.0,
+                "mass": 0.95,
+                "fixed_stat": null
+            }
+        }
+    ],
+    "prior_sampling": {
+        "draws": 100,
+        "random_seed": 2026
+    },
+    "posterior_sampling": {
+        "draws": 100,
+        "tune": 100,
+        "chains": 4,
+        "random_seed": 2026,
+        "target_accept": 0.95,
+        "nuts_sampler": "nutpie"
+    },
+    "ODE_solver": {
+        "solver_name": "Kvaerno5",
+        "dt0": 1e-12,
+        "max_steps": 10000000,
+        "stepsize_controller": "PIDController"
+    },
+    "ODE_stepsize_controller": {
+        "rtol": 1e-06,
+        "atol": 1e-08,
+        "pcoeff": 0.3,
+        "icoeff": 0.4,
+        "dcoeff": 0.0
+    },
+    "calculation_module": "./test_calculations.py",
+    "datasets": [
+        {
+            "name": "ts_rel_mean",
+            "dataset_type": "timeseries",
+            "data_file": "./Data/ts_relative_mean.csv",
+            "observable": "product_fraction",
+            "column_mapping": {
+                "product_fraction": "product_fraction"
+            },
+            "noise_model": "relative_mean",
+            "noise_params": {
+                "frac": 0.05
+            },
+            "time_column": "time"
+        },
+        {
+            "name": "ts_rel_pointwise",
+            "dataset_type": "timeseries",
+            "data_file": "./Data/ts_relative_pointwise.csv",
+            "observable": "product_concentration",
+            "column_mapping": {
+                "product_concentration": "product_concentration"
+            },
+            "noise_model": "relative_pointwise",
+            "noise_params": {
+                "frac": 0.08,
+                "floor": 0.002
+            },
+            "time_column": "time",
+            "init_cond_columns": {
+                "S": "S_init"
+            }
+        },
+        {
+            "name": "ts_rel_plus_floor",
+            "dataset_type": "timeseries",
+            "data_file": "./Data/ts_relative_plus_floor.csv",
+            "observable": "total_substrate_pool",
+            "column_mapping": {
+                "total_substrate_pool": "total_substrate_pool"
+            },
+            "noise_model": "relative_plus_floor",
+            "noise_params": {
+                "frac": 0.03,
+                "floor": 0.001
+            },
+            "time_column": "time"
+        },
+        {
+            "name": "ts_absolute",
+            "dataset_type": "timeseries",
+            "data_file": "./Data/ts_absolute_total_pool.csv",
+            "observable": "total_product_pool",
+            "column_mapping": {
+                "total_product_pool": "total_product_pool"
+            },
+            "noise_model": "absolute",
+            "noise_params": {
+                "value": 0.025
+            },
+            "time_column": "time"
+        },
+        {
+            "name": "ts_column",
+            "dataset_type": "timeseries",
+            "data_file": "./Data/ts_column_sigma.csv",
+            "observable": "product_fraction",
+            "column_mapping": {
+                "product_fraction": "product_fraction"
+            },
+            "noise_model": "column",
+            "noise_params": {
+                "frac": 0.05
+            },
+            "time_column": "time",
+            "sigma_column_mapping": {
+                "product_fraction": "product_sigma"
+            }
+        },
+        {
+            "name": "replicate_groupwise",
+            "dataset_type": "replicate_timeseries",
+            "data_file": "./Data/replicate_groupwise.csv",
+            "observable": "product_fraction",
+            "column_mapping": {
+                "product_fraction": "product_fraction"
+            },
+            "noise_model": "groupwise",
+            "noise_params": {
+                "group_column": "replicate_id",
+                "statistic": "std",
+                "min_sigma": 0.0001
+            },
+            "time_column": "time",
+            "init_cond_columns": {
+                "S": "S_init",
+                "E": "E_init"
+            }
+        },
+        {
+            "name": "endpoint_absolute",
+            "dataset_type": "endpoint",
+            "data_file": "./Data/endpoint_absolute.csv",
+            "observable": "final_product_concentration",
+            "column_mapping": {
+                "final_product_concentration": "final_product_concentration"
+            },
+            "noise_model": "absolute",
+            "noise_params": {
+                "value": 0.02
+            },
+            "time_values": [
+                4.0
+            ],
+            "init_cond_columns": {
+                "S": "S_init",
+                "E": "E_init"
+            }
+        },
+        {
+            "name": "endpoint_rel_mean",
+            "dataset_type": "endpoint",
+            "data_file": "./Data/endpoint_relative_mean.csv",
+            "observable": "final_product_concentration",
+            "column_mapping": {
+                "final_product_concentration": "final_product_concentration"
+            },
+            "noise_model": "relative_mean",
+            "noise_params": {
+                "frac": 0.07
+            },
+            "time_values": [
+                4.0
+            ],
+            "init_cond_columns": {
+                "S": "S_init"
+            }
+        }
+    ],
+    "init_conds": {
+        "S": 1.0,
+        "E": 0.1,
+        "ES": 0.0,
+        "P": 0.0,
+        "Q": 0.0
+    }
+}
