@@ -1,0 +1,5 @@
+stage,solver,adjoint,rtol,atol,pcoeff,icoeff,dcoeff,dt0,max_steps,n_trials,n_errors,error_example,success_all,time_s_mean,time_s_std,steps_mean,accepted_steps_mean,t_final_mean
+adjoint_check,Kvaerno5,RecursiveCheckpointAdjoint,1e-06,1e-08,0.3,0.4,0.0,1e-06,10000,2,0,,True,4.455030922021251,0.28209723997861147,226.0,226.0,720.0
+adjoint_check,Kvaerno5,DirectAdjoint,1e-06,1e-08,0.3,0.4,0.0,1e-06,10000,2,0,,True,4.815296010492602,1.0858877194987144,226.0,226.0,720.0
+adjoint_check,Kvaerno5,BacksolveAdjoint,1e-06,1e-08,0.3,0.4,0.0,1e-06,10000,0,2,Cannot use `adjoint=BacksolveAdjoint()` with `saveat=SaveAt(steps=True)` or saveat=SaveAt(dense=True)`.,False,,,,,
+adjoint_check,Kvaerno5,ImplicitAdjoint,1e-06,1e-08,0.3,0.4,0.0,1e-06,10000,0,2,Can only use `adjoint=ImplicitAdjoint()` with `saveat=SaveAt(t1=True)`.,False,,,,,

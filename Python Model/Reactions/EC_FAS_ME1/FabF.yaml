@@ -1,0 +1,164 @@
+# FabF — β-ketoacyl-ACP synthase II
+# Condenses acyl-ACPs with malonyl-ACP and elongates by 2 carbons.
+# Initiation activity: can bind malonyl-ACP with acetyl- or malonyl-ACP but not acetyl-CoA; 
+# BUT final condensation step to make C4 BKeAcACP is turned off. (Generates acetyl-ACP that 
+# FabB can turn into acetyl-CoA for FabH initiation.)
+# Inhibited by ACP. kcat values differ between saturated and unsaturated substrates.
+# Units: kon: μM⁻¹s⁻¹, koff: s⁻¹, kcat: s⁻¹
+
+enzymes: [FabF]
+schema_version: ME1_model
+
+defaults:
+  sat_chain_lengths: [4, 6, 8, 10, 12, 14, 16, 18]
+  unsat_chain_lengths: [12, 14, 16, 18]
+
+reactions:
+  - rxn_name: "C{chain}_FabF_binding_AcACP"
+    chain_template: true
+    saturation_template: true
+    reactants: {FabF: 1, "C{chain}_AcACP": 1}
+    products: {"C{chain}_FabF_AcACP": 1}
+    rate_const_key: kon_F_AcACP
+    scaling_group: null
+    rate_const_value: 11.7763992136
+    reversible: true
+    rvs_rate_const_key: koff_F_AcACP
+    rvs_scaling_group: a2
+    rvs_rate_const_value: 164.8695889904
+
+  - rxn_name: "C{chain}_FabF_activation_release_ACP"
+    chain_template: true
+    saturation_template: true
+    reactants: {"C{chain}_FabF_AcACP": 1}
+    products: {"C{chain}_FabF_Act": 1, ACP: 1}
+    rate_const_key: kfwd_F_AcACP
+    scaling_group: (b1/b3)
+    rate_const_value: 1411.1030972777992
+    reversible: true
+    rvs_rate_const_key: krvs_F_AcACP
+    rvs_scaling_group: b1
+    rvs_rate_const_value: 402.13929190000005
+
+  - rxn_name: "C{chain}_FabF_Act_binding_MalACP"
+    chain_template: true
+    saturation_template: true
+    token_offsets: {intermediate: 3}
+    reactants: {"C{chain}_FabF_Act": 1, C3_MalACP: 1}
+    products: {"C{intermediate}_FabF_Act_MalACP": 1}
+    rate_const_key: kon_F_Act_MalACP
+    scaling_group: null
+    rate_const_value: 20.106047437853658
+    reversible: true
+    rvs_rate_const_key: koff_F_Act_MalACP
+    rvs_scaling_group: a2
+    rvs_rate_const_value: 164.8695889904
+
+  - rxn_name: "C{chain}_FabF_condensation_release_BKeAcACP"
+    chain_template: true
+    saturation_template: true
+    sat_chain_lengths: [6, 8, 10, 12, 14, 16, 18, 20]
+    unsat_chain_lengths: [14, 16, 18, 20]
+    token_offsets: {intermediate: 1}
+    reactants: {"C{intermediate}_FabF_Act_MalACP": 1}
+    products: {FabF: 1, "C{chain}_BKeAcACP": 1, C1_CO2: 1}
+    fwd_unsat_params_same_as_sat: false
+    rate_const_key: "C{chain}_kcat_F_BKeAcACP"
+    scaling_group: c2
+    sat_rate_const_value: [254.2847118905488, 254.2847118905488, 250.66797091179922, 278.2108445192,
+                            250.38976006728,   80.4029340660488,  6.17628074832624,   6.17628074832624]
+    unsat_rate_const_value: [250.38976006728, 80.4029340660488, 94.591687136528, 94.591687136528]
+    reversible: false
+
+  - rxn_name: C2_FabF_binding_AcCoA
+    reactants: {FabF: 1, C2_AcCoA: 1}
+    products: {C2_FabF_AcCoA: 1}
+    rate_const_key: C2_kon_F_AcCoA
+    scaling_group: null
+    rate_const_value: 0
+    reversible: true
+    rvs_rate_const_key: C2_koff_F_AcCoA
+    rvs_scaling_group: null
+    rvs_rate_const_value: 0
+
+  - rxn_name: C2_FabF_AcCoA_activation
+    reactants: {C2_FabF_AcCoA: 1}
+    products: {C2_FabF_Act: 1, CoA: 1}
+    rate_const_key: C2_kfwd_F_AcCoA
+    scaling_group: null
+    rate_const_value: 0
+    reversible: true
+    rvs_rate_const_key: C2_krvs_F_AcCoA
+    rvs_scaling_group: null
+    rvs_rate_const_value: 0
+
+  - rxn_name: FabF_binding_MalACP
+    reactants: {FabF: 1, C3_MalACP: 1}
+    products: {C3_FabF_MalACP: 1}
+    rate_const_key: kon_F_MalACP
+    scaling_group: null
+    rate_const_value: 284.9474476
+    reversible: true
+    rvs_rate_const_key: koff_F_MalACP
+    rvs_scaling_group: null
+    rvs_rate_const_value: 11397.8979
+
+  - rxn_name: FabF_decarboxylating_MalACP
+    reactants: {C3_FabF_MalACP: 1}
+    products: {C2_FabF_AcACP: 1, C1_CO2: 1}
+    rate_const_key: kcat_F_MalACP_F_C2_AcACP
+    scaling_group: x1
+    rate_const_value: 7.848508288126024
+    reversible: false
+
+  - rxn_name: FabF_binding_C2_AcACP
+    reactants: {FabF: 1, C2_AcACP: 1}
+    products: {C2_FabF_AcACP: 1}
+    rate_const_key: kon_F_C2_AcACP
+    scaling_group: null
+    rate_const_value: 284.9474476
+    reversible: true
+    rvs_rate_const_key: koff_F_C2_AcACP
+    rvs_scaling_group: x3
+    rvs_rate_const_value: 393195.44843109022
+
+  - rxn_name: C2_FabF_AcACP_activation
+    reactants: {C2_FabF_AcACP: 1}
+    products: {C2_FabF_Act: 1, ACP: 1}
+    rate_const_key: kfwd_F_C2_AcACP
+    scaling_group: null
+    rate_const_value: 1411.103097
+    reversible: true
+    rvs_rate_const_key: krvs_F_C2_AcACP
+    rvs_scaling_group: null
+    rvs_rate_const_value: 402.139291
+
+  - rxn_name: C2_FabF_Act_binding_MalACP
+    reactants: {C2_FabF_Act: 1, C3_MalACP: 1}
+    products: {C5_FabF_Act_MalACP: 1}
+    rate_const_key: C2_kon_F_Act_MalACP
+    scaling_group: null
+    rate_const_value: 618.3359613
+    reversible: true
+    rvs_rate_const_key: C2_koff_F_Act_MalACP
+    rvs_scaling_group: null
+    rvs_rate_const_value: 3091.679806
+
+  - rxn_name: C4_FabF_Act_condensation_release_BKeAcACP
+    reactants: {C5_FabF_Act_MalACP: 1}
+    products: {FabF: 1, C4_BKeAcACP: 1, C1_CO2: 1}
+    rate_const_key: C4_kcat_F_BKeAcACP
+    scaling_group: null
+    rate_const_value: 0
+    reversible: false
+
+  - rxn_name: FabF_inhibition_by_ACP
+    reactants: {FabF: 1, ACP: 1}
+    products: {FabF_ACP: 1}
+    rate_const_key: kon_F_ACP
+    scaling_group: e
+    rate_const_value: 0.00695672449193
+    reversible: true
+    rvs_rate_const_key: koff_F_ACP
+    rvs_scaling_group: null
+    rvs_rate_const_value: 0.091574

@@ -1,0 +1,92 @@
+# FabA — β-hydroxyacyl-ACP dehydratase/trans-2-decenoyl-ACP isomerase
+# Dual-function enzyme: dehydrates beta-hydroxyacyl-ACP (like FabZ) AND isomerizes
+# the C10 trans-2-enoyl intermediate to cis-3-enoyl-ACP, committing the chain to
+# unsaturated fatty acid synthesis. Inhibited by ACP.
+# Units: kon: μM⁻¹s⁻¹, koff: s⁻¹, kcat: s⁻¹
+
+enzymes: [FabA]
+schema_version: ME1_model
+
+defaults:
+  sat_chain_lengths: [4, 6, 8, 10, 12, 14, 16, 18, 20]
+  unsat_chain_lengths: [12, 14, 16, 18, 20]
+
+reactions:
+  - rxn_name: "C{chain}_FabA_binding_BHyAcACP"
+    chain_template: true
+    saturation_template: true
+    reactants: {FabA: 1, "C{chain}_BHyAcACP": 1}
+    products: {"C{chain}_FabA_BHyAcACP": 1}
+    fwd_unsat_params_same_as_sat: false
+    rate_const_key: "C{chain}_kon_A_BHyAcACP"
+    scaling_group: null
+    sat_rate_const_value: [0.24936525334798, 0.9480001366948,    2.1109195590378, 2.9440998034,
+                            2.2110189523534,  0.24936525334798,  0.10981492266682, 0.10981492266682,
+                            0.10981492266682]
+    unsat_rate_const_value: [0.0791544784942517, 0.00892727606985768, 0.00393137423147216,
+                              0.00393137423147216, 0.00393137423147216]
+    reversible: true
+    rvs_rate_const_key: koff_A_BHyAcACP
+    rvs_scaling_group: a2
+    rvs_rate_const_value: 164.8695889904
+
+  - rxn_name: "C{chain}_FabA_dehydration"
+    chain_template: true
+    saturation_template: true
+    reactants: {"C{chain}_FabA_BHyAcACP": 1}
+    products: {"C{chain}_FabA_EnAcACP": 1}
+    rate_const_key: kfwd_A_dehyd
+    scaling_group: c2
+    rate_const_value: 24.176789044480003
+    reversible: true
+    rvs_rate_const_key: krvs_A_dehyd
+    rvs_scaling_group: c2
+    rvs_rate_const_value: 96.8849266856
+
+  - rxn_name: "C{chain}_FabA_release_EnAcACP"
+    chain_template: true
+    saturation_template: true
+    reactants: {"C{chain}_FabA_EnAcACP": 1}
+    products: {FabA: 1, "C{chain}_EnAcACP": 1}
+    rate_const_key: koff_A_EnAcACP
+    scaling_group: a2
+    rate_const_value: 164.8695889904
+    reversible: true
+    rvs_rate_const_key: "C{chain}_kon_A_EnAcACP"
+    rvs_scaling_group: null
+    rvs_rate_const_value: [0.24936525334798, 0.9480001366948,    2.1109195590378, 2.9440998034,
+                            2.2110189523534,  0.24936525334798,  0.10981492266682, 0.10981492266682,
+                            0.10981492266682]
+
+  - rxn_name: C10_cis_FabA_dehydration
+    reactants: {C10_FabA_EnAcACP: 1}
+    products: {C10_FabA_cis3EnAcACP: 1}
+    rate_const_key: C10_cis_kfwd_A_dehyd
+    scaling_group: (f*c2)
+    rate_const_value: 3211.8848724093118
+    reversible: true
+    rvs_rate_const_key: krvs_A_dehyd
+    rvs_scaling_group: c2
+    rvs_rate_const_value: 96.8849266856
+
+  - rxn_name: C10_cis_FabA_release_EnAcACP
+    reactants: {C10_FabA_cis3EnAcACP: 1}
+    products: {FabA: 1, C10_cis3EnAcACP: 1}
+    rate_const_key: koff_A_EnAcACP
+    scaling_group: a2
+    rate_const_value: 164.8695889904
+    reversible: true
+    rvs_rate_const_key: C10_cis_kon_A_EnAcACP
+    rvs_scaling_group: null
+    rvs_rate_const_value: 2.9440998034
+
+  - rxn_name: FabA_inhibition_by_ACP
+    reactants: {FabA: 1, ACP: 1}
+    products: {FabA_ACP: 1}
+    rate_const_key: kon_A_ACP
+    scaling_group: null
+    rate_const_value: 0.00241
+    reversible: true
+    rvs_rate_const_key: koff_A_ACP
+    rvs_scaling_group: null
+    rvs_rate_const_value: 0.091574

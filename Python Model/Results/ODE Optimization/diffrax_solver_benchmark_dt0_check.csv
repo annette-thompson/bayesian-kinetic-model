@@ -1,0 +1,4 @@
+stage,solver,adjoint,rtol,atol,pcoeff,icoeff,dcoeff,dt0,max_steps,n_trials,n_errors,error_example,success_all,time_s_mean,time_s_std,steps_mean,accepted_steps_mean,t_final_mean
+dt0_check,Kvaerno5,RecursiveCheckpointAdjoint,1e-06,1e-08,0.3,0.4,0.0,,10000,2,0,,True,4.372615597996628,0.0643639639893081,231.0,224.0,720.0
+dt0_check,Kvaerno5,RecursiveCheckpointAdjoint,1e-06,1e-08,0.3,0.4,0.0,1e-06,10000,2,0,,True,3.4467039100127295,0.01518931397004053,226.0,226.0,720.0
+dt0_check,Kvaerno5,RecursiveCheckpointAdjoint,1e-06,1e-08,0.3,0.4,0.0,1e-09,10000,2,0,,True,3.5379556819971185,0.02436308396863751,233.0,233.0,720.0

@@ -1,0 +1,95 @@
+# FabH — β-ketoacyl-ACP synthase III
+# Condenses acetyl-CoA with malonyl-ACP to produce a C4 β-ketoacyl-ACP.
+# Inhibited by ACP and acyl-ACPs (greater inhibition at longer chain lengths).
+# Units: kon: μM⁻¹s⁻¹, koff: s⁻¹, kcat: s⁻¹
+
+enzymes: [FabH]
+schema_version: ME1_model
+
+defaults:
+  sat_chain_lengths: [4, 6, 8, 10, 12, 14, 16, 18, 20]
+  unsat_chain_lengths: [12, 14, 16, 18, 20]
+
+reactions:
+  - rxn_name: C2_FabH_binding_AcCoA
+    reactants: {FabH: 1, "C2_AcCoA": 1}
+    products: {"C2_FabH_AcCoA": 1}
+    rate_const_key: C2_kon_H_AcCoA
+    scaling_group: null
+    rate_const_value: 284.947447600000030
+    reversible: true
+    rvs_rate_const_key: C2_koff_H_AcCoA
+    rvs_scaling_group: a1
+    rvs_rate_const_value: 11397.897904000001
+
+  - rxn_name: "C2_FabH_activation_release_CoA"
+    reactants: {"C2_FabH_AcCoA": 1}
+    products: {"C2_FabH_Act": 1, CoA: 1}
+    rate_const_key: kfwd_H_AcCoA
+    scaling_group: (b1/b3)
+    rate_const_value: 1411.1030972777992
+    reversible: true
+    rvs_rate_const_key: krvs_H_AcCoA
+    rvs_scaling_group: b1
+    rvs_rate_const_value: 402.13929190000005
+
+  - rxn_name: "C2_FabH_Act_binding_MalACP"
+    reactants: {"C2_FabH_Act": 1, C3_MalACP: 1}
+    products: {"C5_FabH_Act_MalACP": 1}
+    rate_const_key: kon_H_Act_MalACP
+    scaling_group: null
+    rate_const_value: 618.3359612920001
+    reversible: true
+    rvs_rate_const_key: koff_H_Act_MalACP
+    rvs_scaling_group: a1
+    rvs_rate_const_value: 3091.6798064600002
+
+  - rxn_name: "C5_FabH_Act_condensation_release_BKeAcACP"
+    reactants: {"C5_FabH_Act_MalACP": 1}
+    products: {FabH: 1, "C4_BKeAcACP": 1, C1_CO2: 1}
+    rate_const_key: "C4_kcat_H_BKeAcACP"
+    scaling_group: c1
+    rate_const_value: 14.54083748114
+    reversible: false
+
+  - rxn_name: "C{chain}_FabH_inhibition_by_AcACP"
+    chain_template: true
+    saturation_template: true
+    reactants: {FabH: 1, "C{chain}_AcACP": 1}
+    products: {"C{chain}_FabH_AcACP": 1}
+    rate_const_key: kon_H_AcACP
+    scaling_group: null
+    rate_const_value: 0.3088
+    reversible: true
+    rvs_rate_const_key: "C{chain}_koff_H_AcACP"
+    rvs_scaling_group: (1/e)
+    rvs_rate_const_value: [463.7496991784655, 463.7496991784655, 463.7496991784655, 463.7496991784655,
+                            463.7496991784655, 88.22375218566809, 103.50003666743528, 26.90680023007062,
+                            13.776469996932626]
+
+  - rxn_name: "C{chain}_C2_FabH_Act_inhibition_by_AcACP"
+    chain_template: true
+    saturation_template: true
+    token_offsets: {intermediate: 2}
+    reactants: {C2_FabH_Act: 1, "C{chain}_AcACP": 1}
+    products: {"C{intermediate}_FabH_Act_AcACP": 1}
+    rate_const_key: C2_kon_H_Act_AcACP
+    scaling_group: null
+    rate_const_value: 1.552
+    reversible: true
+    rvs_rate_const_key: "C{chain}_C2_koff_H_Act_AcACP"
+    rvs_scaling_group: (1/e)
+    rvs_rate_const_value: [12.726301652839819, 12.726301652839819, 12.726301652839819, 12.726301652839819,
+                            12.726301652839819, 16.183425422495926, 4.059297738865257, 4.5614678167593175,
+                            1.3489772220944278]
+
+  - rxn_name: FabH_inhibition_by_ACP
+    reactants: {FabH: 1, ACP: 1}
+    products: {FabH_ACP: 1}
+    rate_const_key: kon_H_ACP
+    scaling_group: e
+    rate_const_value: 0.000695672449193
+    reversible: true
+    rvs_rate_const_key: koff_H_ACP
+    rvs_scaling_group: null
+    rvs_rate_const_value: 0.091574

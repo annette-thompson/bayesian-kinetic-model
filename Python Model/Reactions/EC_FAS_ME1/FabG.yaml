@@ -1,0 +1,57 @@
+# FabG — β-ketoacyl-ACP reductase
+# Creates a β-hydroxyacyl-ACP by oxidizing NADPH.
+# Inhibited by ACP. No chain-length/saturation specificity.
+# Units: kon: μM⁻¹s⁻¹, koff: s⁻¹, kcat: s⁻¹
+
+enzymes: [FabG]
+schema_version: ME1_model
+
+defaults:
+  sat_chain_lengths: [4, 6, 8, 10, 12, 14, 16, 18, 20]
+  unsat_chain_lengths: [12, 14, 16, 18, 20]
+
+reactions:
+  - rxn_name: FabG_binding_NADPH
+    reactants: {FabG: 1, NADPH: 1}
+    products: {FabG_NADPH: 1}
+    rate_const_key: kon_G_NADPH
+    scaling_group: null
+    rate_const_value: 60.24957791216
+    reversible: true
+    rvs_rate_const_key: koff_G_NADPH
+    rvs_scaling_group: null
+    rvs_rate_const_value: 602.4957791216
+
+  - rxn_name: "C{chain}_FabG_binding_BKeAcACP"
+    chain_template: true
+    saturation_template: true
+    reactants: {FabG_NADPH: 1, "C{chain}_BKeAcACP": 1}
+    products: {"C{chain}_FabG_NADPH_BKeAcACP": 1}
+    rate_const_key: kon_G_BKeAcACP
+    scaling_group: null
+    rate_const_value: 9.698211117082352
+    reversible: true
+    rvs_rate_const_key: koff_G_BKeAcACP
+    rvs_scaling_group: a2
+    rvs_rate_const_value: 164.8695889904
+
+  - rxn_name: "C{chain}_FabG_catalysis_to_BHyAcACP"
+    chain_template: true
+    saturation_template: true
+    reactants: {"C{chain}_FabG_NADPH_BKeAcACP": 1}
+    products: {FabG: 1, NADP: 1, "C{chain}_BHyAcACP": 1}
+    rate_const_key: kcat_G_BHyAcACP
+    scaling_group: c2
+    rate_const_value: 52.4422997656
+    reversible: false
+
+  - rxn_name: FabG_inhibition_by_ACP
+    reactants: {FabG: 1, ACP: 1}
+    products: {FabG_ACP: 1}
+    rate_const_key: kon_G_ACP
+    scaling_group: null
+    rate_const_value: 0.00241
+    reversible: true
+    rvs_rate_const_key: koff_G_ACP
+    rvs_scaling_group: null
+    rvs_rate_const_value: 0.091574

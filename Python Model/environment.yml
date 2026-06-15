@@ -1,0 +1,25 @@
+name: Bayesian
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.11
+  - arviz
+  - c-compiler
+  - cxx-compiler
+  - diffrax
+  - equinox
+  - ipython
+  - jax
+  - matplotlib
+  - numpy
+  - numpyro
+  - pandas
+  - preliz
+  - pymc
+  - pytensor
+  - pyyaml
+  - seaborn
+  - sympy

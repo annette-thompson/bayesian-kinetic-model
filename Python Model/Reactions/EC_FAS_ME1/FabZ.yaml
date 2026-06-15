@@ -1,0 +1,87 @@
+# FabZ — β-hydroxyacyl-ACP dehydratase
+# Dehydrates saturated and unsaturated β-hydroxyacyl-ACPs to trans-2-enoyl-acyl-ACPs.
+# Inhibited by ACP.
+# Units: kon: μM⁻¹s⁻¹, koff: s⁻¹, kcat: s⁻¹
+
+enzymes: [FabZ]
+schema_version: ME1_model
+
+
+defaults:
+  sat_chain_lengths: [4, 6, 8, 10, 12, 14, 16, 18, 20]
+  unsat_chain_lengths: [12, 14, 16, 18, 20]
+
+reactions:
+  - rxn_name: "C{chain}_FabZ_binding_BHyAcACP"
+    chain_template: true
+    saturation_template: true
+    reactants: {FabZ: 1, "C{chain}_BHyAcACP": 1}
+    products: {"C{chain}_FabZ_BHyAcACP": 1}
+    rate_const_key: "C{chain}_kon_Z_BHyAcACP"
+    scaling_group: null
+    rate_const_value: [1.3807828077945998, 2.9440998034, 0.8714535418063999, 1.0952051268648,
+                       0.58881996068, 0.16221989916734, 0.309130479357, 0.309130479357, 0.309130479357]
+    reversible: true
+    rvs_rate_const_key: koff_Z_BHyAcACP
+    rvs_scaling_group: a2
+    rvs_rate_const_value: 164.8695889904
+
+  - rxn_name: "C{chain}_FabZ_dehydration"
+    chain_template: true
+    saturation_template: true
+    reactants: {"C{chain}_FabZ_BHyAcACP": 1}
+    products: {"C{chain}_FabZ_EnAcACP": 1}
+    rate_const_key: kfwd_Z_dehyd
+    scaling_group: c4
+    rate_const_value: 592.973601904
+    reversible: true
+    rvs_rate_const_key: krvs_Z_dehyd
+    rvs_scaling_group: c4
+    rvs_rate_const_value: 2376.25450763
+
+  - rxn_name: "C{chain}_FabZ_release_EnAcACP"
+    chain_template: true
+    saturation_template: true
+    reactants: {"C{chain}_FabZ_EnAcACP": 1}
+    products: {FabZ: 1, "C{chain}_EnAcACP": 1}
+    rate_const_key: koff_Z_EnAcACP
+    scaling_group: a2
+    rate_const_value: 164.8695889904
+    reversible: true
+    rvs_rate_const_key: "C{chain}_kon_Z_EnAcACP"
+    rvs_scaling_group: null
+    rvs_rate_const_value: [1.3807828077945998, 2.9440998034, 0.8714535418063999, 1.0952051268648,
+                            0.58881996068, 0.16221989916734, 0.309130479357, 0.309130479357, 0.309130479357]
+
+  - rxn_name: C10_cis_FabZ_dehydration
+    reactants: {C10_FabZ_EnAcACP: 1}
+    products: {C10_FabZ_cis3EnAcACP: 1}
+    rate_const_key: C10_cis_kfwd_Z_dehyd
+    scaling_group: (f*c4)
+    rate_const_value: 0
+    reversible: true
+    rvs_rate_const_key: C10_cis_krvs_Z_dehyd
+    rvs_scaling_group: c4
+    rvs_rate_const_value: 0
+
+  - rxn_name: C10_cis_FabZ_release_EnAcACP
+    reactants: {C10_FabZ_cis3EnAcACP: 1}
+    products: {FabZ: 1, C10_cis3EnAcACP: 1}
+    rate_const_key: C10_cis_koff_Z_EnAcACP
+    scaling_group: a2
+    rate_const_value: 0
+    reversible: true
+    rvs_rate_const_key: C10_cis_kon_Z_EnAcACP
+    rvs_scaling_group: null
+    rvs_rate_const_value: 0
+
+  - rxn_name: FabZ_inhibition_by_ACP
+    reactants: {FabZ: 1, ACP: 1}
+    products: {FabZ_ACP: 1}
+    rate_const_key: kon_Z_ACP
+    scaling_group: null
+    rate_const_value: 0.00241
+    reversible: true
+    rvs_rate_const_key: koff_Z_ACP
+    rvs_scaling_group: null
+    rvs_rate_const_value: 0.091574
