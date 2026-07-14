@@ -1,37 +1,38 @@
 {
     "free_kinetic_params": [
         {
-            "rxn_name": "FabD_binding_MalCoA",
+            "rxn_name": null,
             "param_name": "kon_D_MalCoA",
             "prior_dist_params": {
-                "distribution": "Gamma",
-                "lower": 8.1,
-                "upper": 8800.0,
+                "distribution": "LogNormal",
+                "lower": 10.0,
+                "upper": 1000.0,
                 "mass": 0.95,
                 "fixed_stat": null
             }
         },
         {
-            "rxn_name": "FabD_binding_ACP",
+            "rxn_name": null,
             "param_name": "kon_D_Act_ACP",
             "prior_dist_params": {
-                "distribution": "Gamma",
-                "lower": 0.88,
-                "upper": 280.0,
+                "distribution": "LogNormal",
+                "lower": 1.0,
+                "upper": 300.0,
                 "mass": 0.95,
                 "fixed_stat": null
             }
         }
     ],
     "prior_sampling": {
-        "draws": 10000,
+        "draws": 100000,
         "random_seed": 0
     },
     "posterior_sampling": {
-        "draws": 100,
-        "tune": 400,
+        "draws": 200,
+        "tune": 300,
         "nuts_sampler": "nutpie",
-        "target_accept": 0.95
+        "target_accept": 0.95,
+        "progressbar": false
     },
     "ODE_solver": {
         "solver_name": "Kvaerno5",
@@ -47,7 +48,7 @@
         "icoeff": 0.4,
         "dcoeff": 0.0
     },
-    "calculation_module": "Calculation Files/FabD kon inference/FabD_calculations.py",
+    "calculation_module": "Calculation Files/FabD/FabD_calculations.py",
     "datasets": [
         {
             "name": "conc_vs_final_C3_MalACP",
@@ -90,7 +91,7 @@
     ],
     "path_base": "../..",
     "output_paths": {
-        "reactions_source": "Reactions/FabD",
+        "reactions_source": "Reactions/EC_FAS_ME1/FabD.yaml",
         "results_save_dir": "Results/FabD kon inference",
         "prior_samples_file": "prior_samples_pm.nc",
         "posterior_samples_file": "posterior_samples_pm.nc",

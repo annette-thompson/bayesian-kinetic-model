@@ -1,0 +1,10 @@
+{
+  "phase": "done",
+  "warmup_done": 150,
+  "sampling_done": 150,
+  "n_tune": 150,
+  "n_draws": 150,
+  "stopped_reason": "completed",
+  "n_invocations": 1,
+  "is_done": true
+}

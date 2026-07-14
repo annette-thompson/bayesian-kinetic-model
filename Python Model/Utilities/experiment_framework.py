@@ -152,7 +152,7 @@ def load_experiment_bundle(
     base_dir = _get_path_base_dir(solver_params, solver_params_file)
     calculation_module = solver_params.get("calculation_module")
     module_path = _resolve_path(base_dir, calculation_module)
-    calculated_observables = load_observable_definitions(module_path)
+    calculated_observables = load_observable_definitions(module_path, species_names=species_names)
     noise_models = load_noise_model_definitions()
 
     raw_dataset_configs = solver_params.get("datasets")
@@ -346,7 +346,7 @@ def validate_experiment_config(
         )
 
     module_path = _resolve_path(base_dir, calculation_module)
-    calculated_observables = load_observable_definitions(module_path)
+    calculated_observables = load_observable_definitions(module_path, species_names=species_names)
     noise_models = load_noise_model_definitions()
 
     dataset_configs = solver_params.get("datasets")
@@ -573,7 +573,10 @@ def load_noise_model_definitions() -> dict[str, NoiseModelDefinition]:
     }
 
 
-def load_observable_definitions(module_path: str | Path) -> dict[str, ObservableDefinition]:
+def load_observable_definitions(
+    module_path: str | Path,
+    species_names: list[str] | None = None,
+) -> dict[str, ObservableDefinition]:
     module_path = Path(module_path).resolve()
     spec = spec_from_file_location(module_path.stem, module_path)
     if spec is None or spec.loader is None:
@@ -583,9 +586,13 @@ def load_observable_definitions(module_path: str | Path) -> dict[str, Observable
     spec.loader.exec_module(module)
 
     raw_observables = getattr(module, "OBSERVABLES", None)
+    observable_factory = getattr(module, "build_observables", None)
+    if callable(observable_factory):
+        raw_observables = observable_factory(species_names or [])
+
     if not raw_observables:
         raise AttributeError(
-            f"Calculation module '{module_path.name}' must define a non-empty OBSERVABLES mapping."
+            f"Calculation module '{module_path.name}' must define a non-empty OBSERVABLES mapping or build_observables(species_names)."
         )
 
     normalized: dict[str, ObservableDefinition] = {}

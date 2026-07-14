@@ -1,0 +1,57 @@
+# FabI — Enoyl-acyl-ACP reductase
+# Reduces trans-2-enoyl-acyl-ACPs to acyl-ACPs using NADH.
+# Inhibited by ACP. No chain-length/saturation specificity.
+# Units: kon: μM⁻¹s⁻¹, koff: s⁻¹, kcat: s⁻¹
+
+enzymes: [FabI]
+schema_version: ME1_model
+
+defaults:
+  sat_chain_lengths: [4, 6, 8, 10, 12, 14, 16, 18]
+  unsat_chain_lengths: []
+  
+reactions:
+  - rxn_name: FabI_binding_NADH
+    reactants: {FabI: 1, NADH: 1}
+    products: {FabI_NADH: 1}
+    rate_const_key: kon_I_NADH
+    scaling_group: null
+    rate_const_value: 30.12478895608
+    reversible: true
+    rvs_rate_const_key: koff_I_NADH
+    rvs_scaling_group: null
+    rvs_rate_const_value: 602.4957791216
+
+  - rxn_name: "C{chain}_FabI_binding_EnAcACP"
+    chain_template: true
+    saturation_template: true
+    reactants: {FabI_NADH: 1, "C{chain}_EnAcACP": 1}
+    products: {"C{chain}_FabI_NADH_EnAcACP": 1}
+    rate_const_key: kon_I_EnAcACP
+    scaling_group: null
+    rate_const_value: 8.243479449519999
+    reversible: true
+    rvs_rate_const_key: koff_I_EnAcACP
+    rvs_scaling_group: a2
+    rvs_rate_const_value: 164.8695889904
+
+  - rxn_name: "C{chain}_FabI_catalysis_release_AcACP"
+    chain_template: true
+    saturation_template: true
+    reactants: {"C{chain}_FabI_NADH_EnAcACP": 1}
+    products: {FabI: 1, NAD: 1, "C{chain}_AcACP": 1}
+    rate_const_key: kcat_I_AcACP
+    scaling_group: c2
+    rate_const_value: 355.54101536
+    reversible: false
+
+  - rxn_name: FabI_inhibition_by_ACP
+    reactants: {FabI: 1, ACP: 1}
+    products: {FabI_ACP: 1}
+    rate_const_key: kon_I_ACP
+    scaling_group: null
+    rate_const_value: 0.00241
+    reversible: true
+    rvs_rate_const_key: koff_I_ACP
+    rvs_scaling_group: null
+    rvs_rate_const_value: 0.091574

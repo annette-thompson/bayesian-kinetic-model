@@ -1,0 +1,20 @@
+{
+  "config": "Test FabD - a1",
+  "max_steps": 1500,
+  "solver": "Kvaerno5",
+  "rtol": 0.001,
+  "atol": 1e-06,
+  "n_param_sets": 53,
+  "n_conditions": 8,
+  "total_solves": 424,
+  "n_hit_max_steps": 0,
+  "successful_num_steps": {
+    "min": 30,
+    "median": 36,
+    "p95": 42,
+    "p99": 42,
+    "max": 420
+  },
+  "max_rejected_steps": 223,
+  "recommended_max_steps": 1300
+}

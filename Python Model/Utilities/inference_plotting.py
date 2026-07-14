@@ -204,12 +204,53 @@ def _aggregate_groupwise_series(
     )
 
 
+def _extract_trace_series(
+    inf_data: az.InferenceData,
+    param_name: str,
+    include_tuning: bool,
+) -> tuple[np.ndarray, int]:
+    """Return trace series with optional warmup prepended and posterior start index."""
+    posterior_values = np.asarray(inf_data.posterior[param_name].values, dtype=float)
+
+    if posterior_values.ndim < 2:
+        posterior_series = posterior_values.reshape(1, -1)
+    else:
+        chains = posterior_values.shape[0]
+        draws = posterior_values.shape[1]
+        posterior_series = posterior_values.reshape(chains, draws, -1)[:, :, 0]
+
+    if not include_tuning:
+        return posterior_series, 0
+
+    warmup_group = getattr(inf_data, "warmup_posterior", None)
+    if warmup_group is None or param_name not in set(warmup_group.data_vars):
+        return posterior_series, 0
+
+    warmup_values = np.asarray(warmup_group[param_name].values, dtype=float)
+    if warmup_values.ndim < 2:
+        warmup_series = warmup_values.reshape(1, -1)
+    else:
+        warmup_chains = warmup_values.shape[0]
+        warmup_draws = warmup_values.shape[1]
+        warmup_series = warmup_values.reshape(warmup_chains, warmup_draws, -1)[:, :, 0]
+
+    n_chains = min(warmup_series.shape[0], posterior_series.shape[0])
+    if n_chains == 0:
+        return posterior_series, 0
+
+    warmup_series = warmup_series[:n_chains]
+    posterior_series = posterior_series[:n_chains]
+    return np.concatenate([warmup_series, posterior_series], axis=1), warmup_series.shape[1]
+
+
 def plot_posterior_trace_diagnostics(
     inf_data: az.InferenceData,
     free_params: list[str],
     save_file: str | None = None,
     show: bool = False,
     use_log_param_axis: bool = False,
+    include_tuning: bool = False,
+    posterior_start_line: bool = True,
 ) -> dict[str, Any]:
     _apply_plot_style()
     selected_free_params = _select_free_params(inf_data, free_params)
@@ -239,16 +280,25 @@ def plot_posterior_trace_diagnostics(
         density_ax.legend(loc="best")
 
         trace_ax = axes[row_index, 1]
-        if posterior_values.ndim < 2:
-            trace_series = posterior_values.reshape(1, -1)
-        else:
-            chains = posterior_values.shape[0]
-            draws = posterior_values.shape[1]
-            trace_series = posterior_values.reshape(chains, draws, -1)[:, :, 0]
+        trace_series, posterior_start_idx = _extract_trace_series(
+            inf_data=inf_data,
+            param_name=param_name,
+            include_tuning=include_tuning,
+        )
 
         x_draws = np.arange(trace_series.shape[1], dtype=int)
         for chain_index in range(trace_series.shape[0]):
             trace_ax.plot(x_draws, trace_series[chain_index], linewidth=1.0, label=f"Chain {chain_index}")
+
+        if include_tuning and posterior_start_line and posterior_start_idx > 0:
+            trace_ax.axvline(
+                posterior_start_idx - 0.5,
+                color="black",
+                linestyle="--",
+                linewidth=1.5,
+                alpha=0.8,
+                label="Posterior start",
+            )
 
         trace_ax.set_title(f"{param_name} Trace")
         trace_ax.set_xlabel("Draw")
@@ -885,6 +935,8 @@ def plot_inference_diagnostics(
     save_path: str | None = None,
     show: bool = False,
     use_log_param_axis: bool = False,
+    include_tuning_in_trace: bool = False,
+    posterior_start_line: bool = True,
 ) -> dict[str, Any]:
     selected_free_params = _select_free_params(inf_data, free_params)
     summary = az.summary(inf_data, var_names=selected_free_params, round_to=4)
@@ -897,6 +949,8 @@ def plot_inference_diagnostics(
         save_file=str(paths["trace"]) if paths["trace"] is not None else None,
         show=show,
         use_log_param_axis=use_log_param_axis,
+        include_tuning=include_tuning_in_trace,
+        posterior_start_line=posterior_start_line,
     )
     posterior_marginal_artifacts = plot_parameter_marginals(
         inf_data=inf_data,

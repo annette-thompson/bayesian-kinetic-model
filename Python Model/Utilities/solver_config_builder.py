@@ -1,8 +1,161 @@
 from __future__ import annotations
 
 import json
+import re
+import sys
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
+
+
+def _resolve_path(base_dir: str | Path, path_value: "str | Path | Sequence[str | Path]") -> "Path | list[Path]":
+    if isinstance(path_value, (list, tuple)):
+        return [_resolve_path(base_dir, entry) for entry in path_value]  # type: ignore[return-value]
+    path = Path(path_value).expanduser()
+    if path.is_absolute():
+        return path.resolve()
+    return (Path(base_dir).expanduser() / path).resolve()
+
+
+def discover_observable_names(
+    calculation_module_path: str | Path,
+    reactions_source: "str | Path | Sequence[str | Path]",
+    path_base: str | Path = ".",
+) -> list[str]:
+    """Return observable names exposed by a calculation module for a reaction network."""
+    base_dir = Path(path_base).expanduser().resolve()
+    utilities_dir = str(base_dir / "Utilities")
+    if utilities_dir not in sys.path:
+        sys.path.insert(0, utilities_dir)
+
+    from experiment_framework import load_observable_definitions
+    from reaction_model_builder import build_ode_system_from_reactions
+
+    module_path = _resolve_path(base_dir, calculation_module_path)
+    reactions_path = _resolve_path(base_dir, reactions_source)
+    _, species_names, _, _, _ = build_ode_system_from_reactions(reactions_path)
+    return list(load_observable_definitions(module_path, species_names=species_names).keys())
+
+
+def build_observables_mapping(
+    *,
+    output_names: Sequence[str] | None = None,
+    output_pattern: str | None = None,
+    available_outputs: Sequence[str] | None = None,
+    csv_columns: Mapping[str, str] | Sequence[str] | None = None,
+) -> dict[str, str]:
+    """Build calculated-output -> CSV-column mapping for a dataset."""
+    if output_pattern is not None:
+        if available_outputs is None:
+            raise ValueError("output_pattern requires available_outputs.")
+        pattern = re.compile(output_pattern)
+        selected_outputs = [name for name in available_outputs if pattern.fullmatch(name)]
+    elif output_names is not None:
+        selected_outputs = list(output_names)
+    elif csv_columns is not None:
+        selected_outputs = list(csv_columns.keys() if isinstance(csv_columns, Mapping) else csv_columns)
+    else:
+        raise ValueError("Provide output_names, output_pattern, or csv_columns.")
+
+    if not selected_outputs:
+        raise ValueError("No dataset outputs were selected.")
+
+    if available_outputs is not None:
+        available_set = set(available_outputs)
+        missing_outputs = [name for name in selected_outputs if name not in available_set]
+        if missing_outputs:
+            raise ValueError(f"Selected outputs are not available from the calculation module: {missing_outputs}")
+
+    if csv_columns is None:
+        return {name: name for name in selected_outputs}
+
+    if isinstance(csv_columns, Mapping):
+        missing_columns = [name for name in selected_outputs if name not in csv_columns]
+        if missing_columns:
+            raise ValueError(f"Missing CSV column mapping for outputs: {missing_columns}")
+        return {name: csv_columns[name] for name in selected_outputs}
+
+    if len(csv_columns) != len(selected_outputs):
+        raise ValueError("csv_columns sequence must have the same length as selected outputs.")
+    return dict(zip(selected_outputs, csv_columns))
+
+
+def timeseries_dataset(
+    *,
+    name: str,
+    data_file: str | Path,
+    time_column: str,
+    observables: Mapping[str, str] | None = None,
+    output_names: Sequence[str] | None = None,
+    output_pattern: str | None = None,
+    available_outputs: Sequence[str] | None = None,
+    csv_columns: Mapping[str, str] | Sequence[str] | None = None,
+    init_cond_overrides: Mapping[str, Any] | None = None,
+    init_cond_columns: Mapping[str, str] | None = None,
+    noise_model: str | None = "relative_mean",
+    noise_params: Mapping[str, Any] | None = None,
+    enabled: bool = True,
+) -> dict[str, Any]:
+    dataset = {
+        "name": name,
+        "dataset_type": "timeseries",
+        "data_file": str(data_file),
+        "observables": dict(observables) if observables is not None else build_observables_mapping(
+            output_names=output_names,
+            output_pattern=output_pattern,
+            available_outputs=available_outputs,
+            csv_columns=csv_columns,
+        ),
+        "time_column": time_column,
+        "noise_model": noise_model,
+        "noise_params": dict(noise_params or {"frac": 0.05}),
+        "enabled": enabled,
+    }
+    if init_cond_overrides is not None:
+        dataset["init_cond_overrides"] = dict(init_cond_overrides)
+    if init_cond_columns is not None:
+        dataset["init_cond_columns"] = dict(init_cond_columns)
+    return dataset
+
+
+def endpoint_dataset(
+    *,
+    name: str,
+    data_file: str | Path,
+    time_values: Sequence[float] | float,
+    observables: Mapping[str, str] | None = None,
+    output_names: Sequence[str] | None = None,
+    output_pattern: str | None = None,
+    available_outputs: Sequence[str] | None = None,
+    csv_columns: Mapping[str, str] | Sequence[str] | None = None,
+    init_cond_columns: Mapping[str, str] | None = None,
+    init_cond_overrides: Mapping[str, Any] | None = None,
+    noise_model: str | None = "relative_mean",
+    noise_params: Mapping[str, Any] | None = None,
+    enabled: bool = True,
+) -> dict[str, Any]:
+    if isinstance(time_values, (int, float)):
+        time_values = [float(time_values)]
+
+    dataset = {
+        "name": name,
+        "dataset_type": "endpoint",
+        "data_file": str(data_file),
+        "observables": dict(observables) if observables is not None else build_observables_mapping(
+            output_names=output_names,
+            output_pattern=output_pattern,
+            available_outputs=available_outputs,
+            csv_columns=csv_columns,
+        ),
+        "time_values": list(time_values),
+        "noise_model": noise_model,
+        "noise_params": dict(noise_params or {"frac": 0.05}),
+        "enabled": enabled,
+    }
+    if init_cond_columns is not None:
+        dataset["init_cond_columns"] = dict(init_cond_columns)
+    if init_cond_overrides is not None:
+        dataset["init_cond_overrides"] = dict(init_cond_overrides)
+    return dataset
 
 
 def validate_required_fields(

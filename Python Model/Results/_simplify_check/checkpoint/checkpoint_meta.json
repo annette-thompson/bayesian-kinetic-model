@@ -1,0 +1,10 @@
+{
+  "phase": "done",
+  "warmup_done": 150,
+  "sampling_done": 150,
+  "n_tune": 150,
+  "n_draws": 150,
+  "n_chains": 4,
+  "config_hash": "650cfbf358f94d61",
+  "updated": "2026-07-10T14:37:33"
+}

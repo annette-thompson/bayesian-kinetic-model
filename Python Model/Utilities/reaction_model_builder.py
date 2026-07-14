@@ -311,15 +311,16 @@ class ReactionList(list):  # type: ignore[type-arg]
 
 
 def load_elementary_reactions(
-    reactions_path: str | Path,
+    reactions_path: "str | Path | Sequence[str | Path]",
     schemas: frozenset[str] | set[str] | None = None,
 ) -> ReactionList:
-    """Load and expand reactions from a YAML or JSON file/directory.
+    """Load and expand reactions from a YAML or JSON file/directory/file list.
 
     Parameters
     ----------
     reactions_path:
-        Path to a YAML/JSON file or directory of such files.
+        Path to a YAML/JSON file, a directory of such files, or an explicit
+        list of individual file paths to compose a system from.
     schemas:
         Optional set of accepted ``schema_version`` strings. When provided, only
         files whose ``schema_version`` appears in this set contribute reactions;
@@ -391,7 +392,7 @@ class ReactionNetwork(eqx.Module):
         return self.stoich_matrix @ rates
     
 def build_ode_system_from_reactions(
-    reactions_source: str | Path | Sequence[dict[str, Any]] | Sequence[ElementaryReaction],
+    reactions_source: "str | Path | Sequence[str | Path] | Sequence[dict[str, Any]] | Sequence[ElementaryReaction]",
     schemas: frozenset[str] | set[str] | None = None,
     scaling_group: dict[str, float] | None = None,
 ):
@@ -400,6 +401,8 @@ def build_ode_system_from_reactions(
 
     Accepted inputs:
     - Path to a YAML file or directory
+    - List of individual YAML/JSON file paths (composes a system from
+      specific files, e.g. a subset of enzymes from a larger library)
     - Preloaded list of reaction mappings
     - Preloaded list of ElementaryReaction objects
 
@@ -546,7 +549,7 @@ def build_ode_system_from_reactions(
 
 
 def _normalize_reaction_input(
-    reactions_source: str | Path | Sequence[dict[str, Any]] | Sequence[ElementaryReaction],
+    reactions_source: "str | Path | Sequence[str | Path] | Sequence[dict[str, Any]] | Sequence[ElementaryReaction]",
     schemas: frozenset[str] | set[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Normalize supported reaction source formats into reaction mapping dictionaries."""
@@ -558,6 +561,9 @@ def _normalize_reaction_input(
         return []
 
     first = reactions_list[0]
+    if isinstance(first, (str, Path)):
+        return _load_reactions(reactions_list, schemas=schemas)  # type: ignore[arg-type]
+
     if isinstance(first, ElementaryReaction):
         return [rxn.to_mapping() for rxn in reactions_list]  # type: ignore[union-attr]
 
@@ -565,7 +571,8 @@ def _normalize_reaction_input(
         return reactions_list  # type: ignore[return-value]
 
     raise TypeError(
-        "Unsupported reactions_source type. Expected path, list[dict], or list[ElementaryReaction]."
+        "Unsupported reactions_source type. Expected path, list[str|Path], "
+        "list[dict], or list[ElementaryReaction]."
     )
 
 
@@ -623,10 +630,17 @@ def _validate_known_fields(
 
 
 def _load_reactions(
-    reactions_path: str | Path,
+    reactions_path: "str | Path | Sequence[str | Path]",
     schemas: frozenset[str] | set[str] | None = None,
 ) -> list[dict[str, Any]]:
-    """Load reactions from a YAML or JSON file/directory and expand compact entries."""
+    """Load reactions from a YAML/JSON file, directory, or explicit list of files.
+
+    ``reactions_path`` may be a single file, a directory (all ``*.yaml``/``*.json``
+    files in it are loaded), or a list/tuple of individual file paths — the
+    latter lets you compose a reaction system from files spread across a
+    directory (e.g. specific enzymes from a larger reaction library) without
+    copying them into a new folder.
+    """
 
     def _parse_file(file_path: Path) -> dict[str, Any]:
         with open(file_path, "r", encoding="utf-8") as fh:
@@ -634,19 +648,34 @@ def _load_reactions(
                 return _json.load(fh)
             return yaml.safe_load(fh)
 
-    source_path = Path(reactions_path).expanduser().resolve()
-    if not source_path.exists():
-        raise FileNotFoundError(f"Reaction source not found: {source_path}")
-
     file_specs: list[tuple[str, dict[str, Any]]] = []
-    if source_path.is_dir():
-        reaction_files = sorted(source_path.glob("*.yaml")) + sorted(source_path.glob("*.json"))
-        if not reaction_files:
-            raise ValueError(f"No YAML or JSON reaction files found in directory: {source_path}")
-        for file_path in sorted(reaction_files, key=lambda p: p.name):
+    if isinstance(reactions_path, (list, tuple)):
+        if not reactions_path:
+            raise ValueError("Reaction source list is empty.")
+        for entry in reactions_path:
+            file_path = Path(entry).expanduser().resolve()
+            if not file_path.exists():
+                raise FileNotFoundError(f"Reaction source not found: {file_path}")
+            if file_path.is_dir():
+                raise ValueError(
+                    f"Reaction source list entries must be files, got a directory: {file_path}"
+                )
             file_specs.append((str(file_path), _parse_file(file_path)))
+        source_label = ", ".join(spec[0] for spec in file_specs)
     else:
-        file_specs.append((str(source_path), _parse_file(source_path)))
+        source_path = Path(reactions_path).expanduser().resolve()
+        if not source_path.exists():
+            raise FileNotFoundError(f"Reaction source not found: {source_path}")
+
+        if source_path.is_dir():
+            reaction_files = sorted(source_path.glob("*.yaml")) + sorted(source_path.glob("*.json"))
+            if not reaction_files:
+                raise ValueError(f"No YAML or JSON reaction files found in directory: {source_path}")
+            for file_path in sorted(reaction_files, key=lambda p: p.name):
+                file_specs.append((str(file_path), _parse_file(file_path)))
+        else:
+            file_specs.append((str(source_path), _parse_file(source_path)))
+        source_label = str(source_path)
 
     required_keys = {
         "rxn_name",
@@ -664,7 +693,7 @@ def _load_reactions(
         found_versions: set[Any] = {spec.get("schema_version") for _, spec in file_specs}
         if len(found_versions) > 1:
             warnings.warn(
-                f"Inconsistent schema_version values found across files in {source_path}: "
+                f"Inconsistent schema_version values found across files in {source_label}: "
                 f"{sorted(str(v) for v in found_versions)}. "
                 "Pass schemas= to filter to specific versions.",
                 UserWarning,
@@ -749,7 +778,7 @@ def _load_reactions(
         reactions.extend(file_reactions)
 
     if not reactions:
-        raise ValueError(f"No reactions loaded from source: {source_path}")
+        raise ValueError(f"No reactions loaded from source: {source_label}")
     return reactions
 
 

@@ -1,0 +1,64 @@
+# TesA — Thioesterase I
+# Cleaves acyl-ACP to release free fatty acids.
+# Inhibited by ACP.
+# Units: kon: μM⁻¹s⁻¹, koff: s⁻¹, kcat: s⁻¹
+
+enzymes: [TesA]
+schema_version: ME1_model
+
+reactions:
+  - rxn_name: "C{chain}_TesA_binding_AcACP"
+    chain_template: true
+    saturation_template: true
+    sat_chain_lengths: [4, 6, 8, 10]
+    reactants: {TesA: 1, "C{chain}_AcACP": 1}
+    products: {"C{chain}_TesA_AcACP": 1}
+    rate_const_key: "C{chain}_kon_T_AcACP"
+    scaling_group: 1/exp(12*d1+d2)
+    rate_const_value: [0.0016306583672193245, 0.0026243668176071473, 0.014556701915501086,
+                       0.05215019659869781]
+    reversible: true
+    rvs_rate_const_key: koff_T_AcACP
+    rvs_scaling_group: a3
+    rvs_rate_const_value: 0.0928041717631
+
+  - rxn_name: "C{chain}_TesA_binding_AcACP"
+    chain_template: true
+    saturation_template: true
+    sat_chain_lengths: [12, 14, 16, 18]
+    unsat_chain_lengths: []
+    reactants: {TesA: 1, "C{chain}_AcACP": 1}
+    products: {"C{chain}_TesA_AcACP": 1}
+    rate_const_key: "C{chain}_kon_T_AcACP"
+    scaling_group: 1/exp((2*{chain}-12)*d1+d2)
+    rate_const_value: [0.10048207437128671,   0.17792816708253872,
+                       0.31506547649854633,   0.557900731002347]
+    reversible: true
+    rvs_rate_const_key: koff_T_AcACP
+    rvs_scaling_group: a3
+    rvs_rate_const_value: 0.0928041717631
+
+  - rxn_name: "C{chain}_TesA_hydrolysis_release_FA"
+    chain_template: true
+    saturation_template: true
+    sat_chain_lengths: [4, 6, 8, 10, 12, 14, 16, 18]
+    unsat_chain_lengths: []
+    reactants: {"C{chain}_TesA_AcACP": 1}
+    products: {TesA: 1, ACP: 1, "C{chain}_FA": 1}
+    rate_const_key: "C{chain}_kcat_T_FA"
+    scaling_group: c3
+    rate_const_value: [0.0330538280256,  0.029620419832800005, 0.060230126772,
+                       0.009194550753600001, 0.14697314799552003, 0.26663615251848,
+                       0.581933592,      0.7105409158320001]
+    reversible: false
+
+  - rxn_name: TesA_inhibition_by_ACP
+    reactants: {TesA: 1, ACP: 1}
+    products: {TesA_ACP: 1}
+    rate_const_key: kon_T_ACP
+    scaling_group: null
+    rate_const_value: 0.00241
+    reversible: true
+    rvs_rate_const_key: koff_T_ACP
+    rvs_scaling_group: null
+    rvs_rate_const_value: 0.091574

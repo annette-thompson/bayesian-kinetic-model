@@ -1,0 +1,50 @@
+# FabD — Malonyl-CoA:ACP transacylase
+# Units: kon: μM⁻¹s⁻¹, koff: s⁻¹
+
+enzymes: [FabD]
+schema_version: ME1_model
+
+reactions:
+  - rxn_name: FabD_binding_MalCoA
+    reactants: {FabD: 1, C3_MalCoA: 1}
+    products: {C3_FabD_MalCoA: 1}
+    rate_const_key: kon_D_MalCoA
+    scaling_group: null
+    rate_const_value: 189.96496506666668
+    reversible: true
+    rvs_rate_const_key: koff_D_MalCoA
+    rvs_scaling_group: a1
+    rvs_rate_const_value: 11397.897904000001
+
+  - rxn_name: FabD_activation_release_CoA
+    reactants: {C3_FabD_MalCoA: 1}
+    products: {C3_FabD_Act: 1, CoA: 1}
+    rate_const_key: kfwd_D_MalCoA
+    scaling_group: (b1/b2)
+    rate_const_value: 60222.860002345195
+    reversible: true
+    rvs_rate_const_key: krvs_D_MalCoA
+    rvs_scaling_group: b1
+    rvs_rate_const_value: 402.13929190000005
+
+  - rxn_name: FabD_Act_binding_ACP
+    reactants: {C3_FabD_Act: 1, ACP: 1}
+    products: {C3_FabD_Act_ACP: 1}
+    rate_const_key: kon_D_Act_ACP
+    scaling_group: null
+    rate_const_value: 77.29199516150001
+    reversible: true
+    rvs_rate_const_key: koff_D_Act_ACP
+    rvs_scaling_group: a1
+    rvs_rate_const_value: 3091.6798064600002
+
+  - rxn_name: FabD_catalysis_release_MalACP
+    reactants: {C3_FabD_Act_ACP: 1}
+    products: {FabD: 1, C3_MalACP: 1}
+    rate_const_key: kfwd_D_Act_ACP
+    scaling_group: (b1/b3)
+    rate_const_value: 1411.1030972777992
+    reversible: true
+    rvs_rate_const_key: krvs_D_Act_ACP
+    rvs_scaling_group: b1
+    rvs_rate_const_value: 402.13929190000005

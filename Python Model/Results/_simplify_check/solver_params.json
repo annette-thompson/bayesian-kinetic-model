@@ -1,0 +1,93 @@
+{
+    "free_kinetic_params": [
+        {
+            "rxn_name": null,
+            "param_name": "a1",
+            "prior_dist_params": {
+                "distribution": "LogNormal",
+                "lower": 0.01,
+                "upper": 100.0,
+                "mass": 0.95,
+                "fixed_stat": null
+            }
+        }
+    ],
+    "prior_sampling": {
+        "draws": 200,
+        "random_seed": 0
+    },
+    "posterior_sampling": {
+        "draws": 150,
+        "tune": 150,
+        "chains": 4,
+        "target_accept": 0.9,
+        "checkpoint_every_steps": 300,
+        "random_seed": 0
+    },
+    "ODE_solver": {
+        "solver_name": "Kvaerno5",
+        "max_steps": 1500,
+        "dt0": 1e-06,
+        "stepsize_controller": "PIDController"
+    },
+    "ODE_stepsize_controller": {
+        "rtol": 0.001,
+        "atol": 1e-06,
+        "pcoeff": 0.2,
+        "icoeff": 0.4,
+        "dcoeff": 0.0
+    },
+    "calculation_module": "Calculation Files/Test_FabD/FabD_conc.py",
+    "datasets": [
+        {
+            "name": "time_vs_conc_Test_FabD",
+            "dataset_type": "timeseries",
+            "data_file": "Data/Test_FabD/time_vs_conc.csv",
+            "observables": {
+                "C3_MalACP (uM)": "C3_MalACP (uM)"
+            },
+            "noise_model": "relative_mean",
+            "noise_params": {
+                "frac": 0.1
+            },
+            "enabled": true,
+            "time_column": "Time (s)",
+            "init_cond_overrides": {
+                "FabD": 0.001,
+                "C3_MalCoA": 0.1,
+                "ACP": 10
+            }
+        },
+        {
+            "name": "sweep_conc_Test_FabD",
+            "dataset_type": "endpoint",
+            "data_file": "Data/Test_FabD/init_vs_final_conc.csv",
+            "observables": {
+                "C3_MalACP (uM)": "C3_MalACP (uM)"
+            },
+            "noise_model": "relative_mean",
+            "noise_params": {
+                "frac": 0.1
+            },
+            "enabled": true,
+            "time_values": [
+                150
+            ],
+            "init_cond_columns": {
+                "FabD": "FabD (uM)",
+                "C3_MalCoA": "C3_MalCoA (uM)",
+                "ACP": "ACP (uM)"
+            }
+        }
+    ],
+    "path_base": "../..",
+    "output_paths": {
+        "reactions_source": [
+            "Reactions/EC_FAS_ME1/FabD.yaml"
+        ],
+        "results_save_dir": "Results/_simplify_check",
+        "prior_samples_file": "prior_samples_pm.nc",
+        "posterior_samples_file": "posterior_samples_pm.nc",
+        "trace_plot_file": "trace_plot.png"
+    }
+}

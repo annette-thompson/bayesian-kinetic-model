@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(jupyter nbconvert *)",
+      "Bash(python3 -c ' *)",
+      "Bash(conda env *)",
+      "Bash(jupyter kernelspec *)"
+    ]
+  }
+}

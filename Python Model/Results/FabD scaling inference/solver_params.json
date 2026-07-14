@@ -46,14 +46,15 @@
         }
     ],
     "prior_sampling": {
-        "draws": 10000,
+        "draws": 100000,
         "random_seed": 0
     },
     "posterior_sampling": {
-        "draws": 100,
-        "tune": 400,
+        "draws": 200,
+        "tune": 300,
         "nuts_sampler": "nutpie",
-        "target_accept": 0.95
+        "target_accept": 0.95,
+        "progressbar": false
     },
     "ODE_solver": {
         "solver_name": "Kvaerno5",

@@ -1,25 +1,24 @@
 name: Bayesian
-
 channels:
-  - conda-forge
   - defaults
-
 dependencies:
-  - python=3.11
-  - arviz
-  - c-compiler
-  - cxx-compiler
-  - diffrax
-  - equinox
-  - ipython
-  - jax
-  - matplotlib
-  - numpy
-  - numpyro
-  - pandas
-  - preliz
-  - pymc
+  - python=3.12
+  - numba=0.65.1
+  - llvmlite
   - pytensor
-  - pyyaml
-  - seaborn
-  - sympy
+  - arviz
+  - blackjax
+  - diffrax
+  - jaxlib
+  - numpyro
+  - nutpie
+  - preliz
+  - zarr>=3
+  - jax=0.7.0
+  - pymc
+  - equinox
+  - jaxtyping
+  - ipykernel
+  - libsqlite[version='>=3.53']
+  - sqlite[version='>=3.53']
+prefix: /projects/anth4580/software/anaconda3/envs/Bayesian
