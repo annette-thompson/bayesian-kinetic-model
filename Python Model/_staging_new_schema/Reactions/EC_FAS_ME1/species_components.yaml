@@ -1,0 +1,104 @@
+# Species-components glossary for EC_FAS_ME1.
+# Declares mass-balance composition once per species-name pattern -- never
+# inferred from the finished name string. This file is a directory-wide
+# superset: it's fine to declare species that don't appear in whatever subset
+# of enzyme files is actually loaded, and fine for it to not (yet) cover every
+# species a given subset uses (reaction_sanity_check.check_balances skips and
+# reports any reaction with an uncovered species rather than erroring).
+#
+# Tracked groups include FabB itself (enzyme conservation: free FabB + every
+# FabB-bound complex all declare FabB: 1), alongside carbon/ACP/CoA.
+#
+# Currently covers FabB.yaml only. As other enzyme files are migrated, add
+# their species-name patterns here rather than duplicating shared ones
+# (ACP, CoA, AcACP, BKeAcACP, ... already declared below cover any other file
+# that references them).
+
+schema_version: components_v1
+
+axis_definitions:
+  chain:
+    type: numeric
+    values: [4, 6, 8, 10, 12, 14, 16, 18, 20]
+  saturation:
+    type: categorical
+    values:
+      sat:   {token: "sat", restrict: {chain: [4, 6, 8, 10, 12, 14, 16, 18]}}
+      unsat: {token: "unsat", restrict: {chain: [12, 14, 16, 18]}}
+
+components:
+  # Enzyme -- free FabB is the base case for the FabB-conservation group.
+  - pattern: FabB
+    formula: {FabB: 1}
+
+  # Free substrate acyl-ACP, chain-templated across sat/unsat.
+  - pattern: "C{chain}_AcACP_{saturation}"
+    axes: [chain, saturation]
+    formula: {carbon: "{chain}", ACP: 1}
+
+  # FabB-bound acyl-ACP complex.
+  - pattern: "C{chain}_FabB_AcACP_{saturation}"
+    axes: [chain, saturation]
+    formula: {carbon: "{chain}", ACP: 1, FabB: 1}
+
+  # Activated FabB
+  - pattern: "C{chain}_FabB_Act_{saturation}"
+    axes: [chain, saturation]
+    formula: {carbon: "{chain}", FabB: 1}
+
+  # Post-binding, pre-decarboxylation intermediate
+  - pattern: "C{chain}_FabB_Act_{saturation}_MalACP"
+    axes: [chain, saturation]
+    formula: {carbon: "{chain+3}", ACP: 1, FabB: 1}
+
+  # Condensation product
+  - pattern: "C{chain+2}_BKeAcACP_{saturation}"
+    axes: [chain, saturation]
+    formula: {carbon: "{chain+2}", ACP: 1}
+
+  # Free metabolites / cofactors.
+  - pattern: ACP
+    formula: {ACP: 1}
+  - pattern: CoA
+    formula: {CoA: 1}
+  - pattern: CO2
+    formula: {carbon: 1}
+  - pattern: MalACP
+    formula: {carbon: 3, ACP: 1}
+
+  # Non-templated one-offs: the C10-cis isomerization branch.
+  - pattern: C10_cis3EnAcACP
+    formula: {carbon: 10, ACP: 1}
+  - pattern: C10_FabB_cis3EnAcACP
+    formula: {carbon: 10, ACP: 1, FabB: 1}
+  - pattern: C10_FabB_Act_cis3
+    formula: {carbon: 10, FabB: 1}
+  - pattern: C10_FabB_Act_cis3_MalACP
+    formula: {carbon: 13, ACP: 1, FabB: 1}
+  - pattern: C12_BKeAcACP_unsat
+    formula: {carbon: 12, ACP: 1}
+
+  # Non-templated one-offs: the C2/C3/C4/C5 initiation-chemistry branch
+  # (chain lengths outside the templated 4-18 range).
+  - pattern: C2_AcCoA
+    formula: {carbon: 2, CoA: 1}
+  - pattern: C2_FabB_AcCoA
+    formula: {carbon: 2, CoA: 1, FabB: 1}
+  - pattern: C2_FabB_Act
+    formula: {carbon: 2, FabB: 1}
+  - pattern: FabB_MalACP
+    formula: {carbon: 3, ACP: 1, FabB: 1}
+  - pattern: C2_AcACP
+    formula: {carbon: 2, ACP: 1}
+  - pattern: C2_FabB_AcACP
+    formula: {carbon: 2, ACP: 1, FabB: 1}
+  - pattern: C2_FabB_AcACP
+    formula: {carbon: 2, ACP: 1, FabB: 1}
+  - pattern: C2_FabB_Act_MalACP
+    formula: {carbon: 5, ACP: 1, FabB: 1}
+  - pattern: C4_BKeAcACP_sat
+    formula: {carbon: 4, ACP: 1}
+
+  # FabB inhibited by free ACP -- complex contains both.
+  - pattern: FabB_ACP
+    formula: {ACP: 1, FabB: 1}

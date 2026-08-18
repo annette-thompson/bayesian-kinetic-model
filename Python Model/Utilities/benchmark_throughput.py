@@ -31,6 +31,7 @@ from pathlib import Path
 import numpy as np
 
 from inference_runner import _build_model_bundle, import_solver_params
+from reaction_model_builder import load_elementary_reactions
 import resumable_sampler as rs
 
 import jax
@@ -80,11 +81,18 @@ def grad_eval_probe(solver_params_file: str, n_evals: int = 25) -> dict:
     if isinstance(reactions_source, str):
         reactions_source = [reactions_source]
 
+    # n_enzymes (file count) isn't the real cost axis -- each enzyme's YAML
+    # expands via chain templates into a different number of elementary
+    # reactions, so record the actual expanded reaction/species counts too.
+    rxns = load_elementary_reactions(imported.reactions_source)
+
     per_eval = float(statistics.median(times))
     report = {
         "config": imported.results_save_dir.name,
         "n_chains": n_chains,
         "n_enzymes": len(reactions_source),
+        "n_reactions": len(rxns),
+        "n_species": len(rxns.species),
         "n_free_params": len(bundle.free_params),
         "device": _device_str(),
         "measured_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -99,7 +107,8 @@ def grad_eval_probe(solver_params_file: str, n_evals: int = 25) -> dict:
         json.dump(report, fh, indent=2)
 
     print("\n=== Gradient-Eval Probe ===")
-    print(f"  config: {report['config']}   chains: {n_chains}   free params: {report['n_free_params']}   device: {report['device']}")
+    print(f"  config: {report['config']}   chains: {n_chains}   reactions: {report['n_reactions']}"
+          f"   species: {report['n_species']}   free params: {report['n_free_params']}   device: {report['device']}")
     print(f"  compile: {compile_sec:.0f}s")
     print(f"  {per_eval * 1000:.1f} ms / gradient-eval  ({report['gradient_evals_per_sec']:.1f}/s), vmapped over {n_chains} chains")
     print("  (compare across configs: rises with #reactions; #free params adds VJP cost)")
@@ -156,6 +165,9 @@ def probe(solver_params_file: str, minutes: float, probe_tune: int,
     deadline = time.perf_counter() + minutes * 60.0
     prev_w = prev_s = 0
     mean_leapfrog = None
+    wall_leapfrog = p90_leapfrog = wall_leapfrog_warmup = None
+    max_leapfrog = None
+    leapfrog_source = None
     try:
         while time.perf_counter() < deadline:
             t0 = time.perf_counter()
@@ -171,17 +183,37 @@ def probe(solver_params_file: str, minutes: float, probe_tune: int,
                 print(f"  sampling +{ds:>3} draws in {dt:6.1f}s  (total {status.sampling_done})")
             if status.is_done:
                 break
-        # Mean leapfrog (integration) steps per sampling draw: separates ODE/VJP
-        # compute cost from posterior difficulty. Read before the store is removed.
+        # Leapfrog (integration) steps per draw: separates ODE/VJP compute cost
+        # from posterior difficulty. Read before the store is removed.
+        #
+        # n_steps is (chains, draws). The MEAN over both axes is the wrong statistic
+        # for projecting wall time: chains advance under jax.vmap of a lax.scan, and
+        # NUTS's inner while_loop runs until the SLOWEST batch element finishes, so
+        # each draw costs max-over-chains, not mean-over-chains. Keep the mean for
+        # continuity, but wall_leapfrog_per_draw is what a time projection must use.
         samp_stats = sampler.read_stats("sampling")
         if "n_steps" in samp_stats and samp_stats["n_steps"].size:
-            mean_leapfrog = float(np.mean(samp_stats["n_steps"]))
+            n = np.asarray(samp_stats["n_steps"])
+            mean_leapfrog = float(np.mean(n))
+            wall_leapfrog = float(np.mean(n.max(axis=0)))
+            p90_leapfrog = float(np.percentile(n.max(axis=0), 90))
+            max_leapfrog = int(n.max())
+            leapfrog_source = "sampling"
+        warm_stats = sampler.read_stats("warmup")
+        if "n_steps" in warm_stats and warm_stats["n_steps"].size:
+            wn = np.asarray(warm_stats["n_steps"])
+            wall_leapfrog_warmup = float(np.mean(wn.max(axis=0)))
+        # Fallback: a probe that never reached sampling still tells us something.
+        if wall_leapfrog is None and wall_leapfrog_warmup is not None:
+            wall_leapfrog = wall_leapfrog_warmup
+            leapfrog_source = "warmup_only"
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
     warmup_step, warmup_compile, n_warm_steady = _steady_per_step(warmup_recs)
     sampling_step, sampling_compile, n_samp_steady = _steady_per_step(sampling_recs)
-    sec_per_gradient = (sampling_step / mean_leapfrog) if (sampling_step and mean_leapfrog) else None
+    # divide by the wall figure so this is genuinely "seconds per gradient eval"
+    sec_per_gradient = (sampling_step / wall_leapfrog) if (sampling_step and wall_leapfrog) else None
 
     report: dict = {
         "config": imported.results_save_dir.name,
@@ -191,6 +223,11 @@ def probe(solver_params_file: str, minutes: float, probe_tune: int,
         "probe_tune": probe_tune,
         "checkpoint_every": checkpoint_every,
         "warmup_sec_per_step": warmup_step,
+        "wall_leapfrog_per_draw": wall_leapfrog,
+        "wall_leapfrog_per_warmup_step": wall_leapfrog_warmup,
+        "p90_leapfrog_per_draw": p90_leapfrog,
+        "max_leapfrog_per_draw": max_leapfrog,
+        "leapfrog_source": leapfrog_source,
         "warmup_compile_sec": warmup_compile,
         "warmup_steady_chunks": n_warm_steady,
         "sampling_sec_per_step": sampling_step,

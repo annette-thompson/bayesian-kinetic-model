@@ -1,0 +1,39 @@
+{
+    "sigma_frac": 0.05,
+    "perturbed_species": [
+        "ACP",
+        "FabB",
+        "FabD",
+        "FabF",
+        "FabG",
+        "FabH",
+        "FabI",
+        "FabZ",
+        "TesA",
+        "C2_AcCoA",
+        "C3_MalCoA",
+        "NADPH",
+        "NADH"
+    ],
+    "n_samples_requested": 300,
+    "n_samples_succeeded": 298,
+    "n_samples_failed": 2,
+    "observables": {
+        "total_production": {
+            "observable": {
+                "type": "total_production"
+            },
+            "mean": 4.109589340554883,
+            "std": 0.21987221476700317,
+            "relative_std": 0.05350223502801759
+        },
+        "mean_chain_length": {
+            "observable": {
+                "type": "mean_chain_length"
+            },
+            "mean": 16.631604839746984,
+            "std": 0.050541475687481165,
+            "relative_std": 0.0030388814654070417
+        }
+    }
+}

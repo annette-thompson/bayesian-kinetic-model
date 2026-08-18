@@ -26,7 +26,6 @@ reactions:
     chain_template: true
     saturation_template: true
     sat_chain_lengths: [12, 14, 16, 18]
-    unsat_chain_lengths: []
     reactants: {TesA: 1, "C{chain}_AcACP": 1}
     products: {"C{chain}_TesA_AcACP": 1}
     rate_const_key: "C{chain}_kon_T_AcACP"
@@ -42,7 +41,6 @@ reactions:
     chain_template: true
     saturation_template: true
     sat_chain_lengths: [4, 6, 8, 10, 12, 14, 16, 18]
-    unsat_chain_lengths: []
     reactants: {"C{chain}_TesA_AcACP": 1}
     products: {TesA: 1, ACP: 1, "C{chain}_FA": 1}
     rate_const_key: "C{chain}_kcat_T_FA"

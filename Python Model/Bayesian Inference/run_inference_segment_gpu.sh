@@ -1,44 +1,71 @@
-#!/bin/bash
+#!/bin/bash -l
 #SBATCH --job-name=bayes_seg_gpu
 #SBATCH --partition=aa100
-#SBATCH --qos=normal
+#SBATCH --qos=gpu-normal
 #SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
-#SBATCH --gpus=1
-#SBATCH --mem=32G
+#SBATCH --ntasks=8
 #SBATCH --time=24:00:00
+#SBATCH --gres=gpu:a100-40gb:1
 #SBATCH --output=/projects/anth4580/Bayesian/job_files/%x.%j.out
 #SBATCH --mail-type=ALL
+#SBATCH --export=NONE
 #SBATCH --account=ucb634_asc2
 
-# GPU variant of run_inference_segment.sh: one resumable BlackJAX inference
-# SEGMENT, running on a GPU node. Same CLI contract as the CPU worker (so
-# submit_inference_chain.sh --worker "run_inference_segment_gpu.sh" drops in
-# directly) -- only the SBATCH resources and device env differ. Runs
-# inference_runner.py with a wall-clock budget (--max_hours) so it checkpoints
-# and exits cleanly before SLURM's --time limit kills it. Chain these with
-# submit_inference_chain.sh; each segment resumes from
-# <results_save_dir>/checkpoint/. A finished run makes later segments a fast
-# no-op.
-#
-# NOTE: confirm the partition/qos above actually permits a 24h --time and GPU
-# access on your account (submit_inference_chain.sh can override --time per job
-# via --time, and the worker script via --worker).
+# `-l` (login shell) and `--export=NONE` below are both load-bearing, and this
+# script silently failed without them. sbatch defaults to --export=ALL, so the
+# job inherited the submitting shell's MODULEPATH -- which on the login node does
+# NOT contain /curc/sw/alpine-modules/* -- and that overrode what the compute node
+# would have set for itself, making `module load miniforge` report "unknown
+# module". --export=NONE lets the node build its own environment; -l makes it
+# actually run the profile that initialises Lmod.
+
 
 _die() { echo "Error: $*" >&2; exit 1; }
 
-if [[ $# -lt 2 || $# -gt 3 ]]; then
-  echo "Usage: $0 /path/to/solver_params.json|yaml MAX_HOURS [EXTRA_DRAWS]" >&2
-  echo "  MAX_HOURS   wall-clock budget before checkpoint+exit (set below SBATCH --time)" >&2
+# SLURM's [D-]HH:MM:SS time-limit string -> decimal hours.
+_time_str_to_hours() {
+  awk -F'[-:]' '{
+    n = NF
+    if (n == 4)      { d=$1; h=$2; m=$3; s=$4 }
+    else if (n == 3) { d=0;  h=$1; m=$2; s=$3 }
+    else if (n == 2) { d=0;  h=0;  m=$1; s=$2 }
+    else             { d=0;  h=0;  m=0;  s=$1 }
+    printf "%.4f", d*24 + h + m/60 + s/3600
+  }' <<< "$1"
+}
+
+# This job's SLURM --time limit, in hours (falls back to this script's
+# #SBATCH --time header if squeue is unavailable or the limit is unlimited).
+_job_time_limit_hours() {
+  local raw=""
+  if [[ -n "${SLURM_JOB_ID:-}" ]] && command -v squeue >/dev/null 2>&1; then
+    raw="$(squeue -h -j "$SLURM_JOB_ID" -o %l 2>/dev/null | head -n1)"
+  fi
+  if [[ -z "$raw" || "$raw" == "UNLIMITED" ]]; then
+    raw="$(grep -m1 '^#SBATCH --time=' "$0" | cut -d= -f2)"
+  fi
+  [[ -n "$raw" ]] || { echo "24"; return; }
+  _time_str_to_hours "$raw"
+}
+
+if [[ $# -lt 1 || $# -gt 3 ]]; then
+  echo "Usage: $0 /path/to/solver_params.json|yaml [MAX_HOURS] [EXTRA_DRAWS]" >&2
+  echo "  MAX_HOURS   wall-clock budget before checkpoint+exit; omit (or pass \"\") to" >&2
+  echo "              default to 95% of this job's SLURM --time limit" >&2
   echo "  EXTRA_DRAWS optional: raise the draw target (pass on the FIRST segment only)" >&2
   exit 1
 fi
 
 SOLVER_PARAMS_FILE="$1"
-MAX_HOURS="$2"
+MAX_HOURS="${2:-}"
 EXTRA_DRAWS="${3:-}"
 [[ -r "$SOLVER_PARAMS_FILE" ]] || _die "Solver params file not readable: $SOLVER_PARAMS_FILE"
+
+if [[ -z "$MAX_HOURS" ]]; then
+  TIME_LIMIT_HOURS="$(_job_time_limit_hours)"
+  MAX_HOURS="$(awk -v t="$TIME_LIMIT_HOURS" 'BEGIN{ if (t<=0.25) printf "%.4f", t; else printf "%.4f", t-0.25 }')"
+  echo "==> MAX_HOURS not provided; defaulting to SLURM time limit (${TIME_LIMIT_HOURS}h) minus 15 min = ${MAX_HOURS}h"
+fi
 
 EXTRA_ARGS=()
 if [[ -n "$EXTRA_DRAWS" && "$EXTRA_DRAWS" != "0" ]]; then
@@ -47,9 +74,9 @@ fi
 
 PROJECT_DIR="/projects/anth4580/Bayesian"
 
-source /etc/profile.d/lmod.sh
-module load anaconda
-conda activate Bayesian
+module purge
+module load miniforge
+mamba activate Bayesian
 
 echo "----------------------------------------------------------"
 echo "==> Resumable BlackJAX inference segment (GPU)"
@@ -62,12 +89,6 @@ echo "==> CUDA_VISIBLE_DEVICES: ${CUDA_VISIBLE_DEVICES:-unset}"
 echo "----------------------------------------------------------"
 
 export PYTHONUNBUFFERED=1
-# No JAX_PLATFORMS override here (unlike the CPU worker) -- JAX auto-detects
-# and uses the allocated GPU. Every chain is vmapped onto that one device.
-
-# CPU-side threading still matters for non-GPU work (data loading, numpy
-# bookkeeping around the JAX/GPU calls); the ODE solve + NUTS gradient steps
-# themselves run on the GPU.
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}

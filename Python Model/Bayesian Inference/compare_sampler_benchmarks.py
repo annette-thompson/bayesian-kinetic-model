@@ -8,6 +8,13 @@ discovered by globbing for configs rather than assuming a fixed directory
 layout -- add a new Results/Test .../solver_params.json and it's picked up
 automatically.
 
+n_enzymes (how many reaction YAML files a config composes) is not the real
+cost-scaling axis -- each enzyme's YAML expands (via chain templates) into a
+different number of elementary reactions. n_reactions/n_species are recomputed
+here directly from the reaction files via load_elementary_reactions, so the
+comparison table's primary sort key is the actual reaction count, not the
+enzyme count.
+
 Run after the corresponding Alpine job chains (submitted via
 submit_inference_chain.sh, backed by run_inference_segment.sh /
 run_inference_segment_gpu.sh) have finalized and results have been synced back
@@ -18,12 +25,16 @@ Usage (from the "Python Model" directory):
     python "Bayesian Inference/compare_sampler_benchmarks.py"
 """
 import json
+import sys
 from pathlib import Path
 
 import arviz as az
 import pandas as pd
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "Results"
+
+sys.path.insert(0, str(RESULTS_DIR.parent / "Utilities"))
+from reaction_model_builder import load_elementary_reactions  # noqa: E402
 
 
 def _load_run(config_path: Path) -> dict | None:
@@ -38,7 +49,13 @@ def _load_run(config_path: Path) -> dict | None:
         print(f"[skip] {config_label}: solver_params.json has no output_paths.results_save_dir")
         return None
 
-    run_dir = (config_path.parent.parent.parent / results_save_dir).resolve()
+    # config_path's own parent directory is always where a run's outputs
+    # actually live (solver_params.json and its sibling outputs move together
+    # as a unit if Results/ gets reorganized into subfolders), so anchor on it
+    # directly rather than hopping a fixed number of parents up to
+    # RESULTS_DIR -- that hop count broke once configs moved a level deeper
+    # under Results/CPU Scaling Tests/ and Results/GPU Scaling Tests/.
+    run_dir = config_path.parent
     timing_path = run_dir / "timing.json"
     posterior_path = run_dir / str(output_paths.get("posterior_samples_file", "posterior_samples_pm.nc"))
 
@@ -49,10 +66,33 @@ def _load_run(config_path: Path) -> dict | None:
     with open(timing_path, "r", encoding="utf-8") as fh:
         timing = json.load(fh)
 
+    # n_enzymes is just how many reaction files were composed; each enzyme
+    # contributes a different (chain-template-expanded) number of elementary
+    # reactions, so n_reactions/n_species are the actual cost-scaling axis
+    # and are recomputed here rather than trusted from a stale config field.
     reactions_source = output_paths.get("reactions_source", [])
     if isinstance(reactions_source, str):
         reactions_source = [reactions_source]
     n_enzymes = len(reactions_source)
+
+    # Anchor on RESULTS_DIR.parent (the project root, derived from this
+    # script's own location) rather than the config's own path_base field --
+    # reactions_source paths ("Reactions/EC_FAS_ME1/...") never moved when
+    # Results/ got reorganized, but a config's path_base can go stale from
+    # that move (see path_base note in the plan), so it's not a reliable
+    # anchor for resolving other paths either.
+    base_dir = RESULTS_DIR.parent
+    resolved_reactions_source = [
+        (Path(p) if Path(p).is_absolute() else (base_dir / p)).resolve()
+        for p in reactions_source
+    ]
+    try:
+        rxns = load_elementary_reactions(resolved_reactions_source)
+        n_reactions = len(rxns)
+        n_species = len(rxns.species)
+    except Exception as exc:  # noqa: BLE001 - reaction count is informational only
+        print(f"[warn] {config_label}: could not load reactions for n_reactions/n_species ({exc})")
+        n_reactions = n_species = None
 
     free_params = [spec["param_name"] for spec in solver_params.get("free_kinetic_params", [])]
     inf_data = az.from_netcdf(posterior_path)
@@ -90,10 +130,15 @@ def _load_run(config_path: Path) -> dict | None:
 
     return {
         "config": config_label,
+        "config_path": str(config_path),
         "n_enzymes": n_enzymes,
+        "n_reactions": n_reactions,
+        "n_species": n_species,
         "sampler": posterior_sampling.get("sampler") or posterior_sampling.get("nuts_sampler"),
         "free_params": ",".join(free_params),
         "n_free_params": len(free_params),
+        "n_tune": posterior_sampling.get("tune"),
+        "n_draws": posterior_sampling.get("draws"),
         "prior_sampling_sec": timing.get("prior_sampling_sec"),
         "posterior_sampling_sec": timing.get("posterior_sampling_sec"),
         "posterior_predictive_sec": timing.get("posterior_predictive_sec"),
@@ -109,7 +154,9 @@ def _load_run(config_path: Path) -> dict | None:
 
 
 def main() -> pd.DataFrame:
-    config_paths = sorted(RESULTS_DIR.glob("Test*/solver_params.json"))
+    # Recursive glob: configs now live nested under Results/CPU Scaling
+    # Tests/, Results/GPU Scaling Tests/, etc., not just directly in Results/.
+    config_paths = sorted(RESULTS_DIR.glob("**/Test*/solver_params.json"))
 
     rows = []
     for config_path in config_paths:
@@ -118,11 +165,11 @@ def main() -> pd.DataFrame:
             rows.append(row)
 
     if not rows:
-        print(f"\nNo completed runs found yet under {RESULTS_DIR}/Test*/.")
+        print(f"\nNo completed runs found yet under {RESULTS_DIR} (searched recursively for Test*/solver_params.json).")
         return pd.DataFrame()
 
     df = pd.DataFrame(rows)
-    df = df.sort_values(["n_enzymes", "n_free_params", "config"]).reset_index(drop=True)
+    df = df.sort_values(["n_reactions", "n_enzymes", "n_free_params", "config"]).reset_index(drop=True)
 
     print("\n=== Sampler Benchmark Comparison ===")
     print(df.to_string(index=False))

@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --partition=amilan
-#SBATCH --qos=normal
+#SBATCH --partition=acpu
+#SBATCH --qos=cpu-normal
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=32
 #SBATCH --time=1-00:00:00
 #SBATCH --output=/projects/anth4580/Bayesian/job_files/%x.%j.out
 #SBATCH --mail-type=ALL
@@ -42,6 +42,13 @@ export OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-4}"
 export OPENBLAS_NUM_THREADS="${SLURM_CPUS_PER_TASK:-4}"
 export MKL_NUM_THREADS="${SLURM_CPUS_PER_TASK:-4}"
 export NUMEXPR_NUM_THREADS="${SLURM_CPUS_PER_TASK:-4}"
+
+# This partition is CPU-only, but the shared "Bayesian" env has jax[cuda12] installed (for
+# the GPU inference scripts), so JAX's plugin auto-discovery probes for a CUDA device on
+# every process start (main + each spawned worker) and fails noisily before falling back to
+# CPU. Forcing the platform here skips that probe entirely.
+export JAX_PLATFORMS=cpu
+export JAX_PLATFORM_NAME=cpu
 
 echo "==> Python executable: $(command -v python)"
 echo "==> Host: $(hostname)"

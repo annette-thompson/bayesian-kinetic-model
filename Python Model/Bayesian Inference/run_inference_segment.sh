@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 #SBATCH --job-name=bayes_seg
 #SBATCH --partition=acpu
 #SBATCH --qos=cpu-normal
@@ -8,7 +8,16 @@
 #SBATCH --time=24:00:00
 #SBATCH --output=/projects/anth4580/Bayesian/job_files/%x.%j.out
 #SBATCH --mail-type=ALL
+#SBATCH --export=NONE
 #SBATCH --account=ucb634_asc2
+
+# `-l` (login shell) and `--export=NONE` below are both load-bearing, and this
+# script silently failed without them. sbatch defaults to --export=ALL, so the
+# job inherited the submitting shell's MODULEPATH -- which on the login node does
+# NOT contain /curc/sw/alpine-modules/* -- and that overrode what the compute node
+# would have set for itself, making `module load miniforge` report "unknown
+# module". --export=NONE lets the node build its own environment; -l makes it
+# actually run the profile that initialises Lmod.
 
 # One resumable BlackJAX inference SEGMENT. Runs inference_runner.py with a
 # wall-clock budget (--max_hours) so it checkpoints and exits cleanly before
@@ -40,9 +49,9 @@ fi
 
 PROJECT_DIR="/projects/anth4580/Bayesian"
 
-source /etc/profile.d/lmod.sh
-module load anaconda
-conda activate Bayesian
+module purge
+module load miniforge
+mamba activate Bayesian
 
 echo "----------------------------------------------------------"
 echo "==> Resumable BlackJAX inference segment"

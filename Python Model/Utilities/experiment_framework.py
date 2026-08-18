@@ -315,12 +315,35 @@ def load_experiment_bundle(
         observed_values_parts.append(dataset_bundle.observed_values)
         observed_sigma_parts.append(dataset_bundle.observed_sigma)
 
+    # Optional floor on zero initial concentrations. Species that no dataset sets
+    # start at exactly 0, which gives relative error control no scale to work
+    # against; a small positive value is also arguably the more faithful picture,
+    # since nothing in vivo sits at exactly zero.
+    #
+    # Applied HERE rather than by the caller because the condition matrix is baked
+    # into the simulator closure during the model build -- patching it afterwards
+    # is too late. Living in the config (rather than a monkeypatch of this
+    # function) is what lets inference_runner.py see it at all: it reaches this
+    # code through _build_model_bundle, so it inherits the floor for free.
+    #
+    # NOTE: unrelated to the `floor` of the "relative_plus_floor" NOISE model
+    # below -- that one floors sigma, this one floors initial state.
+    #
+    # Default 0.0 leaves every existing config byte-identical.
+    condition_matrix = np.asarray(condition_matrix_rows, dtype=np.float64)
+    ic_floor = float(solver_params.get("initial_condition_floor", 0.0) or 0.0)
+    if ic_floor > 0.0:
+        n_floored = int(np.count_nonzero(condition_matrix == 0.0))
+        condition_matrix = np.where(condition_matrix == 0.0, ic_floor, condition_matrix)
+        print(f"Initial-condition floor: {ic_floor:g} applied to {n_floored} zero entries "
+              f"of the {condition_matrix.shape[0]}x{condition_matrix.shape[1]} condition matrix")
+
     return ExperimentBundle(
         calculation_module_path=str(module_path),
         calculated_observables=calculated_observables,
         datasets=tuple(datasets),
-        condition_matrix_np=np.asarray(condition_matrix_rows, dtype=np.float64),
-        condition_matrix_jax=jnp.asarray(np.asarray(condition_matrix_rows, dtype=np.float64)),
+        condition_matrix_np=condition_matrix,
+        condition_matrix_jax=jnp.asarray(condition_matrix),
         simulation_times_np=simulation_times_np,
         simulation_times_jax=simulation_times_jax,
         observed_values=np.concatenate(observed_values_parts).reshape(1, -1),

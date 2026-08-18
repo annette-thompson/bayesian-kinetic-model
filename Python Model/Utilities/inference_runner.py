@@ -17,6 +17,7 @@ jax.config.update("jax_enable_x64", True)
 
 device_count = jax.local_device_count()
 print(f"Total JAX local devices initialized: {device_count}")
+print(jax.devices())
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -430,6 +431,7 @@ def run_bayesian_inference(
     max_hours: float | None = None,
     extra_draws: int = 0,
     resume: bool = True,
+    checkpoint_every_steps: int | None = None,
 ) -> "InferenceRunResult | dict[str, Any]":
     """Run (or advance) a checkpointed BlackJAX NUTS inference run.
 
@@ -440,7 +442,10 @@ def run_bayesian_inference(
     ``--max_hours`` below the wall limit; each call resumes from
     ``<results_save_dir>/checkpoint/`` and finalizes -- writes the netcdf
     outputs -- only once the draw target is met). ``extra_draws`` raises the
-    target so a follow-up job/call can run longer.
+    target so a follow-up job/call can run longer. ``checkpoint_every_steps``
+    overrides ``solver_params['posterior_sampling']['checkpoint_every_steps']``
+    (default 50) -- e.g. set to 5 for a quick smoke test so the run
+    checkpoints (and can stop on ``max_hours``) after a much smaller chunk.
 
     Returns an :class:`InferenceRunResult` once the run is finalized. If a
     prior call already finished this run (e.g. a chained SLURM job that
@@ -466,7 +471,11 @@ def run_bayesian_inference(
     n_chains = int(posterior_config.get("chains", 4))
     target_accept = float(posterior_config.get("target_accept", 0.8))
     seed = int(posterior_config.get("random_seed", 0))
-    checkpoint_every = int(posterior_config.get("checkpoint_every_steps", 50))
+    checkpoint_every = int(
+        checkpoint_every_steps
+        if checkpoint_every_steps is not None
+        else posterior_config.get("checkpoint_every_steps", 50)
+    )
     is_diag = bool(posterior_config.get("is_mass_matrix_diagonal", True))
     initial_step = float(posterior_config.get("initial_step_size", 1.0))
 
@@ -928,6 +937,14 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Discard any existing checkpoint and start the run fresh.",
     )
+    parser.add_argument(
+        "--checkpoint_every_steps",
+        type=int,
+        default=None,
+        help="Override solver_params posterior_sampling.checkpoint_every_steps "
+        "(chunk size between checkpoints, for both warmup and sampling). "
+        "Useful for shortening quick smoke-test runs. Omit to use the config value.",
+    )
     return parser.parse_args()
 
 
@@ -938,4 +955,5 @@ if __name__ == "__main__":
         max_hours=args.max_hours,
         extra_draws=args.extra_draws,
         resume=not args.no_resume,
+        checkpoint_every_steps=args.checkpoint_every_steps,
     )

@@ -1,0 +1,8 @@
+Utilities32/
+
+# Benchmark harness output. The JSONL/CSV summaries ARE worth keeping -- they are
+# the artifact. The per-run netcdf and zarr checkpoints are regenerable bulk
+# (Stage 3 writes ~50 of them) and would otherwise land in git, since Results/ is
+# otherwise fully tracked.
+Results/Benchmarks/runs/**/*.nc
+Results/Benchmarks/runs/**/checkpoint/

@@ -57,17 +57,13 @@ reactions:
     chain_template: true
     saturation_template: true
     sat_chain_lengths: [6, 8, 10, 12, 14, 16]
-    unsat_chain_lengths: []
     token_offsets: {intermediate: 1}
     reactants: {"C{intermediate}_FabB_Act_MalACP": 1}
     products: {FabB: 1, "C{chain}_BKeAcACP": 1, C1_CO2: 1}
     rate_const_key: "C{chain}_kcat_B_BKeAcACP"
-    sat_scaling_group: c2
-    fwd_unsat_params_same_as_sat: false
-    sat_rate_const_value: [162.633348951048, 162.633348951048, 185.45908213716, 183.9373665914192,
+    scaling_group: c2
+    rate_const_value: [162.633348951048, 162.633348951048, 185.45908213716, 183.9373665914192,
                             190.2144432176,   23.7768054022]
-    unsat_scaling_group: c2
-    unsat_rate_const_value: []
     reversible: false
 
   - rxn_name: C2_FabB_binding_AcCoA
@@ -143,14 +139,6 @@ reactions:
     rvs_rate_const_key: C2_koff_B_Act_MalACP
     rvs_scaling_group: null
     rvs_rate_const_value: 3091.679806
-
-  - rxn_name: C4_FabB_Act_condensation_release_BKeAcACP
-    reactants: {C5_FabB_Act_MalACP: 1}
-    products: {FabB: 1, C4_BKeAcACP: 1, C1_CO2: 1}
-    rate_const_key: C4_kcat_B_BKeAcACP
-    scaling_group: null
-    rate_const_value: 0
-    reversible: false
 
   - rxn_name: FabB_inhibition_by_ACP
     reactants: {FabB: 1, ACP: 1}

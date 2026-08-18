@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 #SBATCH --job-name=probe
 #SBATCH --partition=acpu
 #SBATCH --qos=cpu-normal
@@ -8,7 +8,16 @@
 #SBATCH --time=01:00:00
 #SBATCH --output=/projects/anth4580/Bayesian/job_files/%x.%j.out
 #SBATCH --mail-type=NONE
+#SBATCH --export=NONE
 #SBATCH --account=ucb634_asc2
+
+# `-l` (login shell) and `--export=NONE` below are both load-bearing, and this
+# script silently failed without them. sbatch defaults to --export=ALL, so the
+# job inherited the submitting shell's MODULEPATH -- which on the login node does
+# NOT contain /curc/sw/alpine-modules/* -- and that overrode what the compute node
+# would have set for itself, making `module load miniforge` report "unknown
+# module". --export=NONE lets the node build its own environment; -l makes it
+# actually run the profile that initialises Lmod.
 
 # Throughput probe for ONE solver config: measures BlackJAX warmup/sampling
 # draws-per-hour and the sec-per-gradient / leapfrog-per-draw decomposition, then
@@ -35,9 +44,13 @@ EXTRA_ARGS=("$@")
 
 PROJECT_DIR="/projects/anth4580/Bayesian"
 
-source /etc/profile.d/lmod.sh
-module load anaconda
-conda activate Bayesian
+# miniforge, not anaconda: /curc/sw/alpine-modules/idep/anaconda/2023.09.lua has
+# a real Lmod bug ("attempt to concatenate a nil value"), and that pinned version
+# no longer resolves on the login nodes at all. The GPU worker already moved to
+# miniforge for the same reason.
+module purge
+module load miniforge
+mamba activate Bayesian
 
 echo "----------------------------------------------------------"
 echo "==> Throughput probe"

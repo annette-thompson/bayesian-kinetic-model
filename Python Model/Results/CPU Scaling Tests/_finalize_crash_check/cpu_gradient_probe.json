@@ -1,0 +1,12 @@
+{
+  "config": "Test FabD FabH FabG - a1",
+  "n_chains": 4,
+  "n_enzymes": 3,
+  "n_free_params": 1,
+  "device": "cpu",
+  "measured_at": "2026-07-14T16:23:04",
+  "compile_sec": 24.509225729852915,
+  "sec_per_gradient_eval": 4.423855376895517,
+  "gradient_evals_per_sec": 0.2260471726138931,
+  "n_evals_timed": 25
+}

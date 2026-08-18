@@ -1,0 +1,125 @@
+{
+    "free_kinetic_params": [
+        {
+            "rxn_name": null,
+            "param_name": "a2",
+            "prior_dist_params": {
+                "distribution": "LogNormal",
+                "lower": 0.01,
+                "upper": 100.0,
+                "mass": 0.95,
+                "fixed_stat": null
+            }
+        }
+    ],
+    "prior_sampling": {
+        "draws": 200,
+        "random_seed": 0
+    },
+    "posterior_sampling": {
+        "draws": 20,
+        "tune": 20,
+        "chains": 4,
+        "target_accept": 0.8,
+        "random_seed": 42,
+        "checkpoint_every_steps": 10
+    },
+    "ODE_solver": {
+        "solver_name": "Kvaerno5",
+        "max_steps": 20000,
+        "dt0": 1e-06,
+        "stepsize_controller": "PIDController"
+    },
+    "ODE_stepsize_controller": {
+        "rtol": 0.0001,
+        "atol": 1e-08,
+        "pcoeff": 0.2,
+        "icoeff": 0.4,
+        "dcoeff": 0.0
+    },
+    "calculation_module": "Calculation Files/Full_FAS/FA_conc.py",
+    "datasets": [
+        {
+            "name": "time_vs_conc_Chain_C4",
+            "dataset_type": "timeseries",
+            "data_file": "Data/Chain_C4/time_vs_conc.csv",
+            "observables": {
+                "C4_FA (uM)": "C4_FA (uM)"
+            },
+            "noise_model": "relative_mean",
+            "noise_params": {
+                "frac": 0.1
+            },
+            "enabled": true,
+            "time_column": "Time (s)",
+            "init_cond_overrides": {
+                "C3_MalCoA": 500.0,
+                "C2_AcCoA": 500.0,
+                "ACP": 10.0,
+                "NADPH": 1000.0,
+                "NADH": 1000.0,
+                "FabD": 1.0,
+                "FabH": 1.0,
+                "FabG": 1.0,
+                "FabZ": 1.0,
+                "FabI": 1.0,
+                "FabF": 1.0,
+                "FabA": 1.0,
+                "FabB": 1.0,
+                "TesA": 10.0
+            }
+        },
+        {
+            "name": "sweep_conc_Chain_C4",
+            "dataset_type": "endpoint",
+            "data_file": "Data/Chain_C4/init_vs_final_conc.csv",
+            "observables": {
+                "C4_FA (uM)": "C4_FA (uM)"
+            },
+            "noise_model": "relative_mean",
+            "noise_params": {
+                "frac": 0.1
+            },
+            "enabled": true,
+            "time_values": [
+                720
+            ],
+            "init_cond_columns": {
+                "C3_MalCoA": "C3_MalCoA (uM)",
+                "C2_AcCoA": "C2_AcCoA (uM)",
+                "ACP": "ACP (uM)",
+                "FabD": "FabD (uM)",
+                "FabH": "FabH (uM)",
+                "FabG": "FabG (uM)",
+                "FabZ": "FabZ (uM)",
+                "FabI": "FabI (uM)",
+                "FabF": "FabF (uM)",
+                "FabA": "FabA (uM)",
+                "FabB": "FabB (uM)",
+                "TesA": "TesA (uM)"
+            },
+            "init_cond_overrides": {
+                "NADPH": 1000.0,
+                "NADH": 1000.0
+            }
+        }
+    ],
+    "path_base": "../../../..",
+    "output_paths": {
+        "reactions_source": [
+            "Reactions/EC_FAS_ME1/C4/FabD.yaml",
+            "Reactions/EC_FAS_ME1/C4/FabH.yaml",
+            "Reactions/EC_FAS_ME1/C4/FabG.yaml",
+            "Reactions/EC_FAS_ME1/C4/FabZ.yaml",
+            "Reactions/EC_FAS_ME1/C4/FabI.yaml",
+            "Reactions/EC_FAS_ME1/C4/TesA.yaml",
+            "Reactions/EC_FAS_ME1/C4/FabF.yaml",
+            "Reactions/EC_FAS_ME1/C4/FabA.yaml",
+            "Reactions/EC_FAS_ME1/C4/FabB.yaml"
+        ],
+        "results_save_dir": "Results/Benchmarks/runs/bench__mac__cpu__C4__does_it_run",
+        "prior_samples_file": "prior_samples_pm.nc",
+        "posterior_samples_file": "posterior_samples_pm.nc",
+        "trace_plot_file": "trace_plot.png"
+    }
+}
