@@ -68,6 +68,12 @@ echo "==> PID: $$"
 echo "----------------------------------------------------------"
 
 export PYTHONUNBUFFERED=1
+# nate runs jax 0.10.2 (vs 0.7.0 on Mac/Alpine), where jax.lax.map -- the
+# default condition-batching strategy in inference_runner.py -- silently
+# returns wrong (inf) gradients on this model. vmap is confirmed correct on
+# nate; measured ~32x slower than lax.map on jax 0.7.0, so it's opt-in per
+# environment rather than the global default.
+export BAYESIAN_BATCH_STRATEGY=vmap
 CPU_COUNT="$(nproc 2>/dev/null || echo 4)"
 export OMP_NUM_THREADS="$CPU_COUNT"
 export OPENBLAS_NUM_THREADS="$CPU_COUNT"

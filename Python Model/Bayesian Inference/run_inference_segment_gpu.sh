@@ -3,7 +3,8 @@
 #SBATCH --partition=aa100
 #SBATCH --qos=gpu-normal
 #SBATCH --nodes=1
-#SBATCH --ntasks=8
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
 #SBATCH --time=24:00:00
 #SBATCH --gres=gpu:a100-40gb:1
 #SBATCH --output=/projects/anth4580/Bayesian/job_files/%x.%j.out
@@ -86,9 +87,21 @@ echo "==> Extra draws: ${EXTRA_DRAWS:-none}"
 echo "==> SLURM job: ${SLURM_JOB_ID:-unset}  time limit: ${SBATCH_TIMELIMIT:-see --time}"
 echo "==> SLURM_CPUS_PER_TASK: ${SLURM_CPUS_PER_TASK:-unset}"
 echo "==> CUDA_VISIBLE_DEVICES: ${CUDA_VISIBLE_DEVICES:-unset}"
+echo "==> GPU model: $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null || echo unknown)"
 echo "----------------------------------------------------------"
 
 export PYTHONUNBUFFERED=1
+# vmap batches all sweep conditions into one dispatch instead of lax.map's
+# sequential scan -- measured ~2-3x faster on GPU (nate RTX 3080, Alpine A100)
+# since GPU kernel-launch overhead dominates lax.map's per-condition calls.
+# lax.map remains the default (faster on CPU), so this is set per-environment
+# rather than in solver_params.json, which is synced across CPU and GPU runs.
+export BAYESIAN_BATCH_STRATEGY=vmap
+# Persistent XLA compile cache on shared storage -- a fresh process (e.g. after
+# a preempt/requeue or a new segment) can skip the multi-minute JIT compile IF
+# it lands on the same GPU architecture as a previous run that populated the
+# cache. No effect (but no harm) on a cache miss from a different GPU model.
+export JAX_COMPILATION_CACHE_DIR="$PROJECT_DIR/.jax_cache"
 export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export OPENBLAS_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}

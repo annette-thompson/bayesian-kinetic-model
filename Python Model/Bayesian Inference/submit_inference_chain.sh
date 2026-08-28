@@ -95,7 +95,7 @@ echo ""
 first_job=""
 prev=""
 for ((i = 1; i <= SEGMENTS; i++)); do
-  cmd=(sbatch --parsable --time="$TIME")
+  cmd=(sbatch --parsable --export=NONE --time="$TIME")
   dep_note="no dependency"
   if [[ -n "$prev" ]]; then
     cmd+=(--dependency="afterany:$prev")
