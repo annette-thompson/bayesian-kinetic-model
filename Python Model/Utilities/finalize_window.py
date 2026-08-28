@@ -43,7 +43,8 @@ def _parse_args() -> argparse.Namespace:
         type=int,
         default=None,
         help="Draws to discard from the START of the full (warmup++sampling) per-chain "
-        "timeline. Default = n_tune, i.e. discard exactly the warmup.",
+        "timeline. Default = n_tune + posterior_burn_in_draws (config), i.e. reproduces "
+        "exactly what the live run auto-finalized to.",
     )
     parser.add_argument("--thin", type=int, default=1, help="Keep every THIN-th draw after burn-in (default 1).")
     parser.add_argument(
@@ -58,7 +59,9 @@ def main() -> None:
     args = _parse_args()
     imported = import_solver_params(args.solver_params_file)
     checkpoint_dir = imported.results_save_dir / "checkpoint"
-    n_tune = int(imported.solver_params.get("posterior_sampling", {}).get("tune", 0))
+    posterior_config = imported.solver_params.get("posterior_sampling", {})
+    n_tune = int(posterior_config.get("tune", 0))
+    posterior_burn_in_draws = int(posterior_config.get("posterior_burn_in_draws", 0))
 
     warm = load_draws(checkpoint_dir, "warmup")
     samp = load_draws(checkpoint_dir, "sampling")
@@ -78,7 +81,7 @@ def main() -> None:
     print(f"Run: {imported.results_save_dir}")
     print(f"  chains={n_chains}  warmup draws={n_warm}  sampling draws={n_samp}  total per chain={total}")
 
-    burn_in = n_tune if args.burn_in is None else args.burn_in
+    burn_in = (n_tune + posterior_burn_in_draws) if args.burn_in is None else args.burn_in
     if args.list:
         kept = len(range(burn_in, total, args.thin))
         print(f"  with --burn_in {burn_in} --thin {args.thin} -> {kept} posterior draws/chain "

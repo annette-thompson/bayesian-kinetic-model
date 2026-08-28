@@ -73,6 +73,10 @@ class SamplerSpec:
     initial_step_size: float = 1.0
     checkpoint_every: int = 50
     random_seed: int = 0
+    rhat_threshold: float | None = None
+    rhat_check_every: int = 100
+    posterior_burn_in_draws: int = 0
+    post_convergence_checks: int = 0
 
     def to_json_dict(self) -> dict[str, Any]:
         return dataclasses.asdict(self)
@@ -87,7 +91,7 @@ class RunStatus:
     sampling_done: int
     n_tune: int
     n_draws: int
-    stopped_reason: str  # "completed" | "time_budget" | "nothing_to_do"
+    stopped_reason: str  # "completed" | "converged" | "time_budget" | "nothing_to_do"
     n_invocations: int = 0  # how many run() calls (i.e. job segments) so far
 
     @property
@@ -266,6 +270,10 @@ class ResumableSampler:
         self._run_dir = Path(run_dir)
         self._run_dir.mkdir(parents=True, exist_ok=True)
         self._config_hash = config_hash
+        try:
+            self._device_kind = jax.devices()[0].device_kind
+        except Exception:
+            self._device_kind = "unknown"
 
         self._warmup_chunk, self._adapt_init, self._adapt_final = _make_warmup_chunk(
             logdensity_fn, spec.target_accept, spec.is_mass_matrix_diagonal
@@ -310,6 +318,18 @@ class ResumableSampler:
         }
         with open(self._run_dir / self.META, "w", encoding="utf-8") as fh:
             json.dump(meta, fh, indent=2)
+        # Appended (not overwritten) throughput history -- checkpoint_meta.json
+        # only ever shows the latest state, so this is the only way to later
+        # reconstruct draws-over-time, e.g. to see where a preempt/requeue (or
+        # a GPU-model change) shows up as a stall or a rate change.
+        with open(self._run_dir / "progress_log.jsonl", "a", encoding="utf-8") as fh:
+            fh.write(json.dumps({
+                "t": time.time(),
+                "phase": ckpt["phase"],
+                "warmup_done": ckpt["warmup_done"],
+                "sampling_done": ckpt["sampling_done"],
+                "device": self._device_kind,
+            }) + "\n")
 
     def _fresh_state(self) -> dict[str, Any]:
         positions = self._init_positions
@@ -342,6 +362,43 @@ class ResumableSampler:
             "rng_keys": np.asarray(keys),
         }
 
+    # -- convergence early-stop --------------------------------------------- #
+    def _check_converged(self) -> tuple[bool, float, float]:
+        """Rank-normalized r-hat/bulk-ESS over sampling-phase draws so far
+        (per-chain), worst case across free parameters. This is the standard
+        diagnostic (warmup excluded, since it's a non-stationary adaptation
+        process and mixing it in inflates r-hat / deflates ESS, making this
+        check much slower to trigger for no real benefit). See Vehtari et al.
+        2021 (Bayesian Analysis 16(2):667-718) for the rank-normalized r-hat
+        and the ESS>=400 recommendation.
+
+        ``posterior_burn_in_draws`` additionally drops that many of the
+        earliest sampling draws before computing the diagnostic -- a
+        retroactive extra burn-in on top of tuning, for when tune-phase
+        adaptation alone isn't trusted to have the chain stationary by
+        sampling draw 0. This is the SAME boundary used to finalize the
+        actual saved posterior (see run()/inference_runner.py's finalize
+        call and finalize_window.py) -- the live diagnostic and the final
+        posterior always agree on which draws count, by construction.
+        """
+        import arviz as az
+
+        sampling = self._store.read("sampling")
+        min_draws = self._spec.posterior_burn_in_draws
+        worst_rhat, worst_ess = 0.0, float("inf")
+        for name in self._var_names:
+            arr = sampling.get(name)
+            if arr is None:
+                return False, float("nan"), float("nan")
+            arr = arr[:, min_draws:]
+            if arr.shape[1] < 2:
+                return False, float("nan"), float("nan")
+            rhat = float(az.rhat({name: arr})[name].values)
+            ess = float(az.ess({name: arr}, method="bulk")[name].values)
+            worst_rhat = max(worst_rhat, rhat)
+            worst_ess = min(worst_ess, ess)
+        return (worst_rhat < self._spec.rhat_threshold and worst_ess >= 400), worst_rhat, worst_ess
+
     # -- main loop --------------------------------------------------------- #
     def run(self, max_seconds: float | None = None, extra_draws: int = 0) -> RunStatus:
         """Advance the chain until complete or the time budget is exhausted.
@@ -358,6 +415,50 @@ class ResumableSampler:
         start = time.perf_counter()
         ckpt = self._load_checkpoint() or self._fresh_state()
         ckpt["n_invocations"] = ckpt.get("n_invocations", 0) + 1
+        ckpt.setdefault("last_rhat_check", 0)
+        ckpt.setdefault("converged_early", False)
+
+        def _maybe_converge() -> bool:
+            """Returns True if the run just stopped early on convergence.
+
+            Only checks once in the sampling phase (standard practice --
+            warmup is a non-stationary adaptation process, not valid
+            posterior draws), every rhat_check_every sampling draws.
+
+            ``post_convergence_checks`` (in rhat_check_every-sized units)
+            extends the draw target by that many more checks the FIRST time
+            convergence is detected, instead of stopping immediately -- a
+            bare-minimum-draws stop can leave too few draws for downstream
+            diagnostics (e.g. az.loo needs >=5 tail draws) to be numerically
+            stable. The extension only fires once (guarded by
+            converged_early); after that the normal "reached n_draws target"
+            path below finalizes the run.
+            """
+            if self._spec.rhat_threshold is None or ckpt["phase"] != "sampling":
+                return False
+            n = ckpt["sampling_done"]
+            if n - ckpt["last_rhat_check"] < self._spec.rhat_check_every:
+                return False
+            ckpt["last_rhat_check"] = n
+            converged, rhat, ess = self._check_converged()
+            print(f"==> r_hat/ESS check at {n} sampling draws: "
+                  f"r_hat={rhat:.4f} ess_bulk={ess:.1f} "
+                  f"(threshold r_hat<{self._spec.rhat_threshold}, ess>=400)")
+            if converged and not ckpt["converged_early"]:
+                ckpt["converged_early"] = True
+                ckpt["converged_at_draws"] = n
+                extra = self._spec.post_convergence_checks * self._spec.rhat_check_every
+                if extra > 0:
+                    ckpt["n_draws"] = n + extra
+                    print(f"==> Converged at {n} sampling draws -- running {extra} more "
+                          f"for stable downstream diagnostics before finalizing at {ckpt['n_draws']}")
+                    self._write_checkpoint(ckpt)
+                    return False
+                print(f"==> Converged -- stopping early at {n} sampling draws")
+                ckpt["phase"] = "done"
+                self._write_checkpoint(ckpt)
+                return True
+            return False
 
         if extra_draws:
             ckpt["n_draws"] += int(extra_draws)
@@ -404,6 +505,8 @@ class ResumableSampler:
             )
             self._write_checkpoint(ckpt)
             did_work = True
+            if _maybe_converge():
+                break
 
         # ---- warmup -> sampling transition (freeze tuned params) ---- #
         if ckpt["phase"] == "warmup" and ckpt["warmup_done"] >= ckpt["n_tune"]:
@@ -435,13 +538,15 @@ class ResumableSampler:
             )
             self._write_checkpoint(ckpt)
             did_work = True
+            if _maybe_converge():
+                break
 
         if ckpt["phase"] == "sampling" and ckpt["sampling_done"] >= ckpt["n_draws"]:
             ckpt["phase"] = "done"
             self._write_checkpoint(ckpt)
 
         if ckpt["phase"] == "done":
-            reason = "completed"
+            reason = "converged" if ckpt.get("converged_early") else "completed"
         elif not did_work:
             reason = "nothing_to_do"
         else:

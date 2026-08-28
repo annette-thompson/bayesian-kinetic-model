@@ -326,6 +326,160 @@ def plot_posterior_trace_diagnostics(
     }
 
 
+def _rhat_ess_trajectory(
+    inf_data: az.InferenceData,
+    free_params: list[str],
+    step: int,
+    ess_method: str = "bulk",
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Worst-case rank-normalized r-hat / min bulk-ESS over growing prefixes of
+    the sampling-phase draws, at every ``step``-th draw count. Mirrors
+    ResumableSampler._check_converged's logic exactly (worst r-hat, min ESS
+    across free params), just evaluated on a finer grid for a smooth curve
+    instead of the sparse rhat_check_every points actually checked live.
+    """
+    arrays = {name: np.asarray(inf_data.posterior[name].values, dtype=float) for name in free_params}
+    n_draws = next(iter(arrays.values())).shape[1]
+
+    draw_counts = np.arange(step, n_draws + 1, step, dtype=int)
+    if draw_counts.size == 0 or draw_counts[-1] != n_draws:
+        draw_counts = np.append(draw_counts, n_draws)
+
+    rhats = np.full(draw_counts.shape, np.nan)
+    esses = np.full(draw_counts.shape, np.nan)
+    for i, n in enumerate(draw_counts):
+        if n < 2:
+            continue
+        worst_rhat, worst_ess = 0.0, float("inf")
+        for name, arr in arrays.items():
+            windowed = arr[:, :n]
+            worst_rhat = max(worst_rhat, float(az.rhat({name: windowed})[name].values))
+            worst_ess = min(worst_ess, float(az.ess({name: windowed}, method=ess_method)[name].values))
+        rhats[i] = worst_rhat
+        esses[i] = worst_ess
+    return draw_counts, rhats, esses
+
+
+def plot_convergence_diagnostics(
+    inf_data: az.InferenceData,
+    free_params: list[str],
+    rhat_threshold: float = 1.01,
+    ess_threshold: float = 400.0,
+    step: int = 10,
+    bfmi_threshold: float = 0.3,
+    save_file: str | None = None,
+    show: bool = False,
+) -> dict[str, Any]:
+    """Convergence diagnostics vs. cumulative sampling draws: worst-case r-hat,
+    min bulk-ESS, and cumulative NUTS divergence count share one x-axis, with a
+    line marking the first draw count where both r-hat/ESS criteria are
+    jointly met (r_hat < rhat_threshold and ess >= ess_threshold) -- the same
+    criterion ResumableSampler's live early-stop check uses, recomputed on a
+    fine grid for a smooth trajectory rather than the sparse live check
+    points. BFMI (Betancourt's energy diagnostic) is per-chain, not a
+    trajectory over draws, so it gets its own side panel with the
+    conventional bfmi_threshold=0.3 caution line (values below suggest the
+    momentum resampling isn't exploring the energy distribution well).
+    """
+    _apply_plot_style()
+    selected_free_params = _select_free_params(inf_data, free_params)
+    draw_counts, rhats, esses = _rhat_ess_trajectory(inf_data, selected_free_params, step=step)
+
+    passing = np.where((rhats < rhat_threshold) & (esses >= ess_threshold))[0]
+    criteria_met_at = int(draw_counts[passing[0]]) if passing.size else None
+
+    diverging = np.asarray(inf_data.sample_stats["diverging"].values, dtype=bool)  # (chains, draws)
+    n_draws = diverging.shape[1]
+    cum_divergences = np.cumsum(diverging.sum(axis=0))
+    total_divergences = int(cum_divergences[-1]) if n_draws else 0
+
+    try:
+        bfmi_raw = az.bfmi(inf_data)
+        try:
+            # arviz >=1.0 returns a DataTree/Dataset with an "energy" data_var
+            # (one value per chain); older arviz returned a plain ndarray.
+            bfmi = np.asarray(bfmi_raw["energy"].values, dtype=float)
+        except (KeyError, TypeError, IndexError):
+            bfmi = np.asarray(bfmi_raw, dtype=float)
+    except Exception:  # noqa: BLE001 - BFMI needs sample_stats.energy; absent on older saved runs
+        bfmi = np.array([])
+
+    fig = plt.figure(figsize=(12.0, 9.0))
+    gs = fig.add_gridspec(3, 2, width_ratios=(3.0, 1.0))
+    rhat_ax = fig.add_subplot(gs[0, 0])
+    ess_ax = fig.add_subplot(gs[1, 0], sharex=rhat_ax)
+    div_ax = fig.add_subplot(gs[2, 0], sharex=rhat_ax)
+    bfmi_ax = fig.add_subplot(gs[:, 1])
+
+    rhat_ax.plot(draw_counts, rhats, marker="o", markersize=3.0, linewidth=1.5, label="Worst-case r-hat")
+    rhat_ax.axhline(rhat_threshold, color="black", linestyle="--", linewidth=1.2, label=f"Threshold ({rhat_threshold})")
+    rhat_ax.set_ylabel("r-hat")
+    rhat_ax.set_title("Convergence Diagnostics vs. Sampling Draws")
+    rhat_ax.legend(loc="best")
+    plt.setp(rhat_ax.get_xticklabels(), visible=False)
+
+    ess_ax.plot(draw_counts, esses, marker="o", markersize=3.0, linewidth=1.5, color="tab:orange", label="Min bulk-ESS")
+    ess_ax.axhline(ess_threshold, color="black", linestyle="--", linewidth=1.2, label=f"Threshold ({ess_threshold:.0f})")
+    ess_ax.set_ylabel("Bulk-ESS")
+    ess_ax.legend(loc="best")
+    plt.setp(ess_ax.get_xticklabels(), visible=False)
+
+    div_x = np.arange(1, n_draws + 1)
+    div_ax.plot(div_x, cum_divergences, linewidth=1.5, color="tab:red", label=f"Cumulative divergences (total={total_divergences})")
+    div_ax.set_xlabel("Cumulative sampling draws")
+    div_ax.set_ylabel("Divergences")
+    if total_divergences == 0:
+        div_ax.set_ylim(-0.5, 1.0)
+    div_ax.legend(loc="best")
+
+    if criteria_met_at is not None:
+        for ax in (rhat_ax, ess_ax, div_ax):
+            ax.axvline(
+                criteria_met_at, color="firebrick", linestyle=":", linewidth=1.8,
+                label=f"Criteria met (draw {criteria_met_at})",
+            )
+        rhat_ax.legend(loc="best")
+        ess_ax.legend(loc="best")
+        div_ax.legend(loc="best")
+
+    if bfmi.size:
+        chain_idx = np.arange(bfmi.size)
+        colors = ["tab:red" if b < bfmi_threshold else "tab:blue" for b in bfmi]
+        bfmi_ax.bar(chain_idx, bfmi, color=colors)
+        bfmi_ax.axhline(bfmi_threshold, color="black", linestyle="--", linewidth=1.2, label=f"Caution ({bfmi_threshold})")
+        bfmi_ax.set_xticks(chain_idx)
+        bfmi_ax.legend(loc="best")
+    else:
+        bfmi_ax.text(0.5, 0.5, "BFMI unavailable\n(no energy stat)", ha="center", va="center")
+    bfmi_ax.set_xlabel("Chain")
+    bfmi_ax.set_ylabel("BFMI")
+    bfmi_ax.set_title("Energy Fraction of\nMissing Information")
+
+    fig.tight_layout()
+
+    plot_file = None
+    if save_file:
+        plot_path = Path(save_file).expanduser().resolve()
+        plot_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(plot_path, dpi=300, bbox_inches="tight")
+        plot_file = str(plot_path)
+
+    if not show:
+        plt.close(fig)
+
+    return {
+        "figure": fig,
+        "axes": (rhat_ax, ess_ax, div_ax, bfmi_ax),
+        "draw_counts": draw_counts,
+        "rhats": rhats,
+        "esses": esses,
+        "criteria_met_at": criteria_met_at,
+        "total_divergences": total_divergences,
+        "bfmi": bfmi,
+        "plot_file": plot_file,
+    }
+
+
 def plot_parameter_marginals(
     inf_data: az.InferenceData,
     free_params: list[str],

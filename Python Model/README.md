@@ -84,6 +84,7 @@ After running inference, `Results/<folder_name>/` will contain:
 | `trace_plot_hist.pdf` | Marginal posterior distributions |
 | `trace_plot_prior_hist.pdf` | Prior distributions |
 | `*_predictive_*.pdf` | Model predictions overlaid on observed data |
+| `convergence_diagnostics.png` | *(if run)* r-hat/ESS trajectory, cumulative divergences, and per-chain BFMI — see `Utilities/plot_convergence_trajectory.py` below |
 
 ---
 
@@ -138,13 +139,21 @@ Each segment samples within `--max-hours` (default 23.5), checkpoints, and exits
 "Bayesian Inference/submit_inference_chain.sh" --solver-params ".../solver_params.json" --segments 3 --extra-draws 1000
 ```
 
-**4. Re-pick the tuning/posterior boundary** (optional) — because all warm-up and sampling draws are retained, you can move the burn-in boundary after the fact, no resampling:
+**4. Re-pick the tuning/posterior boundary** (optional) — because all warm-up and sampling draws are retained, you can move the burn-in boundary after the fact, no resampling. `solver_params.json`'s `posterior_sampling.posterior_burn_in_draws` sets an automatic extra burn-in (beyond `tune`) applied live during the run and to its auto-written posterior; `finalize_window.py --burn_in` re-derives the posterior netcdf from any chosen boundary after the fact, defaulting to `tune + posterior_burn_in_draws` (i.e. reproducing what the run already did) when `--burn_in` isn't given:
 
 ```bash
 python "Utilities/finalize_window.py" --solver_params_file "Results/<folder_name>/solver_params.json" --burn_in 800
 ```
 
-The cluster scripts only run sampling and write `prior_samples_pm.nc` and `posterior_samples_pm.nc`. To make or remake plots after a job finishes, open `Bayesian Inference/guided_bayesian_inference.ipynb`, set the same `folder_name`, set `use_existing_results = True`, and rerun the plotting cell.
+**5. Plot convergence diagnostics** (optional) — r-hat/ESS vs. cumulative sampling draws (with a line marking where both criteria are first jointly met), cumulative NUTS divergences, and per-chain BFMI, recomputed from the saved posterior netcdf:
+
+```bash
+python "Utilities/plot_convergence_trajectory.py" --solver_params_file "Results/<folder_name>/solver_params.json"
+```
+
+Cheap enough (plain numpy/arviz over a handful of draws/chains) to run locally after transferring just the `posterior_samples_pm.nc` file down from the cluster — no need to run on Alpine/Blanca.
+
+The cluster scripts only run sampling and write `prior_samples_pm.nc` and `posterior_samples_pm.nc`. To make or remake the main plots after a job finishes, open `Bayesian Inference/guided_bayesian_inference.ipynb`, set the same `folder_name`, set `use_existing_results = True`, and rerun the plotting cell.
 
 ---
 

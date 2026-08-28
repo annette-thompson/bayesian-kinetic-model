@@ -34,6 +34,7 @@ import numpy as np
 import pymc as pm
 import preliz as pz
 import pytensor.tensor as pt
+import xarray as xr
 
 from pytensor.graph import Apply, Op
 from pytensor.link.jax.dispatch import jax_funcify
@@ -234,9 +235,9 @@ _register_jaxify_handlers()
 
 @dataclass(frozen=True)
 class InferenceRunResult:
-    posterior: az.InferenceData
-    prior_predictive: az.InferenceData
-    posterior_predictive: az.InferenceData | None
+    posterior: xr.DataTree
+    prior_predictive: xr.DataTree
+    posterior_predictive: xr.DataTree | None
     summary: Any
     free_params: list[str]
     species_names: list[str]
@@ -272,7 +273,7 @@ def get_free_parameter_names(solver_params: dict[str, Any]) -> list[str]:
 
 
 def summarize_inference_metrics(
-    inf_data: az.InferenceData,
+    inf_data: xr.DataTree,
     free_params: list[str],
 ) -> dict[str, Any]:
     """Compute summary and LOO for provided free parameters."""
@@ -478,6 +479,11 @@ def run_bayesian_inference(
     )
     is_diag = bool(posterior_config.get("is_mass_matrix_diagonal", True))
     initial_step = float(posterior_config.get("initial_step_size", 1.0))
+    rhat_threshold = posterior_config.get("rhat_threshold", None)
+    rhat_threshold = float(rhat_threshold) if rhat_threshold is not None else None
+    rhat_check_every = int(posterior_config.get("rhat_check_every", 100))
+    posterior_burn_in = int(posterior_config.get("posterior_burn_in_draws", 0))
+    post_convergence_checks = int(posterior_config.get("post_convergence_checks", 0))
 
     # Fast no-op if a prior job already finished this run (SLURM chains overshoot).
     results_file = savedir_path / imported.posterior_samples_file
@@ -511,6 +517,15 @@ def run_bayesian_inference(
     _print_kv("target_accept", target_accept)
     _print_kv("mass matrix", "diagonal" if is_diag else "dense")
     _print_kv("checkpoint_every_steps", checkpoint_every)
+    if rhat_threshold is not None:
+        burn_in_note = f", after a {posterior_burn_in}-draw burn-in" if posterior_burn_in else ""
+        extra_note = (
+            f", running {post_convergence_checks * rhat_check_every} more draws after first convergence"
+            if post_convergence_checks else ""
+        )
+        _print_kv("early-stop", f"r_hat<{rhat_threshold} and ess_bulk>=400, checked every {rhat_check_every} draws{burn_in_note}{extra_note}")
+    if posterior_burn_in:
+        _print_kv("posterior_burn_in_draws", f"{posterior_burn_in} (extra, beyond tune={n_tune}; final posterior = sampling[{posterior_burn_in}:])")
     _print_kv("max_hours (this segment)", max_hours if max_hours else "unbounded")
     if extra_draws:
         _print_kv("extra_draws requested", extra_draws)
@@ -527,6 +542,10 @@ def run_bayesian_inference(
         initial_step_size=initial_step,
         checkpoint_every=checkpoint_every,
         random_seed=seed,
+        rhat_threshold=rhat_threshold,
+        rhat_check_every=rhat_check_every,
+        posterior_burn_in_draws=posterior_burn_in,
+        post_convergence_checks=post_convergence_checks,
     )
     sampler = rs.ResumableSampler(
         bridge.logdensity_fn,
@@ -554,13 +573,28 @@ def run_bayesian_inference(
         return status
 
     _print_section("Finalizing (draw target met)")
+    sampling_draws = sampler.read_draws("sampling")
+    sampling_stats = sampler.read_stats("sampling")
+    warmup_draws = sampler.read_draws("warmup")
+    if posterior_burn_in:
+        # Same boundary _check_converged used live -- the auto-written posterior
+        # and the diagnostic that gated it always agree on which draws count.
+        # The discarded head joins warmup_posterior (still visible in trace plots),
+        # matching finalize_window.py's --burn_in semantics over the full timeline.
+        discarded = {name: arr[:, :posterior_burn_in] for name, arr in sampling_draws.items()}
+        warmup_draws = {
+            name: np.concatenate([warmup_draws[name], discarded[name]], axis=1) if warmup_draws else discarded[name]
+            for name in discarded
+        }
+        sampling_draws = {name: arr[:, posterior_burn_in:] for name, arr in sampling_draws.items()}
+        sampling_stats = {name: arr[:, posterior_burn_in:] for name, arr in sampling_stats.items()}
     return _finalize_resumable_run(
         imported=imported,
         bundle=bundle,
-        draws=sampler.read_draws("sampling"),
-        stats=sampler.read_stats("sampling"),
+        draws=sampling_draws,
+        stats=sampling_stats,
         segment_seconds=segment_seconds,
-        warmup_draws=sampler.read_draws("warmup"),
+        warmup_draws=warmup_draws,
     )
 
 
@@ -753,9 +787,24 @@ def _build_simulator(ode_system, species_names, solver_params, experiment):
         return ys
 
     def solve_all_conditions(condition_matrix, params):
-        return jax.vmap(
-            lambda y0: solve_single_initial_condition(y0, params)
-        )(condition_matrix)
+        # lax.map (sequential scan) vs vmap (batched): under the checkpointed
+        # adjoint, vmap forces every condition through the same recomputation
+        # schedule as the most expensive one in the batch, which measured ~32x
+        # slower on jax 0.7.0 (83.5s vs 2.6s) even though every individual
+        # condition's gradient is cheap (a few hundred ms) alone. lax.map is the
+        # default. BAYESIAN_BATCH_STRATEGY=vmap overrides this -- measured
+        # necessary on jax 0.10.2 (nate), where lax.map silently returns wrong
+        # (inf) gradients; vmap is correct there. Set per-environment (e.g. by
+        # the nate launcher script), not in solver_params.json, since the same
+        # config file is synced across machines with different jax versions.
+        strategy = os.environ.get("BAYESIAN_BATCH_STRATEGY", "lax_map")
+        if strategy == "vmap":
+            return jax.vmap(
+                lambda y0: solve_single_initial_condition(y0, params)
+            )(condition_matrix)
+        return jax.lax.map(
+            lambda y0: solve_single_initial_condition(y0, params), condition_matrix
+        )
 
     def simulator(params):
 
@@ -878,7 +927,7 @@ def _sample_prior(pm_model, solver_params, free_params):
         )
 
 
-def _safe_write_idata(inf_data: az.InferenceData, output_file: Path):
+def _safe_write_idata(inf_data: xr.DataTree, output_file: Path):
     def _netcdf_safe_attr(value):
         if isinstance(value, (str, bytes, int, float, bool)) or value is None:
             return value
