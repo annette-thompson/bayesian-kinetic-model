@@ -1,0 +1,47 @@
+{
+  "config": "Chain C4 gradsafe - a2",
+  "rtol": 0.001,
+  "atol": 1e-06,
+  "initial_condition_floor": 0.0,
+  "n_chains": 4,
+  "seed": 42,
+  "jitter": false,
+  "repeats": 10,
+  "jax_devices": [
+    "TFRT_CPU_0"
+  ],
+  "per_chain": [
+    {
+      "chain": 0,
+      "logp": 125.3589642345125,
+      "logp_finite": true,
+      "grad_finite": false,
+      "median_seconds_per_grad_eval": 1.8819526510196738,
+      "grad_evals_per_sec": 0.5313629965441389
+    },
+    {
+      "chain": 1,
+      "logp": 125.3589642345125,
+      "logp_finite": true,
+      "grad_finite": false,
+      "median_seconds_per_grad_eval": 1.8804615440312773,
+      "grad_evals_per_sec": 0.53178433942139
+    },
+    {
+      "chain": 2,
+      "logp": 125.3589642345125,
+      "logp_finite": true,
+      "grad_finite": false,
+      "median_seconds_per_grad_eval": 1.8066582140163518,
+      "grad_evals_per_sec": 0.5535081246922275
+    },
+    {
+      "chain": 3,
+      "logp": 125.3589642345125,
+      "logp_finite": true,
+      "grad_finite": false,
+      "median_seconds_per_grad_eval": 1.8063061429420486,
+      "grad_evals_per_sec": 0.5536160101693697
+    }
+  ]
+}

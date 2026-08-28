@@ -30,8 +30,8 @@
         "stepsize_controller": "PIDController"
     },
     "ODE_stepsize_controller": {
-        "rtol": 0.0001,
-        "atol": 1e-08,
+        "rtol": 0.001,
+        "atol": 1e-06,
         "pcoeff": 0.2,
         "icoeff": 0.4,
         "dcoeff": 0.0
@@ -39,9 +39,9 @@
     "calculation_module": "Calculation Files/Full_FAS/FA_conc.py",
     "datasets": [
         {
-            "name": "time_vs_conc_Chain_C4_tmin",
+            "name": "time_vs_conc_Chain_C4",
             "dataset_type": "timeseries",
-            "data_file": "Data/Chain_C4_tmin/time_vs_conc.csv",
+            "data_file": "Data/Chain_C4_gradsafe/time_vs_conc.csv",
             "observables": {
                 "C4_FA (uM)": "C4_FA (uM)"
             },
@@ -52,26 +52,26 @@
             "enabled": true,
             "time_column": "Time (s)",
             "init_cond_overrides": {
-                "C3_MalCoA": 500.0,
-                "C2_AcCoA": 500.0,
-                "ACP": 10.0,
-                "NADPH": 1000.0,
-                "NADH": 1000.0,
-                "FabD": 1.0,
-                "FabH": 1.0,
-                "FabG": 1.0,
-                "FabZ": 1.0,
-                "FabI": 1.0,
-                "FabF": 1.0,
-                "FabA": 1.0,
-                "FabB": 1.0,
-                "TesA": 10.0
+                "C3_MalCoA": 2500.0,
+                "C2_AcCoA": 2500.0,
+                "ACP": 50.0,
+                "NADPH": 5000.0,
+                "NADH": 5000.0,
+                "FabD": 5.0,
+                "FabH": 5.0,
+                "FabG": 5.0,
+                "FabZ": 5.0,
+                "FabI": 5.0,
+                "FabF": 5.0,
+                "FabA": 5.0,
+                "FabB": 5.0,
+                "TesA": 50.0
             }
         },
         {
-            "name": "sweep_conc_Chain_C4_tmin",
+            "name": "sweep_conc_Chain_C4",
             "dataset_type": "endpoint",
-            "data_file": "Data/Chain_C4_tmin/init_vs_final_conc.csv",
+            "data_file": "Data/Chain_C4_gradsafe/init_vs_final_conc.csv",
             "observables": {
                 "C4_FA (uM)": "C4_FA (uM)"
             },
@@ -98,8 +98,8 @@
                 "TesA": "TesA (uM)"
             },
             "init_cond_overrides": {
-                "NADPH": 1000.0,
-                "NADH": 1000.0
+                "NADPH": 5000.0,
+                "NADH": 5000.0
             }
         }
     ],
@@ -116,7 +116,7 @@
             "Reactions/EC_FAS_ME1/C4/FabA.yaml",
             "Reactions/EC_FAS_ME1/C4/FabB.yaml"
         ],
-        "results_save_dir": "Results/Chain Scaling Tests/Chain C4 tmin - a2",
+        "results_save_dir": "Results/Chain Scaling Tests/Chain C4 gradsafe - a2",
         "prior_samples_file": "prior_samples_pm.nc",
         "posterior_samples_file": "posterior_samples_pm.nc",
         "trace_plot_file": "trace_plot.png"
