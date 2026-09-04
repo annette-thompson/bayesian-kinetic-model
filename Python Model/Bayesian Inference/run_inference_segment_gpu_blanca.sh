@@ -7,6 +7,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --time=24:00:00
 #SBATCH --gres=gpu:1
+#SBATCH --constraint="A100|V100|h100"
 #SBATCH --output=/projects/anth4580/Bayesian/job_files/%x.%j.out
 #SBATCH --mail-type=ALL
 #SBATCH --export=NONE
@@ -17,6 +18,13 @@
 # congestion. preemptable jobs can be killed and requeued anytime by the
 # owning group's own jobs -- safe here because inference_runner.py resumes
 # from its zarr checkpoint automatically, same as a SLURM time-limit exit.
+# The constraint restricts to GPU families with real fp64 throughput --
+# Blanca's fleet is mostly A40/L40/T4/RTX6000, which are fast for fp32/ML
+# workloads but bad for this float64-heavy codebase (see sinfo -M blanca).
+# P100 is deliberately excluded despite having fp64: Blanca has exactly one
+# P100 node (bgpu-mktg1), and the CUDA-12 jaxlib pinned here may not support
+# Pascal -- not worth risking a multi-hour job landing there for one node's
+# worth of capacity when A100/V100/H100 schedule immediately.
 # `-l` + `--export=NONE` are load-bearing (see run_inference_segment_gpu.sh).
 
 _die() { echo "Error: $*" >&2; exit 1; }

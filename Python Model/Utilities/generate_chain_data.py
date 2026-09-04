@@ -84,6 +84,30 @@ def log_distance(a, b) -> float:
     return float(np.max(np.abs(la - lb)))
 
 
+def relative_error(candidate, reference, floor: float = 1e-6) -> float:
+    """Max relative error between two full-state vectors, masked to species where
+    |reference| exceeds floor (avoids blowup from dividing by near-zero noise)."""
+    candidate = np.asarray(candidate, dtype=np.float64)
+    reference = np.asarray(reference, dtype=np.float64)
+    mask = np.abs(reference) > floor
+    if not mask.any():
+        return float("nan")
+    return float(np.max(np.abs(candidate[mask] - reference[mask]) / np.abs(reference[mask])))
+
+
+def nominal_scaling_group_overrides(scaling_groups: list[str]) -> dict[str, float]:
+    """The correct no-op value per scaling group: 1.0 for ordinary multiplicative
+    groups, 0.0 for ``d``-prefixed groups (which enter ADDITIVELY inside an exp(), e.g.
+    TesA's ``1/exp(12*d1+d2)`` -- nominal is d=0 giving exp(0)=1, NOT d=1). Verified
+    against the hand-maintained notebook (ODE Runner/run_model.ipynb), which sets
+    d1=0, d2=0 explicitly while every other group is 1. A previous blanket
+    ``{g: 1 for g in scaling_groups}`` silently used d=1 everywhere, giving TesA's
+    rate a ~440,000x error (1/exp(13) vs 1/exp(0)) -- caught only because C4_NoFB's
+    baseline then failed to converge even within 200,000 steps at tight tolerance.
+    """
+    return {g: (0.0 if g.startswith("d") else 1.0) for g in scaling_groups}
+
+
 class ChainSystem:
     """One built network plus the solve/export operations that need it.
 
@@ -92,13 +116,30 @@ class ChainSystem:
     them to an instance removes that hazard entirely.
     """
 
-    def __init__(self, reactions_dir: Path, rtol: float, atol: float):
+    def __init__(self, reactions_dir: Path, rtol: float, atol: float,
+                pcoeff: float = 0.2, icoeff: float = 0.4, dcoeff: float = 0.0,
+                scaling_group_overrides: dict[str, float] | None = None):
         out = build_ode_system_from_reactions(reactions_dir)
         self.network, self.species, self.params, param_values, scaling_groups = out
         self.sp = make_namespace(self.species)
         theta = jnp.array([param_values[p] for p in self.params], dtype=jnp.float64)
-        self.theta = set_scaling_group_values(theta, self.params, {g: 1 for g in scaling_groups})
+        if scaling_group_overrides is None:
+            raise ValueError(
+                f"scaling_group_overrides must be provided explicitly (reactions_dir={reactions_dir} "
+                f"has scaling_groups={sorted(scaling_groups)}). A previous silent default of 1 for "
+                "every group was wrong for 'd'-prefixed groups (additive inside exp(), nominal is 0) "
+                "and produced a ~440,000x rate-constant error on TesA that went undetected for an "
+                "entire session. Use nominal_scaling_group_overrides(scaling_groups) for the standard "
+                "nominal parameterization, or pass an explicit dict for a deliberate non-nominal one.")
+        missing = set(scaling_groups) - set(scaling_group_overrides)
+        extra = set(scaling_group_overrides) - set(scaling_groups)
+        if missing or extra:
+            raise ValueError(
+                f"scaling_group_overrides does not exactly match this network's scaling groups "
+                f"(reactions_dir={reactions_dir}): missing={sorted(missing)}, extra={sorted(extra)}")
+        self.theta = set_scaling_group_values(theta, self.params, scaling_group_overrides)
         self.rtol, self.atol = rtol, atol
+        self.pcoeff, self.icoeff, self.dcoeff = pcoeff, icoeff, dcoeff
         self.index_of = {name: i for i, name in enumerate(self.species)}
 
     def y0(self) -> np.ndarray:
@@ -112,8 +153,12 @@ class ChainSystem:
         rx = re.compile(pattern)
         return [s for s in self.species if rx.fullmatch(s)]
 
-    def solve(self, y0, max_steps: int, save_steps: bool = True):
+    def solve(self, y0, max_steps: int, save_steps: bool = True, return_stats: bool = False):
         """Returns (times, concentrations), or (None, None) for a non-converged solve.
+        With return_stats=True, returns a third element: the actual step count taken
+        (even on a converged solve well under max_steps) -- lets a caller measure a
+        reference condition's own cost, e.g. to size an adaptive per-candidate cap
+        relative to it, rather than only checking against a fixed absolute ceiling.
 
         throw=False plus an explicit result check: a silent failure here would be
         written into the training data as if it were a real trajectory.
@@ -124,16 +169,18 @@ class ChainSystem:
             y0=jnp.asarray(y0, dtype=jnp.float64), args=self.theta,
             saveat=dfrx.SaveAt(steps=True) if save_steps else dfrx.SaveAt(t1=True),
             stepsize_controller=dfrx.PIDController(
-                rtol=self.rtol, atol=self.atol, pcoeff=0.2, icoeff=0.4, dcoeff=0),
+                rtol=self.rtol, atol=self.atol, pcoeff=self.pcoeff, icoeff=self.icoeff, dcoeff=self.dcoeff),
             max_steps=max_steps, throw=False,
         )
         total = int(np.asarray(sol.stats["num_steps"]))
         if total >= max_steps or bool(sol.result != dfrx.RESULTS.successful):
-            return None, None
+            return (None, None, total) if return_stats else (None, None)
         accepted = int(np.asarray(sol.stats["num_accepted_steps"]))
         if save_steps:
-            return sol.ts[:accepted], sol.ys[:accepted, :]
-        return sol.ts, (sol.ys if sol.ys.ndim == 2 else sol.ys[None, :])
+            result = (sol.ts[:accepted], sol.ys[:accepted, :])
+        else:
+            result = (sol.ts, (sol.ys if sol.ys.ndim == 2 else sol.ys[None, :]))
+        return (*result, total) if return_stats else result
 
 
 def export_timeseries(sys_: ChainSystem, targets: list[str], out_dir: Path,
@@ -181,7 +228,19 @@ def export_timeseries(sys_: ChainSystem, targets: list[str], out_dir: Path,
 def make_sweep(sys_: ChainSystem, names: list[str],
                offsets=(-0.08, -0.04, 0.0, 0.04, 0.08)) -> dict[str, list[float]]:
     """Candidate initial-condition rows: a shared base factor per row, plus a small
-    deterministic per-species offset so the multipliers are not uniform across species."""
+    deterministic per-species offset so the multipliers are not uniform across species.
+
+    Names absent from this system are skipped rather than raising: not every rung
+    carries all of SWEEP_SPECIES. C4_NoFB ("No FabF / No FabB") deliberately drops
+    those two enzymes -- C4 *with* them fails via ACP sequestration, since at a
+    4-carbon cap they bind ACP into complexes they can never productively resolve --
+    so sweeping a species that is not in the network is meaningless, not an error.
+    """
+    missing = [n for n in names if n not in sys_.index_of]
+    if missing:
+        print(f"      make_sweep: skipping {len(missing)} species absent from this "
+              f"system: {missing}")
+    names = [n for n in names if n in sys_.index_of]
     y0 = sys_.y0()
     sweep = {n: [] for n in names}
     for row, factor in enumerate(SWEEP_FACTORS):
@@ -192,42 +251,365 @@ def make_sweep(sys_: ChainSystem, names: list[str],
 
 
 def export_sweep(sys_: ChainSystem, targets: list[str], out_dir: Path, max_steps: int,
-                 n_required: int = 9, min_log_diff: float = 0.2):
+                 n_required: int = 9, min_log_diff: float = 0.2,
+                 max_steps_relative_to_baseline: float | None = None,
+                 strict_tolerance: tuple[float, float, float, float, float] | None = None,
+                 strict_max_steps: int = 10_000,
+                 strict_max_steps_relative_to_baseline: float | None = None,
+                 prefer_fastest_at_strict: bool = False,
+                 fastest_pool_multiplier: float = 2.0,
+                 strict_max_steps_fallback_multiplier: float | None = None):
     """One solve per candidate row, keeping rows whose OUTPUT differs from every kept
     row by >= min_log_diff decades. Without that filter the kept rows cluster in output
-    space and the 9 conditions all probe the same dynamical regime."""
+    space and the 9 conditions all probe the same dynamical regime.
+
+    ``max_steps`` is always the hard ceiling (also used to probe the baseline itself,
+    so it must be generous enough for that to succeed). When
+    ``max_steps_relative_to_baseline`` is set, the PER-CANDIDATE acceptance threshold
+    instead becomes min(max_steps, ceil(factor * baseline_steps)) -- adaptive to how
+    stiff this particular system's own unperturbed condition already is, rather than
+    one fixed absolute cap applied identically across every rung of the chain-length
+    ladder regardless of size. Leaving it None reproduces the original fixed-cap
+    behavior exactly.
+
+    ``strict_tolerance``, if given, is (pcoeff, icoeff, dcoeff, rtol, atol) for an
+    EXTRA acceptance check: a row that already passed the checks above must ALSO
+    converge within the strict-tolerance step cap at this (typically much tighter)
+    setting. Found necessary empirically: rows accepted purely on loose-tolerance step
+    count can be secretly near-pathological at tight tolerance (comparable
+    candidate-tolerance step count and rejection count did NOT predict this), so cheap
+    loose-tolerance checks alone cannot catch it -- only actually attempting the tight
+    solve can. ``strict_max_steps`` is the absolute ceiling (also used to probe the
+    baseline itself at strict tolerance). When ``strict_max_steps_relative_to_baseline``
+    is set, the PER-CANDIDATE strict-tolerance cap instead becomes
+    min(strict_max_steps, ceil(factor * baseline_strict_steps)) -- adaptive to how many
+    steps THIS system's own baseline needs at strict tolerance, mirroring
+    max_steps_relative_to_baseline's rationale exactly: a flat cap is either too loose
+    for a small/cheap rung or too tight for a large/stiff one. Leaving it None uses
+    strict_max_steps as a flat cap.
+
+    ``prefer_fastest_at_strict``, when strict_tolerance is also set, changes selection
+    from "first n_required candidates that pass, in sweep order" to "the n_required
+    FASTEST-at-strict-tolerance candidates that pass" (diversity filter still applied,
+    just in speed-sorted order instead of sweep order). Rationale: a candidate that
+    solves fast even at tight tolerance has more margin from whatever stiff feature
+    causes the pathology, so it should be more robust to the theta perturbations
+    explored during actual MCMC sampling, not just at the nominal theta tested here.
+    Costs more -- every surviving candidate gets the strict solve, not just enough to
+    reach n_required. ``fastest_pool_multiplier`` bounds how far the search goes before
+    sorting: stops once ceil(n_required * fastest_pool_multiplier) survivors are found
+    (or the sweep factors run out), rather than exhaustively trying every factor.
+    Necessary in practice, not just an optimization: SWEEP_FACTORS fans out to 100x and
+    0.01x baseline, and empirically most of that extreme tail fails to converge at ANY
+    tolerance -- exhaustively trying it can leave too few survivors to reach n_required
+    at all, when the easy near-baseline factors (tried first, same order as always)
+    would have been plenty.
+
+    ``strict_max_steps_fallback_multiplier``, if set, must be >= strict_max_steps_relative_to_baseline
+    and defines a second, looser threshold. Every candidate is solved at the LARGER
+    (fallback) cap regardless -- no extra solves -- and classified into one of two
+    tiers: PRIMARY if it converges within the tighter (relative_to_baseline) cap, or
+    FALLBACK if it needs more than that but still converges within the looser cap.
+    Selection fills n_required from PRIMARY survivors first (fastest first, as above);
+    only if that pool is exhausted before reaching n_required does it fall back to
+    FALLBACK survivors (also fastest first) to fill the remainder. Exists because the
+    primary threshold can be too tight to find n_required diverse rows AT ALL for some
+    candidate settings, even with the full sweep available -- found empirically on
+    C20+unsat, where a 1.5x threshold left only 4-8 of the 9 required rows for some
+    (PID, tolerance) candidates. Leaving this None means a stiff rejection is final.
+    """
     sweep = make_sweep(sys_, SWEEP_SPECIES)
     idx = [sys_.index_of[n] for n in targets]
     y0_base = sys_.y0()
 
-    rows, kept, n_bad, n_similar = [], [], 0, 0
-    for combo in zip(*sweep.values()):
-        y0 = y0_base.copy()
-        for name, conc in zip(sweep, combo):
-            y0[sys_.index_of[name]] = round_sigfigs(conc)
-        _, C = sys_.solve(y0, max_steps, save_steps=False)
-        if C is None:
-            n_bad += 1
-            continue
-        out = [float(C[-1, i]) for i in idx]
-        if kept and min(log_distance(out, p) for p in kept) < min_log_diff:
-            n_similar += 1
-            continue
-        rows.append([round_sigfigs(c) for c in combo] + out)
-        kept.append(out)
-        if len(rows) >= n_required:
-            break
+    effective_max_steps = max_steps
+    if max_steps_relative_to_baseline is not None:
+        _, _, baseline_steps = sys_.solve(y0_base, max_steps, save_steps=False, return_stats=True)
+        if baseline_steps >= max_steps:
+            raise RuntimeError(f"baseline condition itself did not converge within max_steps={max_steps}; "
+                               "raise max_steps before using max_steps_relative_to_baseline")
+        effective_max_steps = min(max_steps, max(1, int(np.ceil(max_steps_relative_to_baseline * baseline_steps))))
+        print(f"      baseline solved in {baseline_steps} steps -> per-candidate cap set to "
+              f"{effective_max_steps} ({max_steps_relative_to_baseline}x baseline, capped at {max_steps})")
+
+    effective_strict_max_steps = strict_max_steps
+    if strict_tolerance is not None and strict_max_steps_relative_to_baseline is not None:
+        pcoeff, icoeff, dcoeff, s_rtol, s_atol = strict_tolerance
+        baseline_sol = dfrx.diffeqsolve(
+            dfrx.ODETerm(sys_.network), dfrx.Kvaerno5(),
+            t0=TIME_RANGE[0], t1=TIME_RANGE[1], dt0=1e-6,
+            y0=jnp.asarray(y0_base, dtype=jnp.float64), args=sys_.theta,
+            saveat=dfrx.SaveAt(t1=True),
+            stepsize_controller=dfrx.PIDController(
+                rtol=s_rtol, atol=s_atol, pcoeff=pcoeff, icoeff=icoeff, dcoeff=dcoeff),
+            max_steps=strict_max_steps, throw=False,
+        )
+        baseline_strict_steps = int(np.asarray(baseline_sol.stats["num_steps"]))
+        if baseline_strict_steps >= strict_max_steps or bool(baseline_sol.result != dfrx.RESULTS.successful):
+            raise RuntimeError(f"baseline condition itself did not converge within "
+                               f"strict_max_steps={strict_max_steps} at strict tolerance; "
+                               "raise strict_max_steps before using strict_max_steps_relative_to_baseline")
+        effective_strict_max_steps = min(strict_max_steps,
+                                         max(1, int(np.ceil(strict_max_steps_relative_to_baseline * baseline_strict_steps))))
+        print(f"      baseline solved in {baseline_strict_steps} steps at strict tolerance -> per-candidate "
+              f"strict cap set to {effective_strict_max_steps} "
+              f"({strict_max_steps_relative_to_baseline}x baseline, capped at {strict_max_steps})")
+
+        effective_strict_max_steps_fallback = effective_strict_max_steps
+        if strict_max_steps_fallback_multiplier is not None:
+            effective_strict_max_steps_fallback = min(
+                strict_max_steps,
+                max(effective_strict_max_steps,
+                    int(np.ceil(strict_max_steps_fallback_multiplier * baseline_strict_steps))))
+            print(f"      fallback strict cap set to {effective_strict_max_steps_fallback} "
+                  f"({strict_max_steps_fallback_multiplier}x baseline, capped at {strict_max_steps}) -- used "
+                  f"only to fill remaining rows if the primary cap alone doesn't reach n_required")
+    else:
+        effective_strict_max_steps_fallback = effective_strict_max_steps
+
+    def _strict_check(y0):
+        """Solves at the (possibly looser) fallback cap so a candidate needing more than
+        the primary cap but less than the fallback one isn't truncated into a false
+        rejection -- classified into a tier afterward from the step count alone."""
+        pcoeff, icoeff, dcoeff, s_rtol, s_atol = strict_tolerance
+        sol = dfrx.diffeqsolve(
+            dfrx.ODETerm(sys_.network), dfrx.Kvaerno5(),
+            t0=TIME_RANGE[0], t1=TIME_RANGE[1], dt0=1e-6,
+            y0=jnp.asarray(y0, dtype=jnp.float64), args=sys_.theta,
+            saveat=dfrx.SaveAt(t1=True),
+            stepsize_controller=dfrx.PIDController(
+                rtol=s_rtol, atol=s_atol, pcoeff=pcoeff, icoeff=icoeff, dcoeff=dcoeff),
+            max_steps=effective_strict_max_steps_fallback, throw=False,
+        )
+        strict_steps = int(np.asarray(sol.stats["num_steps"]))
+        ok = strict_steps < effective_strict_max_steps_fallback and bool(sol.result == dfrx.RESULTS.successful)
+        passed_primary = ok and strict_steps < effective_strict_max_steps
+        passed_fallback = ok
+        return passed_primary, passed_fallback, strict_steps
+
+    rows, kept, n_bad, n_similar, n_stiff = [], [], 0, 0, 0
+
+    if strict_tolerance is not None and prefer_fastest_at_strict:
+        pool_target = max(n_required, int(np.ceil(n_required * fastest_pool_multiplier)))
+        primary_survivors = []   # (strict_steps, rounded_combo, out) within the primary cap
+        fallback_survivors = []  # same, but only within the looser fallback cap
+        for combo in zip(*sweep.values()):
+            if len(primary_survivors) >= pool_target:
+                break
+            y0 = y0_base.copy()
+            for name, conc in zip(sweep, combo):
+                y0[sys_.index_of[name]] = round_sigfigs(conc)
+            _, C = sys_.solve(y0, effective_max_steps, save_steps=False)
+            if C is None:
+                n_bad += 1
+                continue
+            out = [float(C[-1, i]) for i in idx]
+            passed_primary, passed_fallback, strict_steps = _strict_check(y0)
+            if not passed_fallback:
+                n_stiff += 1
+                continue
+            entry = (strict_steps, [round_sigfigs(c) for c in combo], out)
+            (primary_survivors if passed_primary else fallback_survivors).append(entry)
+
+        primary_survivors.sort(key=lambda s: s[0])
+        fallback_survivors.sort(key=lambda s: s[0])
+        n_fallback_used = 0
+        for pool, is_fallback in ((primary_survivors, False), (fallback_survivors, True)):
+            for strict_steps, rounded_combo, out in pool:
+                if len(rows) >= n_required:
+                    break
+                if kept and min(log_distance(out, p) for p in kept) < min_log_diff:
+                    n_similar += 1
+                    continue
+                rows.append(rounded_combo + out)
+                kept.append(out)
+                if is_fallback:
+                    n_fallback_used += 1
+            if len(rows) >= n_required:
+                break
+        if n_fallback_used:
+            print(f"      used {n_fallback_used} fallback-tier row(s) (passed the looser cap but not "
+                  f"the primary one) to reach n_required")
+    else:
+        for combo in zip(*sweep.values()):
+            y0 = y0_base.copy()
+            for name, conc in zip(sweep, combo):
+                y0[sys_.index_of[name]] = round_sigfigs(conc)
+            _, C = sys_.solve(y0, effective_max_steps, save_steps=False)
+            if C is None:
+                n_bad += 1
+                continue
+            out = [float(C[-1, i]) for i in idx]
+            if kept and min(log_distance(out, p) for p in kept) < min_log_diff:
+                n_similar += 1
+                continue
+            if strict_tolerance is not None:
+                _, passed_fallback, strict_steps = _strict_check(y0)
+                if not passed_fallback:
+                    n_stiff += 1
+                    continue
+            rows.append([round_sigfigs(c) for c in combo] + out)
+            kept.append(out)
+            if len(rows) >= n_required:
+                break
 
     if len(rows) < n_required:
         raise RuntimeError(
             f"only {len(rows)}/{n_required} usable sweep rows "
-            f"({n_bad} non-converged, {n_similar} too similar); "
+            f"({n_bad} non-converged, {n_similar} too similar, {n_stiff} stiff at strict tolerance); "
             f"lower --min-log-diff or raise --sweep-max-steps")
 
     df = pd.DataFrame(rows, columns=[f"{n} (uM)" for n in sweep] + [f"{n} (uM)" for n in targets])
     out_dir.mkdir(parents=True, exist_ok=True)
     df.to_csv(out_dir / "init_vs_final_conc.csv", index=False)
-    return df, n_bad, n_similar
+    return df, n_bad, n_similar, n_stiff
+
+
+def export_sweep_ranked(sys_: ChainSystem, targets: list[str], out_dir: Path, max_steps: int,
+                        min_log_diff: float = 0.2,
+                        max_steps_relative_to_baseline: float = 1.5,
+                        strict_rtol: float = 1e-10, strict_atol: float = 1e-12,
+                        strict_probe_max_steps: int = 200_000,
+                        n_keep: int | None = None):
+    """Three-phase sweep search, replacing export_sweep's interleaved loose+strict+
+    diversity checking with a simpler, order-independent design: (1) exhaustively find
+    every sweep candidate that converges at the candidate's OWN (loose) tolerance --
+    no diversity filtering yet, (2) strict-tolerance-filter that whole survivor pool
+    (self-referential reference, see below), (3) sort what's left by loose-tolerance
+    steps ascending and THEN resolve diversity in that order, so when two candidates
+    are too similar the cheaper one (by loose-tolerance steps) wins instead of
+    whichever happened to come first in sweep-factor order. Finally keep the top
+    ``n_keep`` (or all of them if None). No forced minimum count -- whatever survives
+    is what gets reported, since forcing exactly N produced confusing all-or-nothing
+    failures for some (PID, tolerance) candidates.
+
+    The strict-tolerance reference is SELF-REFERENTIAL: the same PID as ``sys_`` itself,
+    just at (strict_rtol, strict_atol). This answers "how much does this candidate's own
+    practical tolerance distort the answer relative to its own PID at extreme precision,"
+    rather than comparing every candidate against one externally-chosen reference PID.
+
+    Both step caps are 1.5x-baseline (or whatever ``max_steps_relative_to_baseline`` is):
+    ``loose_cap`` from the baseline's OWN step count at the candidate's tolerance,
+    ``strict_cap`` from the baseline's OWN step count at the strict tolerance -- each
+    computed once, then applied uniformly across all sweep candidates.
+    """
+    sweep = make_sweep(sys_, SWEEP_SPECIES)
+    idx = [sys_.index_of[n] for n in targets]
+    y0_base = sys_.y0()
+
+    def _solve_full(y0, rtol, atol, cap):
+        sol = dfrx.diffeqsolve(
+            dfrx.ODETerm(sys_.network), dfrx.Kvaerno5(),
+            t0=TIME_RANGE[0], t1=TIME_RANGE[1], dt0=1e-6,
+            y0=jnp.asarray(y0, dtype=jnp.float64), args=sys_.theta,
+            saveat=dfrx.SaveAt(t1=True),
+            stepsize_controller=dfrx.PIDController(
+                rtol=rtol, atol=atol, pcoeff=sys_.pcoeff, icoeff=sys_.icoeff, dcoeff=sys_.dcoeff),
+            max_steps=cap, throw=False,
+        )
+        steps = int(np.asarray(sol.stats["num_steps"]))
+        rejected = int(np.asarray(sol.stats["num_rejected_steps"]))
+        ok = steps < cap and bool(sol.result == dfrx.RESULTS.successful)
+        final = np.asarray(sol.ys[-1] if sol.ys.ndim == 2 else sol.ys)
+        return final, steps, rejected, ok
+
+    # Step 1: baseline at the candidate's own (loose) tolerance -> loose_cap.
+    base_loose_final, base_loose_steps, base_loose_rejected, base_loose_ok = _solve_full(
+        y0_base, sys_.rtol, sys_.atol, max_steps)
+    if not base_loose_ok:
+        raise RuntimeError(f"baseline did not converge at candidate tolerance within max_steps={max_steps}")
+    loose_cap = max(1, int(np.ceil(max_steps_relative_to_baseline * base_loose_steps)))
+    print(f"      baseline solved in {base_loose_steps} steps at candidate tolerance -> "
+          f"per-candidate loose cap set to {loose_cap} ({max_steps_relative_to_baseline}x baseline)")
+
+    # Step 2: baseline at the candidate's own PID + strict tolerance -> strict_cap,
+    # and the baseline's own error (self-referential reference).
+    base_strict_final, base_strict_steps, base_strict_rejected, base_strict_ok = _solve_full(
+        y0_base, strict_rtol, strict_atol, strict_probe_max_steps)
+    if not base_strict_ok:
+        raise RuntimeError(f"baseline did not converge at strict tolerance within "
+                           f"max_steps={strict_probe_max_steps}")
+    strict_cap = max(1, int(np.ceil(max_steps_relative_to_baseline * base_strict_steps)))
+    print(f"      baseline solved in {base_strict_steps} steps at strict tolerance (self-referential, "
+          f"same PID) -> per-candidate strict cap set to {strict_cap} ({max_steps_relative_to_baseline}x baseline)")
+    baseline_row = dict(condition="baseline", steps=base_loose_steps, rejected=base_loose_rejected,
+                        err_pct=relative_error(base_loose_final, base_strict_final) * 100)
+
+    # Step 3: exhaustive loose-tolerance search -- every sweep factor is tried, no
+    # diversity filtering yet and no early stop at any N. Diversity is resolved LATER
+    # (step 5), after strict-tolerance has already dropped some candidates, so that
+    # when two candidates turn out to be too similar, the cheaper one (by steps) wins
+    # instead of whichever happened to come first in sweep-factor order.
+    survivors = []
+    n_bad = 0
+    for combo in zip(*sweep.values()):
+        y0 = y0_base.copy()
+        for name, conc in zip(sweep, combo):
+            y0[sys_.index_of[name]] = round_sigfigs(conc)
+        final, steps, rejected, ok = _solve_full(y0, sys_.rtol, sys_.atol, loose_cap)
+        if not ok:
+            n_bad += 1
+            continue
+        out = [float(final[i]) for i in idx]
+        survivors.append(dict(y0=y0, combo=[round_sigfigs(c) for c in combo], loose_final=final,
+                              out=out, steps=steps, rejected=rejected))
+
+    # Step 4: strict-tolerance filter over ALL loose-tolerance survivors (no diversity
+    # filtering has happened yet, so every loose-converged candidate gets this check).
+    passing = []
+    n_stiff = 0
+    for s in survivors:
+        strict_final, strict_steps, strict_rejected, strict_ok = _solve_full(
+            s["y0"], strict_rtol, strict_atol, strict_cap)
+        if not strict_ok:
+            n_stiff += 1
+            continue
+        err_pct = relative_error(s["loose_final"], strict_final) * 100
+        passing.append(dict(combo=s["combo"], out=s["out"], steps=s["steps"], rejected=s["rejected"],
+                            err_pct=err_pct))
+
+    # Step 5: rank by steps ascending, THEN resolve diversity in that order -- the
+    # cheapest member of any too-similar cluster is processed first and claims that
+    # output region, so any pricier candidate too close to it gets dropped instead.
+    passing.sort(key=lambda r: r["steps"])
+    diverse = []
+    kept_outputs = []
+    n_similar = 0
+    for r in passing:
+        if kept_outputs and min(log_distance(r["out"], p) for p in kept_outputs) < min_log_diff:
+            n_similar += 1
+            continue
+        kept_outputs.append(r["out"])
+        diverse.append(r)
+
+    n_found = len(diverse)
+    kept = diverse if n_keep is None else diverse[:n_keep]
+
+    rows = [r["combo"] + r["out"] for r in kept]
+    df = pd.DataFrame(rows, columns=[f"{n} (uM)" for n in sweep] + [f"{n} (uM)" for n in targets])
+    out_dir.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_dir / "init_vs_final_conc.csv", index=False)
+
+    def _summary(rs):
+        if not rs:
+            return dict(n=0, max_steps=None, avg_steps=None, max_rejected=None, avg_rejected=None,
+                       max_err_pct=None, avg_err_pct=None)
+        steps_arr = np.array([r["steps"] for r in rs])
+        rej_arr = np.array([r["rejected"] for r in rs])
+        err_arr = np.array([r["err_pct"] for r in rs])
+        return dict(n=len(rs), max_steps=int(steps_arr.max()), avg_steps=float(steps_arr.mean()),
+                   max_rejected=int(rej_arr.max()), avg_rejected=float(rej_arr.mean()),
+                   max_err_pct=float(err_arr.max()), avg_err_pct=float(err_arr.mean()))
+
+    summary = _summary(kept)
+    print(f"      found {n_found} usable condition(s) ({n_bad} non-converged, {n_similar} too similar, "
+          f"{n_stiff} stiff at strict tolerance); kept {len(kept)}")
+    print(f"      kept-set summary: max_steps={summary['max_steps']} avg_steps={summary['avg_steps']} "
+          f"max_rejected={summary['max_rejected']} avg_rejected={summary['avg_rejected']} "
+          f"max_err_pct={summary['max_err_pct']} avg_err_pct={summary['avg_err_pct']}")
+
+    return dict(kept=kept, baseline=baseline_row, n_found=n_found, n_bad=n_bad, n_similar=n_similar,
+               n_stiff=n_stiff, summary=summary)
 
 
 def main() -> int:
@@ -260,14 +642,16 @@ def main() -> int:
         rx_dir = root / "Reactions" / "EC_FAS_ME1" / name
         out_dir = root / "Data" / data_dir_name(cap, unsat)
         try:
-            sys_ = ChainSystem(rx_dir, a.rtol, a.atol)
+            _, _, _, _, _scaling_groups = build_ode_system_from_reactions(rx_dir)
+            sys_ = ChainSystem(rx_dir, a.rtol, a.atol,
+                              scaling_group_overrides=nominal_scaling_group_overrides(_scaling_groups))
             targets = sys_.targets(UNSAT_PATTERN if unsat else SAT_PATTERN)
             if not targets:
                 raise RuntimeError("no C{n}_FA species in this network")
             ts = export_timeseries(sys_, targets, out_dir, a.ts_max_steps,
                                    min_observable=a.min_observable)
-            sw, n_bad, n_sim = export_sweep(sys_, targets, out_dir, a.sweep_max_steps,
-                                            min_log_diff=a.min_log_diff)
+            sw, n_bad, n_sim, n_stiff = export_sweep(sys_, targets, out_dir, a.sweep_max_steps,
+                                                      min_log_diff=a.min_log_diff)
             print(f"  {name:<12} {len(sys_.species):>4} species  targets={targets}")
             print(f"               timeseries {ts.shape[0]} rows, sweep {sw.shape[0]} rows "
                   f"({n_bad} non-converged, {n_sim} too similar)  -> Data/{data_dir_name(cap, unsat)}/")

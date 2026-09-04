@@ -484,6 +484,14 @@ def run_bayesian_inference(
     rhat_check_every = int(posterior_config.get("rhat_check_every", 100))
     posterior_burn_in = int(posterior_config.get("posterior_burn_in_draws", 0))
     post_convergence_checks = int(posterior_config.get("post_convergence_checks", 0))
+    # Optional third convergence criterion (rank-normalized ECDF mixing check).
+    # NOTE: adding this key to an existing run's solver_params.json changes
+    # config_signature below, which invalidates that run's checkpoint -- set it
+    # only on runs started fresh with it.
+    rank_ecdf_prob = posterior_config.get("rank_ecdf_prob", None)
+    rank_ecdf_prob = float(rank_ecdf_prob) if rank_ecdf_prob is not None else None
+    rank_ecdf_simulations = int(posterior_config.get("rank_ecdf_simulations", 300))
+    convergence_consecutive_checks = int(posterior_config.get("convergence_consecutive_checks", 1))
 
     # Fast no-op if a prior job already finished this run (SLURM chains overshoot).
     results_file = savedir_path / imported.posterior_samples_file
@@ -523,7 +531,11 @@ def run_bayesian_inference(
             f", running {post_convergence_checks * rhat_check_every} more draws after first convergence"
             if post_convergence_checks else ""
         )
-        _print_kv("early-stop", f"r_hat<{rhat_threshold} and ess_bulk>=400, checked every {rhat_check_every} draws{burn_in_note}{extra_note}")
+        rank_note = (
+            f", plus a rank-ECDF mixing check at prob={rank_ecdf_prob}"
+            if rank_ecdf_prob is not None else ""
+        )
+        _print_kv("early-stop", f"r_hat<{rhat_threshold} and ess_bulk>=400, checked every {rhat_check_every} draws{burn_in_note}{extra_note}{rank_note}")
     if posterior_burn_in:
         _print_kv("posterior_burn_in_draws", f"{posterior_burn_in} (extra, beyond tune={n_tune}; final posterior = sampling[{posterior_burn_in}:])")
     _print_kv("max_hours (this segment)", max_hours if max_hours else "unbounded")
@@ -546,6 +558,9 @@ def run_bayesian_inference(
         rhat_check_every=rhat_check_every,
         posterior_burn_in_draws=posterior_burn_in,
         post_convergence_checks=post_convergence_checks,
+        rank_ecdf_prob=rank_ecdf_prob,
+        rank_ecdf_simulations=rank_ecdf_simulations,
+        convergence_consecutive_checks=convergence_consecutive_checks,
     )
     sampler = rs.ResumableSampler(
         bridge.logdensity_fn,
