@@ -1,0 +1,12 @@
+{
+    "reactants": [
+        "B"
+    ],
+    "products": [
+        "A"
+    ],
+    "rate_const_value": 3.0,
+    "rate_const_key": "k_r",
+    "name": "reverse_rxn",
+    "scaling_group_id": null
+}
