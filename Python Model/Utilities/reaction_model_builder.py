@@ -391,10 +391,59 @@ class ReactionNetwork(eqx.Module):
         rates = theta[self.param_idx_arr] * scale_factors * mass_action_terms
         return self.stoich_matrix @ rates
     
+def discover_scaling_groups(
+    reactions_source: "str | Path | Sequence[str | Path] | Sequence[dict[str, Any]] | Sequence[ElementaryReaction]",
+    schemas: frozenset[str] | set[str] | None = None,
+) -> list[str]:
+    """Names of every scaling group these reactions use, in first-seen order.
+
+    Needed because :func:`build_ode_system_from_reactions` requires an explicit value
+    for each group up front -- you have to know the names before you can supply them,
+    and reading them off a build would be circular.
+    """
+    reactions = _normalize_reaction_input(reactions_source, schemas=schemas)
+    names: list[str] = []
+    for reaction in reactions:
+        for key in ("scaling_group", "rvs_scaling_group"):
+            expr = reaction.get(key) if isinstance(reaction, dict) else getattr(reaction, key, None)
+            if expr is None:
+                continue
+            for n in _extract_scale_param_names(expr):
+                if n not in names:
+                    names.append(n)
+    return names
+
+
+def _resolve_scaling_value(name: str, scaling_group) -> float:
+    """Look up one scaling group's value, refusing to invent a default.
+
+    ``scaling_group`` must be an explicit dict covering this group -- sourced from
+    the authoritative solver_params.json (or an equivalent explicit dict from the
+    caller). There is deliberately no built-in fallback, not even a "nominal" rule:
+    a silent default has twice cost a full night of cluster time, once in data
+    generation and once in inference, because ``d``-prefixed groups enter ADDITIVELY
+    inside an exp() (TesA's ``1/exp(12*d1+d2)``) and so are 0.0 at nominal, while
+    every ordinary multiplicative group is 1.0. Encoding that rule in code would just
+    relocate the guess; the values belong in the config that's supposed to be
+    authoritative.
+    """
+    if isinstance(scaling_group, dict) and name in scaling_group:
+        return float(scaling_group[name])
+    raise ValueError(
+        f"No explicit value supplied for scaling group {name!r}. "
+        "build_ode_system_from_reactions will not guess one -- pass "
+        "scaling_group={...} covering every group used by these reactions, with the "
+        "values taken from the authoritative solver_params.json 'scaling_groups' "
+        "block. Note d-prefixed groups are additive inside exp(), so their nominal "
+        "value is 0.0 while ordinary groups are 1.0; defaulting them to 1.0 corrupts "
+        "TesA's rate by ~4.4e5x at C12 and ~4e12 x at C20 with no error raised."
+    )
+
+
 def build_ode_system_from_reactions(
     reactions_source: "str | Path | Sequence[str | Path] | Sequence[dict[str, Any]] | Sequence[ElementaryReaction]",
     schemas: frozenset[str] | set[str] | None = None,
-    scaling_group: dict[str, float] | None = None,
+    scaling_group: "dict[str, float]" = None,
 ):
     """
     Build a generic ODE system from explicit or compact reaction specs.
@@ -450,7 +499,7 @@ def build_ode_system_from_reactions(
                 append_unique(params, _sg_name)
                 append_unique(scaling_params, _sg_name)
                 if _sg_name not in param_values:
-                    param_values[_sg_name] = (scaling_group or {}).get(_sg_name, 1.0)
+                    param_values[_sg_name] = _resolve_scaling_value(_sg_name, scaling_group)
 
         sg_rev_expr = reaction.get("rvs_scaling_group")
         if sg_rev_expr is not None:
@@ -458,7 +507,7 @@ def build_ode_system_from_reactions(
                 append_unique(params, _sg_name)
                 append_unique(scaling_params, _sg_name)
                 if _sg_name not in param_values:
-                    param_values[_sg_name] = (scaling_group or {}).get(_sg_name, 1.0)
+                    param_values[_sg_name] = _resolve_scaling_value(_sg_name, scaling_group)
 
     species_idx = {state: i for i, state in enumerate(species)}
     param_idx = {param: i for i, param in enumerate(params)}

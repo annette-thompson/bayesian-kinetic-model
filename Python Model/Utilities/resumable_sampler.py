@@ -77,9 +77,67 @@ class SamplerSpec:
     rhat_check_every: int = 100
     posterior_burn_in_draws: int = 0
     post_convergence_checks: int = 0
+    rank_ecdf_prob: float | None = None
+    rank_ecdf_simulations: int = 300
+    convergence_consecutive_checks: int = 1
 
     def to_json_dict(self) -> dict[str, Any]:
         return dataclasses.asdict(self)
+
+
+# --------------------------------------------------------------------------- #
+# Rank-normalized ECDF mixing statistic (third convergence criterion).
+#
+# WARNING on arviz's plotted envelope: az.plot_rank's shaded band comes from
+# arviz_stats.ecdf_utils.ecdf_pit, which measures ~1.88 sd half-width -- roughly a
+# POINTWISE 92% band, not a band that is simultaneous over eval points and chains.
+# Measured against perfectly-mixed iid chains it fires on 100% of replicates, so
+# "a chain left the shaded band" in rank_plot.png is NOT on its own evidence of a
+# mixing problem. This module therefore calibrates its own critical value by direct
+# simulation of the null (3.41 sd for 12 chains x 150 draws, ~5% false-alarm rate),
+# which is what makes a zero-tolerance pass/fail defensible as a stopping rule.
+# --------------------------------------------------------------------------- #
+def _max_rank_ecdf_deviation(arr: np.ndarray, eval_points: np.ndarray) -> np.ndarray:
+    """Per-chain max |chain's rank-ECDF - uniform|. ``arr`` is (chains, draws)."""
+    from scipy.stats import rankdata
+
+    n_chains, n_draws = arr.shape
+    frac = rankdata(arr.ravel()).reshape(arr.shape) / (n_chains * n_draws)
+    order = np.sort(frac, axis=1)
+    # ECDF of each chain's fractional ranks, evaluated at eval_points.
+    devs = np.empty(n_chains)
+    for c in range(n_chains):
+        ecdf = np.searchsorted(order[c], eval_points, side="right") / n_draws
+        devs[c] = np.max(np.abs(ecdf - eval_points))
+    return devs
+
+
+def _rank_ecdf_critical_value(n_chains: int, n_draws: int, eval_points: np.ndarray,
+                              prob: float, n_simulations: int, seed: int = 0) -> float:
+    """Simulation-calibrated critical value for the max deviation under the null
+    (all chains iid from the same distribution), simultaneous over chains and
+    eval points."""
+    rng = np.random.default_rng(seed)
+    stats = np.empty(n_simulations)
+    for i in range(n_simulations):
+        stats[i] = _max_rank_ecdf_deviation(
+            rng.normal(size=(n_chains, n_draws)), eval_points
+        ).max()
+    return float(np.quantile(stats, prob))
+
+
+def _thin_to_independence(arr: np.ndarray, ess: float) -> np.ndarray:
+    """Thin (chains, draws) down to roughly-independent draws.
+
+    The rank-ECDF uniformity test assumes independent draws; feeding it raw
+    autocorrelated MCMC output makes every chain blow through an iid-calibrated
+    band no matter how well it mixed. Mirrors az.plot_rank's default thin=True.
+    """
+    n_samples = arr.shape[0] * arr.shape[1]
+    if not np.isfinite(ess) or ess <= 0:
+        return arr
+    factor = int(np.ceil(n_samples / ess))
+    return arr[:, ::factor] if factor > 1 else arr
 
 
 @dataclass
@@ -363,7 +421,7 @@ class ResumableSampler:
         }
 
     # -- convergence early-stop --------------------------------------------- #
-    def _check_converged(self) -> tuple[bool, float, float]:
+    def _check_converged(self) -> tuple[bool, float, float, float, float]:
         """Rank-normalized r-hat/bulk-ESS over sampling-phase draws so far
         (per-chain), worst case across free parameters. This is the standard
         diagnostic (warmup excluded, since it's a non-stationary adaptation
@@ -380,24 +438,64 @@ class ResumableSampler:
         actual saved posterior (see run()/inference_runner.py's finalize
         call and finalize_window.py) -- the live diagnostic and the final
         posterior always agree on which draws count, by construction.
+
+        ``rank_ecdf_prob`` adds an optional THIRD criterion on top of r-hat/ESS:
+        the rank-normalized ECDF mixing check (Vehtari et al. 2021), which can
+        catch a single chain that is not exchangeable with the pool even when
+        r-hat looks fine. Draws are thinned to approximate independence first,
+        and the critical value is calibrated by simulation rather than taken
+        from arviz's plotted envelope -- see the module-level note on why that
+        envelope is not usable as a pass/fail gate.
         """
         import arviz as az
 
         sampling = self._store.read("sampling")
         min_draws = self._spec.posterior_burn_in_draws
         worst_rhat, worst_ess = 0.0, float("inf")
+        nan = float("nan")
+        arrays: dict[str, np.ndarray] = {}
+        ess_by_name: dict[str, float] = {}
         for name in self._var_names:
             arr = sampling.get(name)
             if arr is None:
-                return False, float("nan"), float("nan")
+                return False, nan, nan, nan, nan
             arr = arr[:, min_draws:]
             if arr.shape[1] < 2:
-                return False, float("nan"), float("nan")
+                return False, nan, nan, nan, nan
             rhat = float(az.rhat({name: arr})[name].values)
             ess = float(az.ess({name: arr}, method="bulk")[name].values)
+            tail_ess = float(az.ess({name: arr}, method="tail")[name].values)
             worst_rhat = max(worst_rhat, rhat)
             worst_ess = min(worst_ess, ess)
-        return (worst_rhat < self._spec.rhat_threshold and worst_ess >= 400), worst_rhat, worst_ess
+            arrays[name] = arr
+            ess_by_name[name] = min(ess, tail_ess)
+
+        basic_ok = worst_rhat < self._spec.rhat_threshold and worst_ess >= 400
+        if self._spec.rank_ecdf_prob is None:
+            return basic_ok, worst_rhat, worst_ess, nan, nan
+
+        # Only pay for the (simulation-calibrated) rank check once r-hat/ESS pass.
+        if not basic_ok:
+            return False, worst_rhat, worst_ess, nan, nan
+
+        worst_stat, binding_crit, rank_ok = 0.0, nan, True
+        for name, arr in arrays.items():
+            thinned = _thin_to_independence(arr, ess_by_name[name])
+            n_chains, n_draws = thinned.shape
+            if n_draws < 10:
+                return False, worst_rhat, worst_ess, nan, nan
+            eval_points = np.arange(1, n_draws) / n_draws
+            stat = float(_max_rank_ecdf_deviation(thinned, eval_points).max())
+            crit = _rank_ecdf_critical_value(
+                n_chains, n_draws, eval_points,
+                self._spec.rank_ecdf_prob, self._spec.rank_ecdf_simulations,
+                seed=self._spec.random_seed,
+            )
+            if stat > worst_stat:
+                worst_stat, binding_crit = stat, crit
+            if stat > crit:
+                rank_ok = False
+        return (basic_ok and rank_ok), worst_rhat, worst_ess, worst_stat, binding_crit
 
     # -- main loop --------------------------------------------------------- #
     def run(self, max_seconds: float | None = None, extra_draws: int = 0) -> RunStatus:
@@ -440,10 +538,25 @@ class ResumableSampler:
             if n - ckpt["last_rhat_check"] < self._spec.rhat_check_every:
                 return False
             ckpt["last_rhat_check"] = n
-            converged, rhat, ess = self._check_converged()
-            print(f"==> r_hat/ESS check at {n} sampling draws: "
-                  f"r_hat={rhat:.4f} ess_bulk={ess:.1f} "
-                  f"(threshold r_hat<{self._spec.rhat_threshold}, ess>=400)")
+            passed, rhat, ess, rank_stat, rank_crit = self._check_converged()
+            # Sustained crossing: the criteria must hold for
+            # convergence_consecutive_checks checks in a row. A single passing
+            # check is a fragile signal -- on the existing C8 run the offline
+            # criterion passes at sampling draw 100, then the live check FAILS at
+            # 150 and 300 before passing again at 450.
+            need = max(1, int(self._spec.convergence_consecutive_checks))
+            streak = (ckpt.get("consecutive_passes", 0) + 1) if passed else 0
+            ckpt["consecutive_passes"] = streak
+            converged = passed and streak >= need
+            msg = (f"==> r_hat/ESS check at {n} sampling draws: "
+                   f"r_hat={rhat:.4f} ess_bulk={ess:.1f} "
+                   f"(threshold r_hat<{self._spec.rhat_threshold}, ess>=400)")
+            if self._spec.rank_ecdf_prob is not None and np.isfinite(rank_stat):
+                msg += (f" | rank-ECDF max dev={rank_stat:.4f} "
+                        f"(crit={rank_crit:.4f} @ {self._spec.rank_ecdf_prob:.2f})")
+            if need > 1:
+                msg += f" | {'pass' if passed else 'FAIL'} streak {streak}/{need}"
+            print(msg)
             if converged and not ckpt["converged_early"]:
                 ckpt["converged_early"] = True
                 ckpt["converged_at_draws"] = n
