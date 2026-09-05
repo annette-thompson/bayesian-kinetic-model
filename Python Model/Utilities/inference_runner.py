@@ -375,9 +375,25 @@ def _build_model_bundle(imported: ImportedSolverParams) -> ModelBundle:
     solver_params = imported.solver_params
     solver_params_path = imported.solver_params_file
 
+    # Scaling-group values come from the solver params JSON, which is the authority --
+    # not from a code default. d1/d2 are additive inside exp(), so the old silent
+    # default of 1.0 for every group made TesA's rate ~4.4e5x too small at C12 and
+    # ~4e12 x too small at C20, while the training data was generated with the correct
+    # d=0; inference was fitting a model that could not reproduce its own data.
+    scaling_groups_cfg = solver_params.get("scaling_groups")
+    if not isinstance(scaling_groups_cfg, dict) or not scaling_groups_cfg:
+        raise ValueError(
+            f"{solver_params_path} has no 'scaling_groups' block. Every scaling group "
+            "used by the reactions needs an explicit value there (d-prefixed groups are "
+            "0.0 at nominal because they are additive inside exp(); ordinary groups are "
+            "1.0). Discover the names with "
+            "reaction_model_builder.discover_scaling_groups(reactions_source)."
+        )
     ode_system, species_names, param_names, param_values, scaling_params = build_ode_system_from_reactions(
-        imported.reactions_source
+        imported.reactions_source, scaling_group=scaling_groups_cfg
     )
+    print(f"- scaling groups (from solver params): "
+          f"{ {k: scaling_groups_cfg[k] for k in sorted(scaling_groups_cfg)} }")
 
     validate_experiment_config(
         solver_params=solver_params,

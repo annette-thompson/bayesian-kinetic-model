@@ -36,6 +36,7 @@ import pandas as pd                         # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from reaction_model_builder import (        # noqa: E402
     build_ode_system_from_reactions,
+    discover_scaling_groups,
     make_namespace,
     set_scaling_group_values,
 )
@@ -119,24 +120,29 @@ class ChainSystem:
     def __init__(self, reactions_dir: Path, rtol: float, atol: float,
                 pcoeff: float = 0.2, icoeff: float = 0.4, dcoeff: float = 0.0,
                 scaling_group_overrides: dict[str, float] | None = None):
-        out = build_ode_system_from_reactions(reactions_dir)
-        self.network, self.species, self.params, param_values, scaling_groups = out
-        self.sp = make_namespace(self.species)
-        theta = jnp.array([param_values[p] for p in self.params], dtype=jnp.float64)
+        # Names are discovered first so the overrides can be validated BEFORE the
+        # build; build_ode_system_from_reactions now refuses to invent a value for
+        # any group, so it must be handed the complete explicit dict.
+        discovered = discover_scaling_groups(reactions_dir)
         if scaling_group_overrides is None:
             raise ValueError(
                 f"scaling_group_overrides must be provided explicitly (reactions_dir={reactions_dir} "
-                f"has scaling_groups={sorted(scaling_groups)}). A previous silent default of 1 for "
+                f"has scaling_groups={sorted(discovered)}). A previous silent default of 1 for "
                 "every group was wrong for 'd'-prefixed groups (additive inside exp(), nominal is 0) "
                 "and produced a ~440,000x rate-constant error on TesA that went undetected for an "
                 "entire session. Use nominal_scaling_group_overrides(scaling_groups) for the standard "
                 "nominal parameterization, or pass an explicit dict for a deliberate non-nominal one.")
-        missing = set(scaling_groups) - set(scaling_group_overrides)
-        extra = set(scaling_group_overrides) - set(scaling_groups)
+        missing = set(discovered) - set(scaling_group_overrides)
+        extra = set(scaling_group_overrides) - set(discovered)
         if missing or extra:
             raise ValueError(
                 f"scaling_group_overrides does not exactly match this network's scaling groups "
                 f"(reactions_dir={reactions_dir}): missing={sorted(missing)}, extra={sorted(extra)}")
+
+        out = build_ode_system_from_reactions(reactions_dir, scaling_group=scaling_group_overrides)
+        self.network, self.species, self.params, param_values, scaling_groups = out
+        self.sp = make_namespace(self.species)
+        theta = jnp.array([param_values[p] for p in self.params], dtype=jnp.float64)
         self.theta = set_scaling_group_values(theta, self.params, scaling_group_overrides)
         self.rtol, self.atol = rtol, atol
         self.pcoeff, self.icoeff, self.dcoeff = pcoeff, icoeff, dcoeff
@@ -470,6 +476,7 @@ def export_sweep_ranked(sys_: ChainSystem, targets: list[str], out_dir: Path, ma
                         max_steps_relative_to_baseline: float = 1.5,
                         strict_rtol: float = 1e-10, strict_atol: float = 1e-12,
                         strict_probe_max_steps: int = 200_000,
+                        strict_cap_override: int | None = None,
                         n_keep: int | None = None):
     """Three-phase sweep search, replacing export_sweep's interleaved loose+strict+
     diversity checking with a simpler, order-independent design: (1) exhaustively find
@@ -492,6 +499,11 @@ def export_sweep_ranked(sys_: ChainSystem, targets: list[str], out_dir: Path, ma
     ``loose_cap`` from the baseline's OWN step count at the candidate's tolerance,
     ``strict_cap`` from the baseline's OWN step count at the strict tolerance -- each
     computed once, then applied uniformly across all sweep candidates.
+
+    ``strict_cap_override`` skips the strict baseline probe and uses the supplied cap
+    directly. The probe is nondeterministic on heterogeneous GPU pools (see the note
+    at step 2), so a cap measured for the same system in an earlier successful run is
+    a valid substitute. Doing so leaves the baseline's own ``err_pct`` as None.
     """
     sweep = make_sweep(sys_, SWEEP_SPECIES)
     idx = [sys_.index_of[n] for n in targets]
@@ -524,16 +536,34 @@ def export_sweep_ranked(sys_: ChainSystem, targets: list[str], out_dir: Path, ma
 
     # Step 2: baseline at the candidate's own PID + strict tolerance -> strict_cap,
     # and the baseline's own error (self-referential reference).
-    base_strict_final, base_strict_steps, base_strict_rejected, base_strict_ok = _solve_full(
-        y0_base, strict_rtol, strict_atol, strict_probe_max_steps)
-    if not base_strict_ok:
-        raise RuntimeError(f"baseline did not converge at strict tolerance within "
-                           f"max_steps={strict_probe_max_steps}")
-    strict_cap = max(1, int(np.ceil(max_steps_relative_to_baseline * base_strict_steps)))
-    print(f"      baseline solved in {base_strict_steps} steps at strict tolerance (self-referential, "
-          f"same PID) -> per-candidate strict cap set to {strict_cap} ({max_steps_relative_to_baseline}x baseline)")
-    baseline_row = dict(condition="baseline", steps=base_loose_steps, rejected=base_loose_rejected,
-                        err_pct=relative_error(base_loose_final, base_strict_final) * 100)
+    #
+    # strict_cap_override exists because this probe fails NONDETERMINISTICALLY on
+    # Blanca: C6's baseline solved here in 2105 steps on 2026-09-03 and then blew
+    # past a 200,000-step cap on 2026-09-04 at the same PID and tolerances, on
+    # different GPU hardware. Since the only thing the probe contributes is a step
+    # cap, a known-good cap measured earlier for the same system can be supplied
+    # directly, skipping the solve. The cost is that the baseline's own err_pct is
+    # then unknown (there is no strict baseline state to compare against), so it is
+    # reported as None rather than guessed. Per-condition err_pct is unaffected --
+    # those strict solves still run, using this cap.
+    if strict_cap_override is not None:
+        strict_cap = max(1, int(strict_cap_override))
+        base_strict_final = None
+        print(f"      strict baseline probe SKIPPED -- strict cap set to {strict_cap} "
+              f"from strict_cap_override (baseline err_pct will be unavailable)")
+    else:
+        base_strict_final, base_strict_steps, base_strict_rejected, base_strict_ok = _solve_full(
+            y0_base, strict_rtol, strict_atol, strict_probe_max_steps)
+        if not base_strict_ok:
+            raise RuntimeError(f"baseline did not converge at strict tolerance within "
+                               f"max_steps={strict_probe_max_steps}")
+        strict_cap = max(1, int(np.ceil(max_steps_relative_to_baseline * base_strict_steps)))
+        print(f"      baseline solved in {base_strict_steps} steps at strict tolerance (self-referential, "
+              f"same PID) -> per-candidate strict cap set to {strict_cap} ({max_steps_relative_to_baseline}x baseline)")
+    baseline_row = dict(
+        condition="baseline", steps=base_loose_steps, rejected=base_loose_rejected,
+        err_pct=(None if base_strict_final is None
+                 else relative_error(base_loose_final, base_strict_final) * 100))
 
     # Step 3: exhaustive loose-tolerance search -- every sweep factor is tried, no
     # diversity filtering yet and no early stop at any N. Diversity is resolved LATER
