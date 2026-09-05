@@ -15,7 +15,7 @@ conda activate Bayesian
 ### 2. Run the model
 Open and run **`ODE Runner/run_model.ipynb`**.
 
-This notebook lets you run the model with the given reactions in `Reactions/EC_FAS_ME1/`. Includes demonstration of `reaction_sanity_checker.py` to help identify any mistakes in reactions and `query` property of the reaction class.
+This notebook lets you run the model with the given reactions in `Reactions/EC_FAS_ME1/`. Includes demonstration of `reaction_sanity_check.py` to help identify any mistakes in reactions and `query` property of the reaction class.
 
 The bottom of this notebook also has some example functions to generate the data used for Bayesian inference.
 
@@ -80,11 +80,12 @@ After running inference, `Results/<folder_name>/` will contain:
 | `posterior_samples_pm.nc` | Posterior samples (NetCDF / ArviZ format) |
 | `checkpoint/` | Resumable state + all draws: `draws.zarr`, `checkpoint.pkl`, `status.json` |
 | `throughput_probe.json` | *(if benchmarked)* measured throughput + estimated segments needed |
-| `trace_plot.png` | Posterior trace diagnostics |
-| `trace_plot_hist.pdf` | Marginal posterior distributions |
-| `trace_plot_prior_hist.pdf` | Prior distributions |
-| `*_predictive_*.pdf` | Model predictions overlaid on observed data |
-| `convergence_diagnostics.png` | *(if run)* r-hat/ESS trajectory, cumulative divergences, and per-chain BFMI — see `Utilities/plot_convergence_trajectory.py` below |
+| `trace_plot.png` | Prior-vs-posterior, zoomed posterior, and per-chain trace, one column per free parameter |
+| `predictive_plots_<system>.png` | *(if run)* one row per chain-length observable (plus a combined "Total FA" row) — time-course panel next to the final-concentration/initial-conditions table — see `Utilities/plot_predictive_check.py` below |
+| `convergence_diagnostics.png` | *(if run)* r-hat/ESS trajectory (including warm-up) and cumulative divergences — see `Utilities/plot_convergence_trajectory.py` below |
+| `energy_plot.png` | *(if run)* per-chain BFMI + marginal/transition energy distributions |
+| `rank_plot.png` | *(if run)* per-chain rank-ECDF mixing check |
+| `loo_diagnostics.png` | *(if run)* Pareto-k + LOO summary — needs enough sampling draws for the Pareto tail fit to converge (a few hundred is not always enough) |
 
 ---
 
@@ -145,13 +146,22 @@ Each segment samples within `--max-hours` (default 23.5), checkpoints, and exits
 python "Utilities/finalize_window.py" --solver_params_file "Results/<folder_name>/solver_params.json" --burn_in 800
 ```
 
-**5. Plot convergence diagnostics** (optional) — r-hat/ESS vs. cumulative sampling draws (with a line marking where both criteria are first jointly met), cumulative NUTS divergences, and per-chain BFMI, recomputed from the saved posterior netcdf:
+**5. Plot diagnostics** (optional) — three standalone scripts, all recomputed from the saved posterior netcdf, none of them need the notebook or a re-run on Alpine/Blanca:
 
 ```bash
+# r-hat/ESS vs. cumulative draws (warm-up included by default), cumulative divergences,
+# per-chain BFMI + energy, and a rank-ECDF mixing check, plus LOO if enough draws exist
 python "Utilities/plot_convergence_trajectory.py" --solver_params_file "Results/<folder_name>/solver_params.json"
+
+# Prior-vs-posterior, zoomed posterior, and per-chain trace, one column per free parameter
+python "Utilities/plot_trace_diagnostics.py" --solver_params_file "Results/<folder_name>/solver_params.json"
+
+# Posterior-predictive checks: one combined figure, one row per chain-length observable
+# (time course next to final-concentration-vs-initial-conditions), plus a "Total FA" row
+python "Utilities/plot_predictive_check.py" --solver_params_file "Results/<folder_name>/solver_params.json"
 ```
 
-Cheap enough (plain numpy/arviz over a handful of draws/chains) to run locally after transferring just the `posterior_samples_pm.nc` file down from the cluster — no need to run on Alpine/Blanca.
+Cheap enough (plain numpy/arviz/matplotlib over a handful of draws/chains) to run locally after transferring just the `posterior_samples_pm.nc` file down from the cluster.
 
 The cluster scripts only run sampling and write `prior_samples_pm.nc` and `posterior_samples_pm.nc`. To make or remake the main plots after a job finishes, open `Bayesian Inference/guided_bayesian_inference.ipynb`, set the same `folder_name`, set `use_existing_results = True`, and rerun the plotting cell.
 
@@ -168,7 +178,7 @@ All required packages are in `environment.yml`. Key ones:
 | `blackjax` | The NUTS sampler — checkpointed/resumable, CPU or GPU |
 | `equinox` | JAX-compatible ODE system module |
 | `preliz` | Prior specification via maximum entropy |
-| `arviz` | Inference diagnostics (trace plots, LOO, WAIC) |
+| `arviz` | Inference diagnostics (trace plots, r-hat/ESS, LOO — WAIC is not available in this arviz version) |
 | `zarr` | On-disk streaming store for checkpointed draws |
 
 ---

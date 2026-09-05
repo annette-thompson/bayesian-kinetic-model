@@ -1,0 +1,13 @@
+{
+    "reactants": [
+        "A",
+        "A"
+    ],
+    "products": [
+        "S"
+    ],
+    "rate_const_value": 1.2,
+    "rate_const_key": "k_side",
+    "name": "sideproduct_rxn",
+    "scaling_group_id": 0
+}
