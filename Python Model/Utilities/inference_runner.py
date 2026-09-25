@@ -770,16 +770,35 @@ def _finalize_resumable_run(
     # reproduces on Linux/Alpine. If a finalize step aborts with that error,
     # that's this tradeoff -- rerun, or drop backend="jax" here.
     print("Computing log-likelihood, prior, and posterior predictive...")
-    with pm_model:
-        pm.compute_log_likelihood(idata, progressbar=False, backend="jax")
+    prior_file = savedir_path / imported.prior_samples_file
+    results_file = savedir_path / imported.posterior_samples_file
+    # Both heavy steps here cost one ODE solve per posterior draw (3,200 on the
+    # larger ladder systems -- hours of GPU time each). Until 2026-09-11 nothing
+    # reached disk until AFTER the posterior predictive returned, so a job that
+    # hit its time limit anywhere in between discarded every stage that had
+    # already succeeded and its successor restarted from zero -- C18+unsat spent
+    # three attempts re-running a log-likelihood pass that had finished each
+    # time. Each stage is now flushed as it completes, and reloaded rather than
+    # recomputed when the cache belongs to the draws actually in hand.
+    stage_file = savedir_path / "finalize_stage.nc"
+    cached_log_likelihood = _cached_log_likelihood(stage_file, idata)
+    if cached_log_likelihood is None:
+        with pm_model:
+            pm.compute_log_likelihood(idata, progressbar=False, backend="jax")
+        _safe_write_idata(idata.copy(), stage_file)
+        print(f"  log-likelihood computed, staged -> {stage_file.name}")
+    else:
+        idata.update({"log_likelihood": cached_log_likelihood})
+        print(f"  log-likelihood reused from {stage_file.name} (same draws), recompute skipped")
+
     prior_pred = _sample_prior(pm_model=pm_model, solver_params=solver_params, free_params=free_params)
+    _safe_write_idata(prior_pred, prior_file)
+    print(f"  prior samples written -> {prior_file.name}")
+
     with pm_model:
         post_pred = pm.sample_posterior_predictive(idata, progressbar=False, backend="jax")
 
     _print_section("Artifacts")
-    prior_file = savedir_path / imported.prior_samples_file
-    results_file = savedir_path / imported.posterior_samples_file
-    _safe_write_idata(prior_pred, prior_file)
     combined = idata.copy()
     combined.update(prior_pred)
     combined.update(post_pred)
@@ -792,6 +811,8 @@ def _finalize_resumable_run(
         ).posterior
         combined["warmup_posterior"] = warmup_posterior
     _safe_write_idata(combined, results_file)
+    # Only now is the staged copy redundant: results_file holds everything it did.
+    stage_file.unlink(missing_ok=True)
     _print_kv("Prior file", prior_file.name)
     _print_kv("Posterior file", results_file.name)
 
@@ -1031,6 +1052,35 @@ def _sample_prior(pm_model, solver_params, free_params):
             var_names=var_names,
             backend="jax",
         )
+
+
+def _cached_log_likelihood(stage_file: Path, idata):
+    """An interrupted finalize's log_likelihood for exactly these draws, or None.
+
+    Guarded on the posterior values themselves rather than on their shape: a
+    cache left behind by a different window (finalize_window.py's --burn_in /
+    --thin) or by an earlier run of the same system has the same shape and
+    would otherwise be reused against draws it was never computed for, which
+    fails silently as wrong likelihoods rather than as an error.
+    """
+    if not stage_file.exists():
+        return None
+    try:
+        cached = az.from_netcdf(stage_file)
+        groups = {group.lstrip("/") for group in cached.groups}
+        if not {"posterior", "log_likelihood"} <= groups:
+            return None
+        have, want = cached["posterior"].dataset, idata["posterior"].dataset
+        if set(have.data_vars) != set(want.data_vars):
+            return None
+        for name in want.data_vars:
+            if not np.array_equal(np.asarray(have[name]), np.asarray(want[name])):
+                return None
+        return cached["log_likelihood"]
+    except Exception as exc:  # noqa: BLE001 - a truncated cache must never fail the run
+        print(f"Ignoring unusable finalize cache {stage_file.name} "
+              f"({type(exc).__name__}: {exc}); recomputing")
+        return None
 
 
 def _safe_write_idata(inf_data: xr.DataTree, output_file: Path):
