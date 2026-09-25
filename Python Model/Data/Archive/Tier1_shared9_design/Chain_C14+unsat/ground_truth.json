@@ -1,0 +1,74 @@
+{
+  "source_clean_dir": "Data/Tier1/Chain_C14+unsat/clean",
+  "scaling_group_overrides": {},
+  "seed": 1858394750,
+  "noise_frac": 0.1,
+  "noise_mode": "pointwise",
+  "noise_floor": 0.01,
+  "clip_negative": false,
+  "target_pattern": "^C(\\d+)_FA(_unsat)?$",
+  "aggregate_fa": false,
+  "c16_equiv_timeseries": true,
+  "timeseries_observables": [
+    "C16 Equivalents (uM)"
+  ],
+  "sweep_observables": [
+    "C4_FA (uM)",
+    "C6_FA (uM)",
+    "C8_FA (uM)",
+    "C10_FA (uM)",
+    "C12_FA (uM)",
+    "C14_FA (uM)",
+    "C12_FA_unsat (uM)",
+    "C14_FA_unsat (uM)"
+  ],
+  "timeseries_sigma": {
+    "C16 Equivalents (uM)": {
+      "mode": "pointwise",
+      "floor": 0.01,
+      "frac": 0.1
+    }
+  },
+  "sweep_sigma": {
+    "C4_FA (uM)": {
+      "mode": "pointwise",
+      "floor": 0.01,
+      "frac": 0.1
+    },
+    "C6_FA (uM)": {
+      "mode": "pointwise",
+      "floor": 0.01,
+      "frac": 0.1
+    },
+    "C8_FA (uM)": {
+      "mode": "pointwise",
+      "floor": 0.01,
+      "frac": 0.1
+    },
+    "C10_FA (uM)": {
+      "mode": "pointwise",
+      "floor": 0.01,
+      "frac": 0.1
+    },
+    "C12_FA (uM)": {
+      "mode": "pointwise",
+      "floor": 0.01,
+      "frac": 0.1
+    },
+    "C14_FA (uM)": {
+      "mode": "pointwise",
+      "floor": 0.01,
+      "frac": 0.1
+    },
+    "C12_FA_unsat (uM)": {
+      "mode": "pointwise",
+      "floor": 0.01,
+      "frac": 0.1
+    },
+    "C14_FA_unsat (uM)": {
+      "mode": "pointwise",
+      "floor": 0.01,
+      "frac": 0.1
+    }
+  }
+}

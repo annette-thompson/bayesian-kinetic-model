@@ -1,0 +1,45 @@
+{
+  "C18+unsat": {
+    "per_tolerance": [
+      {
+        "rtol": 0.001,
+        "eligible": false,
+        "n_found": 7,
+        "n_kept": 7,
+        "total_steps": null,
+        "max_steps": null,
+        "max_err_pct": null,
+        "baseline_steps": 246,
+        "error": "only 7 conditions, need 9",
+        "seconds": 386.2
+      },
+      {
+        "rtol": 0.0001,
+        "eligible": false,
+        "n_found": 3,
+        "n_kept": 3,
+        "total_steps": null,
+        "max_steps": null,
+        "max_err_pct": null,
+        "baseline_steps": 112,
+        "error": "only 3 conditions, need 9",
+        "seconds": 181.7
+      },
+      {
+        "rtol": 1e-05,
+        "eligible": true,
+        "n_found": 12,
+        "n_kept": 9,
+        "total_steps": 1388,
+        "max_steps": 150,
+        "max_err_pct": 0.0012648491535459268,
+        "baseline_steps": 150,
+        "error": null,
+        "seconds": 341.2,
+        "timeseries_rows": 10
+      }
+    ],
+    "chosen_rtol": 1e-05,
+    "promoted": true
+  }
+}

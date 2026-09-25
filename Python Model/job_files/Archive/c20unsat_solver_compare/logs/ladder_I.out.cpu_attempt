@@ -1,0 +1,34 @@
+
+==================== SYSTEM=C4_NoFB CANDIDATE=I  job=28132535  host=bgpu-curc2  Thu Sep  3 18:08:47 MDT 2026 ====================
+[C4_NoFB/I] generating with self-referential export_sweep_ranked ((0.3,0.3,0) rtol=1e-5 atol=1e-8), min_total_kept=10 ...
+      dropped 1 timeseries row(s) with all observables < 1e-08
+      baseline solved in 155 steps at candidate tolerance -> per-candidate loose cap set to 233 (1.5x baseline)
+      baseline solved in 1895 steps at strict tolerance (self-referential, same PID) -> per-candidate strict cap set to 2843 (1.5x baseline)
+      found 13 usable condition(s) (6 non-converged, 19 too similar, 22 stiff at strict tolerance); kept 13
+      kept-set summary: max_steps=153 avg_steps=131.46153846153845 max_rejected=0 avg_rejected=0.0 max_err_pct=0.001103260539331743 avg_err_pct=0.00041802413384203914
+[C4_NoFB/I] found 13 usable condition(s) (6 non-converged, 19 too similar, 22 stiff at strict tolerance); total incl. baseline = 14
+[C4_NoFB/I] wrote /projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/ladder_compare_v2_results/C4_NoFB_I.json
+[C4_NoFB/I] PASS: total_kept=14 >= min_total_kept=10
+
+real	4m9.929s
+user	4m4.551s
+sys	0m1.407s
+
+==================== SYSTEM=C6 CANDIDATE=I  job=28132536  host=bgpu-curc2  Thu Sep  3 18:13:01 MDT 2026 ====================
+[C6/I] generating with self-referential export_sweep_ranked ((0.3,0.3,0) rtol=1e-5 atol=1e-8), min_total_kept=10 ...
+      dropped 1 timeseries row(s) with all observables < 1e-08
+      baseline solved in 165 steps at candidate tolerance -> per-candidate loose cap set to 248 (1.5x baseline)
+Traceback (most recent call last):
+  File "/projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/generate_and_score_ladder2.py", line 110, in <module>
+    main()
+  File "/projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/generate_and_score_ladder2.py", line 79, in main
+    result = gcd.export_sweep_ranked(
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/anth4580/Bayesian/Utilities/generate_chain_data.py", line 518, in export_sweep_ranked
+    raise RuntimeError(f"baseline did not converge at strict tolerance within "
+RuntimeError: baseline did not converge at strict tolerance within max_steps=200000
+
+real	9m35.842s
+user	9m29.311s
+sys	0m1.292s
+==================== FAILED at SYSTEM=C6 CANDIDATE=I (exit 1) -- chain stops here ====================

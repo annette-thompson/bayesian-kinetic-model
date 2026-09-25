@@ -1,0 +1,46 @@
+{
+  "C16": {
+    "per_tolerance": [
+      {
+        "rtol": 0.001,
+        "eligible": false,
+        "n_found": 4,
+        "n_kept": 4,
+        "total_steps": null,
+        "max_steps": null,
+        "max_err_pct": null,
+        "baseline_steps": 86,
+        "error": "only 4 conditions, need 9",
+        "seconds": 175.0
+      },
+      {
+        "rtol": 0.0001,
+        "eligible": true,
+        "n_found": 13,
+        "n_kept": 9,
+        "total_steps": 1085,
+        "max_steps": 116,
+        "max_err_pct": 0.004168337855281569,
+        "baseline_steps": 116,
+        "error": null,
+        "seconds": 239.8,
+        "timeseries_rows": 10
+      },
+      {
+        "rtol": 1e-05,
+        "eligible": true,
+        "n_found": 21,
+        "n_kept": 9,
+        "total_steps": 1126,
+        "max_steps": 156,
+        "max_err_pct": 0.0018077534811654218,
+        "baseline_steps": 156,
+        "error": null,
+        "seconds": 264.1,
+        "timeseries_rows": 10
+      }
+    ],
+    "chosen_rtol": 0.0001,
+    "promoted": true
+  }
+}

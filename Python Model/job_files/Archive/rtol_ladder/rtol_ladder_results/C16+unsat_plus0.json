@@ -1,0 +1,46 @@
+{
+  "C16+unsat": {
+    "per_tolerance": [
+      {
+        "rtol": 0.001,
+        "eligible": false,
+        "n_found": 6,
+        "n_kept": 6,
+        "total_steps": null,
+        "max_steps": null,
+        "max_err_pct": null,
+        "baseline_steps": 130,
+        "error": "only 6 conditions, need 9",
+        "seconds": 242.7
+      },
+      {
+        "rtol": 0.0001,
+        "eligible": true,
+        "n_found": 11,
+        "n_kept": 9,
+        "total_steps": 1056,
+        "max_steps": 114,
+        "max_err_pct": 0.0043938183527747155,
+        "baseline_steps": 114,
+        "error": null,
+        "seconds": 253.6,
+        "timeseries_rows": 10
+      },
+      {
+        "rtol": 1e-05,
+        "eligible": true,
+        "n_found": 20,
+        "n_kept": 9,
+        "total_steps": 1094,
+        "max_steps": 152,
+        "max_err_pct": 0.0018385111084846591,
+        "baseline_steps": 152,
+        "error": null,
+        "seconds": 301.7,
+        "timeseries_rows": 10
+      }
+    ],
+    "chosen_rtol": 0.0001,
+    "promoted": true
+  }
+}

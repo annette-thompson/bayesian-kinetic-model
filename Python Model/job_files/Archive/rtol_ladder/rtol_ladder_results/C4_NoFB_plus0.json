@@ -1,0 +1,47 @@
+{
+  "C4_NoFB": {
+    "per_tolerance": [
+      {
+        "rtol": 0.001,
+        "eligible": true,
+        "n_found": 12,
+        "n_kept": 9,
+        "total_steps": 675,
+        "max_steps": 76,
+        "max_err_pct": 0.04659972574788696,
+        "baseline_steps": 76,
+        "error": null,
+        "seconds": 215.2,
+        "timeseries_rows": 10
+      },
+      {
+        "rtol": 0.0001,
+        "eligible": true,
+        "n_found": 13,
+        "n_kept": 9,
+        "total_steps": 853,
+        "max_steps": 102,
+        "max_err_pct": 0.011639767286457502,
+        "baseline_steps": 102,
+        "error": null,
+        "seconds": 211.4,
+        "timeseries_rows": 10
+      },
+      {
+        "rtol": 1e-05,
+        "eligible": true,
+        "n_found": 12,
+        "n_kept": 9,
+        "total_steps": 1073,
+        "max_steps": 141,
+        "max_err_pct": 0.0057864328665829315,
+        "baseline_steps": 141,
+        "error": null,
+        "seconds": 220.1,
+        "timeseries_rows": 10
+      }
+    ],
+    "chosen_rtol": 0.001,
+    "promoted": true
+  }
+}

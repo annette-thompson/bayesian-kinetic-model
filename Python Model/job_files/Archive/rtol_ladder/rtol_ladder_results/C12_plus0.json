@@ -1,0 +1,47 @@
+{
+  "C12": {
+    "per_tolerance": [
+      {
+        "rtol": 0.001,
+        "eligible": true,
+        "n_found": 15,
+        "n_kept": 9,
+        "total_steps": 723,
+        "max_steps": 87,
+        "max_err_pct": 0.026245907687179694,
+        "baseline_steps": 87,
+        "error": null,
+        "seconds": 288.3,
+        "timeseries_rows": 10
+      },
+      {
+        "rtol": 0.0001,
+        "eligible": true,
+        "n_found": 20,
+        "n_kept": 9,
+        "total_steps": 866,
+        "max_steps": 118,
+        "max_err_pct": 0.012506112023770184,
+        "baseline_steps": 118,
+        "error": null,
+        "seconds": 295.4,
+        "timeseries_rows": 10
+      },
+      {
+        "rtol": 1e-05,
+        "eligible": true,
+        "n_found": 20,
+        "n_kept": 9,
+        "total_steps": 1035,
+        "max_steps": 160,
+        "max_err_pct": 0.006678462443404961,
+        "baseline_steps": 160,
+        "error": null,
+        "seconds": 302.0,
+        "timeseries_rows": 10
+      }
+    ],
+    "chosen_rtol": 0.001,
+    "promoted": true
+  }
+}

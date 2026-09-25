@@ -1,0 +1,44 @@
+{
+  "source_clean_dir": "Data/Tier1/Chain_C8/clean",
+  "scaling_group_overrides": {},
+  "seed": 848279207,
+  "noise_frac": 0.1,
+  "noise_mode": "pointwise",
+  "noise_floor": 0.01,
+  "clip_negative": false,
+  "target_pattern": "^C(\\d+)_FA(_unsat)?$",
+  "aggregate_fa": false,
+  "c16_equiv_timeseries": true,
+  "timeseries_observables": [
+    "C16 Equivalents (uM)"
+  ],
+  "sweep_observables": [
+    "C4_FA (uM)",
+    "C6_FA (uM)",
+    "C8_FA (uM)"
+  ],
+  "timeseries_sigma": {
+    "C16 Equivalents (uM)": {
+      "mode": "pointwise",
+      "floor": 0.01,
+      "frac": 0.1
+    }
+  },
+  "sweep_sigma": {
+    "C4_FA (uM)": {
+      "mode": "pointwise",
+      "floor": 0.01,
+      "frac": 0.1
+    },
+    "C6_FA (uM)": {
+      "mode": "pointwise",
+      "floor": 0.01,
+      "frac": 0.1
+    },
+    "C8_FA (uM)": {
+      "mode": "pointwise",
+      "floor": 0.01,
+      "frac": 0.1
+    }
+  }
+}
