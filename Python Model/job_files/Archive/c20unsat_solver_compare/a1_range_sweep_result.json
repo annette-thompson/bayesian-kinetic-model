@@ -1,0 +1,9 @@
+{
+  "step_ceiling": 2000,
+  "base_max_steps": 160,
+  "upper_search_start": 15.0,
+  "upper_last_ok": 14000.0,
+  "upper_first_bad": 15000.0,
+  "lower_bound_fixed": 0.001,
+  "elapsed_s": 1246.2677884101868
+}

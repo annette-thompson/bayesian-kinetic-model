@@ -1,0 +1,12 @@
+{
+  "candidate": "E",
+  "label": "(0.1,0.3,0) rtol=1e-5 atol=1e-7",
+  "condition": "sweep8",
+  "steps": 141,
+  "rejected": 0,
+  "ok": true,
+  "ref_steps": 1843,
+  "ref_rejected": 2,
+  "ref_ok": true,
+  "err_pct": 0.0002080266959906926
+}

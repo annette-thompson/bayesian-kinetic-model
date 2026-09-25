@@ -1,0 +1,47 @@
+{
+  "C14": {
+    "per_tolerance": [
+      {
+        "rtol": 0.001,
+        "eligible": true,
+        "n_found": 10,
+        "n_kept": 9,
+        "total_steps": 823,
+        "max_steps": 88,
+        "max_err_pct": 0.020718495347272124,
+        "baseline_steps": 87,
+        "error": null,
+        "seconds": 230.3,
+        "timeseries_rows": 10
+      },
+      {
+        "rtol": 0.0001,
+        "eligible": true,
+        "n_found": 19,
+        "n_kept": 9,
+        "total_steps": 889,
+        "max_steps": 118,
+        "max_err_pct": 0.01105138785143397,
+        "baseline_steps": 118,
+        "error": null,
+        "seconds": 257.1,
+        "timeseries_rows": 10
+      },
+      {
+        "rtol": 1e-05,
+        "eligible": true,
+        "n_found": 23,
+        "n_kept": 9,
+        "total_steps": 1039,
+        "max_steps": 159,
+        "max_err_pct": 0.005746197575161269,
+        "baseline_steps": 159,
+        "error": null,
+        "seconds": 271.3,
+        "timeseries_rows": 10
+      }
+    ],
+    "chosen_rtol": 0.001,
+    "promoted": true
+  }
+}

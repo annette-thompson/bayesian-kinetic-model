@@ -1,0 +1,326 @@
+
+==================== SYSTEM=C4_NoFB CANDIDATE=N  job=28131694  host=bhpc-c5-u19-6.rc.int.colorado.edu  Thu Sep  3 16:59:33 MDT 2026 ====================
+ERROR:2026-09-03 16:59:36,536:jax._src.xla_bridge:502: Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax/_src/xla_bridge.py", line 500, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 328, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 285, in _check_cuda_versions
+    local_device_count = cuda_versions.cuda_device_count()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: jaxlib/cuda/versions_helpers.cc:113: operation cuInit(0) failed: Unknown CUDA error 303; cuGetErrorName failed. This probably means that JAX was unable to load the CUDA libraries.
+[C4_NoFB/N] generating with self-referential export_sweep_ranked ((0.2,0.4,0) rtol=1e-6 atol=1e-8), min_total_kept=10 ...
+      dropped 1 timeseries row(s) with all observables < 1e-08
+      baseline solved in 189 steps at candidate tolerance -> per-candidate loose cap set to 284 (1.5x baseline)
+      baseline solved in 1672 steps at strict tolerance (self-referential, same PID) -> per-candidate strict cap set to 2508 (1.5x baseline)
+      found 13 usable condition(s) (7 non-converged, 19 too similar, 21 stiff at strict tolerance); kept 13
+      kept-set summary: max_steps=184 avg_steps=146.92307692307693 max_rejected=0 avg_rejected=0.0 max_err_pct=0.0006730823399211397 avg_err_pct=0.0002376900777726445
+[C4_NoFB/N] found 13 usable condition(s) (7 non-converged, 19 too similar, 21 stiff at strict tolerance); total incl. baseline = 14
+[C4_NoFB/N] wrote /projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/ladder_compare_v2_results/C4_NoFB_N.json
+[C4_NoFB/N] PASS: total_kept=14 >= min_total_kept=10
+
+real	1m12.702s
+user	1m31.735s
+sys	0m2.900s
+
+==================== SYSTEM=C6 CANDIDATE=N  job=28131695  host=bhpc-c5-u19-6.rc.int.colorado.edu  Thu Sep  3 17:00:49 MDT 2026 ====================
+ERROR:2026-09-03 17:00:53,719:jax._src.xla_bridge:502: Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax/_src/xla_bridge.py", line 500, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 328, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 285, in _check_cuda_versions
+    local_device_count = cuda_versions.cuda_device_count()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: jaxlib/cuda/versions_helpers.cc:113: operation cuInit(0) failed: Unknown CUDA error 303; cuGetErrorName failed. This probably means that JAX was unable to load the CUDA libraries.
+[C6/N] generating with self-referential export_sweep_ranked ((0.2,0.4,0) rtol=1e-6 atol=1e-8), min_total_kept=10 ...
+      dropped 1 timeseries row(s) with all observables < 1e-08
+      baseline solved in 202 steps at candidate tolerance -> per-candidate loose cap set to 303 (1.5x baseline)
+      baseline solved in 1851 steps at strict tolerance (self-referential, same PID) -> per-candidate strict cap set to 2777 (1.5x baseline)
+      found 15 usable condition(s) (9 non-converged, 17 too similar, 19 stiff at strict tolerance); kept 15
+      kept-set summary: max_steps=198 avg_steps=150.93333333333334 max_rejected=0 avg_rejected=0.0 max_err_pct=0.0006030174262649882 avg_err_pct=0.0001211503679573479
+[C6/N] found 15 usable condition(s) (9 non-converged, 17 too similar, 19 stiff at strict tolerance); total incl. baseline = 16
+[C6/N] wrote /projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/ladder_compare_v2_results/C6_N.json
+[C6/N] PASS: total_kept=16 >= min_total_kept=10
+
+real	1m43.265s
+user	2m57.742s
+sys	0m8.866s
+
+==================== SYSTEM=C8 CANDIDATE=N  job=28131696  host=bhpc-c5-u19-6.rc.int.colorado.edu  Thu Sep  3 17:02:36 MDT 2026 ====================
+ERROR:2026-09-03 17:02:39,780:jax._src.xla_bridge:502: Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax/_src/xla_bridge.py", line 500, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 328, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 285, in _check_cuda_versions
+    local_device_count = cuda_versions.cuda_device_count()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: jaxlib/cuda/versions_helpers.cc:113: operation cuInit(0) failed: Unknown CUDA error 303; cuGetErrorName failed. This probably means that JAX was unable to load the CUDA libraries.
+[C8/N] generating with self-referential export_sweep_ranked ((0.2,0.4,0) rtol=1e-6 atol=1e-8), min_total_kept=10 ...
+      dropped 1 timeseries row(s) with all observables < 1e-08
+      baseline solved in 207 steps at candidate tolerance -> per-candidate loose cap set to 311 (1.5x baseline)
+      baseline solved in 2070 steps at strict tolerance (self-referential, same PID) -> per-candidate strict cap set to 3105 (1.5x baseline)
+      found 21 usable condition(s) (13 non-converged, 16 too similar, 10 stiff at strict tolerance); kept 21
+      kept-set summary: max_steps=224 avg_steps=159.85714285714286 max_rejected=2 avg_rejected=0.09523809523809523 max_err_pct=0.001682553941580493 avg_err_pct=0.0001792193135993545
+[C8/N] found 21 usable condition(s) (13 non-converged, 16 too similar, 10 stiff at strict tolerance); total incl. baseline = 22
+[C8/N] wrote /projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/ladder_compare_v2_results/C8_N.json
+[C8/N] PASS: total_kept=22 >= min_total_kept=10
+
+real	2m3.217s
+user	4m9.860s
+sys	0m8.218s
+
+==================== SYSTEM=C10 CANDIDATE=N  job=28131697  host=bhpc-c5-u7-7.rc.int.colorado.edu  Thu Sep  3 17:04:43 MDT 2026 ====================
+ERROR:2026-09-03 17:04:47,878:jax._src.xla_bridge:502: Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax/_src/xla_bridge.py", line 500, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 328, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 285, in _check_cuda_versions
+    local_device_count = cuda_versions.cuda_device_count()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: jaxlib/cuda/versions_helpers.cc:113: operation cuInit(0) failed: Unknown CUDA error 303; cuGetErrorName failed. This probably means that JAX was unable to load the CUDA libraries.
+[C10/N] generating with self-referential export_sweep_ranked ((0.2,0.4,0) rtol=1e-6 atol=1e-8), min_total_kept=10 ...
+      dropped 1 timeseries row(s) with all observables < 1e-08
+      baseline solved in 209 steps at candidate tolerance -> per-candidate loose cap set to 314 (1.5x baseline)
+      baseline solved in 2005 steps at strict tolerance (self-referential, same PID) -> per-candidate strict cap set to 3008 (1.5x baseline)
+      found 20 usable condition(s) (13 non-converged, 13 too similar, 14 stiff at strict tolerance); kept 20
+      kept-set summary: max_steps=214 avg_steps=151.8 max_rejected=0 avg_rejected=0.0 max_err_pct=0.0034691534916228253 avg_err_pct=0.0003521572987999987
+[C10/N] found 20 usable condition(s) (13 non-converged, 13 too similar, 14 stiff at strict tolerance); total incl. baseline = 21
+[C10/N] wrote /projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/ladder_compare_v2_results/C10_N.json
+[C10/N] PASS: total_kept=21 >= min_total_kept=10
+
+real	3m16.186s
+user	6m31.215s
+sys	0m13.571s
+
+==================== SYSTEM=C12 CANDIDATE=N  job=28131698  host=bhpc-c5-u7-7.rc.int.colorado.edu  Thu Sep  3 17:08:03 MDT 2026 ====================
+ERROR:2026-09-03 17:08:07,993:jax._src.xla_bridge:502: Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax/_src/xla_bridge.py", line 500, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 328, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 285, in _check_cuda_versions
+    local_device_count = cuda_versions.cuda_device_count()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: jaxlib/cuda/versions_helpers.cc:113: operation cuInit(0) failed: Unknown CUDA error 303; cuGetErrorName failed. This probably means that JAX was unable to load the CUDA libraries.
+[C12/N] generating with self-referential export_sweep_ranked ((0.2,0.4,0) rtol=1e-6 atol=1e-8), min_total_kept=10 ...
+      dropped 1 timeseries row(s) with all observables < 1e-08
+      baseline solved in 219 steps at candidate tolerance -> per-candidate loose cap set to 329 (1.5x baseline)
+      baseline solved in 2207 steps at strict tolerance (self-referential, same PID) -> per-candidate strict cap set to 3311 (1.5x baseline)
+      found 20 usable condition(s) (16 non-converged, 13 too similar, 11 stiff at strict tolerance); kept 20
+      kept-set summary: max_steps=212 avg_steps=151.55 max_rejected=0 avg_rejected=0.0 max_err_pct=0.0010138329830256477 avg_err_pct=0.0002852054770955411
+[C12/N] found 20 usable condition(s) (16 non-converged, 13 too similar, 11 stiff at strict tolerance); total incl. baseline = 21
+[C12/N] wrote /projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/ladder_compare_v2_results/C12_N.json
+[C12/N] PASS: total_kept=21 >= min_total_kept=10
+
+real	4m6.837s
+user	8m46.787s
+sys	0m15.631s
+
+==================== SYSTEM=C12+unsat CANDIDATE=N  job=28131699  host=bhpc-c5-u7-1.rc.int.colorado.edu  Thu Sep  3 17:12:14 MDT 2026 ====================
+ERROR:2026-09-03 17:12:18,204:jax._src.xla_bridge:502: Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax/_src/xla_bridge.py", line 500, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 328, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 285, in _check_cuda_versions
+    local_device_count = cuda_versions.cuda_device_count()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: jaxlib/cuda/versions_helpers.cc:113: operation cuInit(0) failed: Unknown CUDA error 303; cuGetErrorName failed. This probably means that JAX was unable to load the CUDA libraries.
+[C12+unsat/N] generating with self-referential export_sweep_ranked ((0.2,0.4,0) rtol=1e-6 atol=1e-8), min_total_kept=10 ...
+      dropped 1 timeseries row(s) with all observables < 1e-08
+      baseline solved in 217 steps at candidate tolerance -> per-candidate loose cap set to 326 (1.5x baseline)
+      baseline solved in 2195 steps at strict tolerance (self-referential, same PID) -> per-candidate strict cap set to 3293 (1.5x baseline)
+      found 23 usable condition(s) (16 non-converged, 13 too similar, 8 stiff at strict tolerance); kept 23
+      kept-set summary: max_steps=220 avg_steps=158.43478260869566 max_rejected=0 avg_rejected=0.0 max_err_pct=0.0012031192984071036 avg_err_pct=0.00019747682243474528
+[C12+unsat/N] found 23 usable condition(s) (16 non-converged, 13 too similar, 8 stiff at strict tolerance); total incl. baseline = 24
+[C12+unsat/N] wrote /projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/ladder_compare_v2_results/C12+unsat_N.json
+[C12+unsat/N] PASS: total_kept=24 >= min_total_kept=10
+
+real	4m22.773s
+user	13m45.536s
+sys	0m12.508s
+
+==================== SYSTEM=C14 CANDIDATE=N  job=28131700  host=bhpc-c5-u7-1.rc.int.colorado.edu  Thu Sep  3 17:16:40 MDT 2026 ====================
+ERROR:2026-09-03 17:16:44,681:jax._src.xla_bridge:502: Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax/_src/xla_bridge.py", line 500, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 328, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 285, in _check_cuda_versions
+    local_device_count = cuda_versions.cuda_device_count()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: jaxlib/cuda/versions_helpers.cc:113: operation cuInit(0) failed: Unknown CUDA error 303; cuGetErrorName failed. This probably means that JAX was unable to load the CUDA libraries.
+[C14/N] generating with self-referential export_sweep_ranked ((0.2,0.4,0) rtol=1e-6 atol=1e-8), min_total_kept=10 ...
+      dropped 1 timeseries row(s) with all observables < 1e-08
+      baseline solved in 216 steps at candidate tolerance -> per-candidate loose cap set to 324 (1.5x baseline)
+      baseline solved in 2172 steps at strict tolerance (self-referential, same PID) -> per-candidate strict cap set to 3258 (1.5x baseline)
+      found 23 usable condition(s) (16 non-converged, 13 too similar, 8 stiff at strict tolerance); kept 23
+      kept-set summary: max_steps=222 avg_steps=153.0 max_rejected=0 avg_rejected=0.0 max_err_pct=0.0035781126216605616 avg_err_pct=0.0004189185839810637
+[C14/N] found 23 usable condition(s) (16 non-converged, 13 too similar, 8 stiff at strict tolerance); total incl. baseline = 24
+[C14/N] wrote /projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/ladder_compare_v2_results/C14_N.json
+[C14/N] PASS: total_kept=24 >= min_total_kept=10
+
+real	4m27.664s
+user	14m1.830s
+sys	0m12.745s
+
+==================== SYSTEM=C14+unsat CANDIDATE=N  job=28131701  host=bhpc-c5-u7-1.rc.int.colorado.edu  Thu Sep  3 17:21:12 MDT 2026 ====================
+ERROR:2026-09-03 17:21:16,141:jax._src.xla_bridge:502: Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax/_src/xla_bridge.py", line 500, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 328, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 285, in _check_cuda_versions
+    local_device_count = cuda_versions.cuda_device_count()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: jaxlib/cuda/versions_helpers.cc:113: operation cuInit(0) failed: Unknown CUDA error 303; cuGetErrorName failed. This probably means that JAX was unable to load the CUDA libraries.
+[C14+unsat/N] generating with self-referential export_sweep_ranked ((0.2,0.4,0) rtol=1e-6 atol=1e-8), min_total_kept=10 ...
+      dropped 1 timeseries row(s) with all observables < 1e-08
+      baseline solved in 212 steps at candidate tolerance -> per-candidate loose cap set to 318 (1.5x baseline)
+      baseline solved in 2159 steps at strict tolerance (self-referential, same PID) -> per-candidate strict cap set to 3239 (1.5x baseline)
+      found 24 usable condition(s) (16 non-converged, 12 too similar, 8 stiff at strict tolerance); kept 24
+      kept-set summary: max_steps=217 avg_steps=153.33333333333334 max_rejected=10 avg_rejected=0.4166666666666667 max_err_pct=0.0038433792731531356 avg_err_pct=0.00041676214403211153
+[C14+unsat/N] found 24 usable condition(s) (16 non-converged, 12 too similar, 8 stiff at strict tolerance); total incl. baseline = 25
+[C14+unsat/N] wrote /projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/ladder_compare_v2_results/C14+unsat_N.json
+[C14+unsat/N] PASS: total_kept=25 >= min_total_kept=10
+
+real	6m9.690s
+user	27m6.085s
+sys	0m15.345s
+
+==================== SYSTEM=C16 CANDIDATE=N  job=28131702  host=bhpc-c5-u7-1.rc.int.colorado.edu  Thu Sep  3 17:27:25 MDT 2026 ====================
+ERROR:2026-09-03 17:27:29,669:jax._src.xla_bridge:502: Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax/_src/xla_bridge.py", line 500, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 328, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 285, in _check_cuda_versions
+    local_device_count = cuda_versions.cuda_device_count()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: jaxlib/cuda/versions_helpers.cc:113: operation cuInit(0) failed: Unknown CUDA error 303; cuGetErrorName failed. This probably means that JAX was unable to load the CUDA libraries.
+[C16/N] generating with self-referential export_sweep_ranked ((0.2,0.4,0) rtol=1e-6 atol=1e-8), min_total_kept=10 ...
+      dropped 1 timeseries row(s) with all observables < 1e-08
+      baseline solved in 212 steps at candidate tolerance -> per-candidate loose cap set to 318 (1.5x baseline)
+      baseline solved in 2158 steps at strict tolerance (self-referential, same PID) -> per-candidate strict cap set to 3237 (1.5x baseline)
+      found 24 usable condition(s) (19 non-converged, 10 too similar, 7 stiff at strict tolerance); kept 24
+      kept-set summary: max_steps=236 avg_steps=163.20833333333334 max_rejected=56 avg_rejected=2.3333333333333335 max_err_pct=0.0031754941797597362 avg_err_pct=0.0004283793323939184
+[C16/N] found 24 usable condition(s) (19 non-converged, 10 too similar, 7 stiff at strict tolerance); total incl. baseline = 25
+[C16/N] wrote /projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/ladder_compare_v2_results/C16_N.json
+[C16/N] PASS: total_kept=25 >= min_total_kept=10
+
+real	5m4.263s
+user	21m8.711s
+sys	0m11.385s
+
+==================== SYSTEM=C16+unsat CANDIDATE=N  job=28131703  host=bhpc-c5-u7-1.rc.int.colorado.edu  Thu Sep  3 17:32:35 MDT 2026 ====================
+ERROR:2026-09-03 17:32:40,693:jax._src.xla_bridge:502: Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax/_src/xla_bridge.py", line 500, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 328, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 285, in _check_cuda_versions
+    local_device_count = cuda_versions.cuda_device_count()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: jaxlib/cuda/versions_helpers.cc:113: operation cuInit(0) failed: Unknown CUDA error 303; cuGetErrorName failed. This probably means that JAX was unable to load the CUDA libraries.
+[C16+unsat/N] generating with self-referential export_sweep_ranked ((0.2,0.4,0) rtol=1e-6 atol=1e-8), min_total_kept=10 ...
+      dropped 1 timeseries row(s) with all observables < 1e-08
+      baseline solved in 207 steps at candidate tolerance -> per-candidate loose cap set to 311 (1.5x baseline)
+      baseline solved in 2122 steps at strict tolerance (self-referential, same PID) -> per-candidate strict cap set to 3183 (1.5x baseline)
+      found 24 usable condition(s) (19 non-converged, 9 too similar, 8 stiff at strict tolerance); kept 24
+      kept-set summary: max_steps=285 avg_steps=165.70833333333334 max_rejected=64 avg_rejected=4.958333333333333 max_err_pct=0.0008567560623181258 avg_err_pct=0.00025805326113595694
+[C16+unsat/N] found 24 usable condition(s) (19 non-converged, 9 too similar, 8 stiff at strict tolerance); total incl. baseline = 25
+[C16+unsat/N] wrote /projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/ladder_compare_v2_results/C16+unsat_N.json
+[C16+unsat/N] PASS: total_kept=25 >= min_total_kept=10
+
+real	9m24.626s
+user	57m0.737s
+sys	0m15.288s
+
+==================== SYSTEM=C18 CANDIDATE=N  job=28131704  host=bhpc-c5-u7-1.rc.int.colorado.edu  Thu Sep  3 17:42:03 MDT 2026 ====================
+ERROR:2026-09-03 17:42:07,812:jax._src.xla_bridge:502: Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax/_src/xla_bridge.py", line 500, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 328, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 285, in _check_cuda_versions
+    local_device_count = cuda_versions.cuda_device_count()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: jaxlib/cuda/versions_helpers.cc:113: operation cuInit(0) failed: Unknown CUDA error 303; cuGetErrorName failed. This probably means that JAX was unable to load the CUDA libraries.
+[C18/N] generating with self-referential export_sweep_ranked ((0.2,0.4,0) rtol=1e-6 atol=1e-8), min_total_kept=10 ...
+      dropped 1 timeseries row(s) with all observables < 1e-08
+      baseline solved in 210 steps at candidate tolerance -> per-candidate loose cap set to 315 (1.5x baseline)
+      baseline solved in 2137 steps at strict tolerance (self-referential, same PID) -> per-candidate strict cap set to 3206 (1.5x baseline)
+      found 21 usable condition(s) (24 non-converged, 8 too similar, 7 stiff at strict tolerance); kept 21
+      kept-set summary: max_steps=239 avg_steps=178.33333333333334 max_rejected=54 avg_rejected=5.190476190476191 max_err_pct=0.0008224139554095411 avg_err_pct=0.00022609703101865322
+[C18/N] found 21 usable condition(s) (24 non-converged, 8 too similar, 7 stiff at strict tolerance); total incl. baseline = 22
+[C18/N] wrote /projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/ladder_compare_v2_results/C18_N.json
+[C18/N] PASS: total_kept=22 >= min_total_kept=10
+
+real	5m49.809s
+user	25m33.861s
+sys	0m13.895s
+
+==================== SYSTEM=C18+unsat CANDIDATE=N  job=28131705  host=bhpc-c5-u7-5.rc.int.colorado.edu  Thu Sep  3 17:47:57 MDT 2026 ====================
+ERROR:2026-09-03 17:48:01,455:jax._src.xla_bridge:502: Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax/_src/xla_bridge.py", line 500, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 328, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 285, in _check_cuda_versions
+    local_device_count = cuda_versions.cuda_device_count()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: jaxlib/cuda/versions_helpers.cc:113: operation cuInit(0) failed: Unknown CUDA error 303; cuGetErrorName failed. This probably means that JAX was unable to load the CUDA libraries.
+[C18+unsat/N] generating with self-referential export_sweep_ranked ((0.2,0.4,0) rtol=1e-6 atol=1e-8), min_total_kept=10 ...
+      dropped 1 timeseries row(s) with all observables < 1e-08
+      baseline solved in 203 steps at candidate tolerance -> per-candidate loose cap set to 305 (1.5x baseline)
+      baseline solved in 2081 steps at strict tolerance (self-referential, same PID) -> per-candidate strict cap set to 3122 (1.5x baseline)
+      found 18 usable condition(s) (26 non-converged, 9 too similar, 7 stiff at strict tolerance); kept 18
+      kept-set summary: max_steps=294 avg_steps=187.16666666666666 max_rejected=58 avg_rejected=7.722222222222222 max_err_pct=0.00058711883256238 avg_err_pct=0.0002796028412331049
+[C18+unsat/N] found 18 usable condition(s) (26 non-converged, 9 too similar, 7 stiff at strict tolerance); total incl. baseline = 19
+[C18+unsat/N] wrote /projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/ladder_compare_v2_results/C18+unsat_N.json
+[C18+unsat/N] PASS: total_kept=19 >= min_total_kept=10
+
+real	17m5.486s
+user	127m10.149s
+sys	0m11.206s
+
+==================== SYSTEM=C20 CANDIDATE=N  job=28131706  host=bgpu-curc3  Thu Sep  3 18:05:07 MDT 2026 ====================
+ERROR:2026-09-03 18:05:11,205:jax._src.xla_bridge:502: Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax/_src/xla_bridge.py", line 500, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 328, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/projects/anth4580/software/anaconda/envs/Bayesian/lib/python3.12/site-packages/jax_plugins/xla_cuda12/__init__.py", line 285, in _check_cuda_versions
+    local_device_count = cuda_versions.cuda_device_count()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: jaxlib/cuda/versions_helpers.cc:113: operation cuInit(0) failed: CUDA_ERROR_NO_DEVICE
+WARNING:2026-09-03 18:05:11,211:jax._src.xla_bridge:872: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+[C20/N] generating with self-referential export_sweep_ranked ((0.2,0.4,0) rtol=1e-6 atol=1e-8), min_total_kept=10 ...
+      dropped 1 timeseries row(s) with all observables < 1e-08
+      baseline solved in 207 steps at candidate tolerance -> per-candidate loose cap set to 311 (1.5x baseline)
+      baseline solved in 2108 steps at strict tolerance (self-referential, same PID) -> per-candidate strict cap set to 3162 (1.5x baseline)
+      found 16 usable condition(s) (29 non-converged, 6 too similar, 9 stiff at strict tolerance); kept 16
+      kept-set summary: max_steps=226 avg_steps=200.6875 max_rejected=41 avg_rejected=11.375 max_err_pct=0.002908813745143771 avg_err_pct=0.0004880569337235149
+[C20/N] found 16 usable condition(s) (29 non-converged, 6 too similar, 9 stiff at strict tolerance); total incl. baseline = 17
+[C20/N] wrote /projects/anth4580/Bayesian/job_files/c20unsat_solver_compare/ladder_compare_v2_results/C20_N.json
+[C20/N] PASS: total_kept=17 >= min_total_kept=10
+
+real	5m27.245s
+user	28m9.000s
+sys	0m12.826s

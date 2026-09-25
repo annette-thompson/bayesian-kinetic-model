@@ -1,0 +1,13 @@
+{
+  "system": "C6",
+  "rtol": 0.001,
+  "atol": 1e-07,
+  "strict_cap": 3158,
+  "strict_probe_skipped": true,
+  "n_found": 14,
+  "n_kept": 9,
+  "baseline_steps": 83,
+  "total_steps": 703,
+  "max_err_pct": 0.005844882923304453,
+  "check_c_max_disagreement_pct": 0.002156814337223611
+}

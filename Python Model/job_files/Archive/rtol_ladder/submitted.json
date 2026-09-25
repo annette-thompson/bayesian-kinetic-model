@@ -1,0 +1,87 @@
+{
+  "C4_NoFB": {
+    "rtol": 0.001,
+    "jobid": "28147991",
+    "total_steps": 675,
+    "max_err_pct": 0.04659972574788696
+  },
+  "C8": {
+    "rtol": 0.001,
+    "jobid": "28147992",
+    "total_steps": 699,
+    "max_err_pct": 0.02993908197005466
+  },
+  "C10": {
+    "rtol": 0.001,
+    "jobid": "28147993",
+    "total_steps": 692,
+    "max_err_pct": 0.033642507242393385
+  },
+  "C14": {
+    "rtol": 0.001,
+    "jobid": "28147994",
+    "total_steps": 823,
+    "max_err_pct": 0.020718495347272124
+  },
+  "C14+unsat": {
+    "rtol": 0.001,
+    "jobid": "28147995",
+    "total_steps": 819,
+    "max_err_pct": 0.026094410164378478
+  },
+  "C16": {
+    "rtol": 0.0001,
+    "jobid": "28147996",
+    "total_steps": 1085,
+    "max_err_pct": 0.004168337855281569
+  },
+  "C16+unsat": {
+    "rtol": 0.0001,
+    "jobid": "28147997",
+    "total_steps": 1056,
+    "max_err_pct": 0.0043938183527747155
+  },
+  "C12": {
+    "rtol": 0.001,
+    "jobid": "28147999",
+    "total_steps": 723,
+    "max_err_pct": 0.026245907687179694
+  },
+  "C12+unsat": {
+    "rtol": 0.001,
+    "jobid": "28148000",
+    "total_steps": 736,
+    "max_err_pct": 0.03514992000968769
+  },
+  "C18": {
+    "rtol": 1e-05,
+    "jobid": "28148046",
+    "total_steps": 1438,
+    "max_err_pct": 0.0019252533400585345
+  },
+  "C18+unsat": {
+    "rtol": 1e-05,
+    "jobid": "28148047",
+    "total_steps": 1388,
+    "max_err_pct": 0.0012648491535459268
+  },
+  "C20": {
+    "rtol": 1e-05,
+    "jobid": "28148048",
+    "total_steps": 1452,
+    "max_err_pct": 0.0023414250003760306
+  },
+  "C20+unsat": {
+    "rtol": 1e-05,
+    "jobid": "28148049",
+    "total_steps": 1399,
+    "max_err_pct": 0.002487588918363734
+  },
+  "C6": {
+    "rtol": 0.001,
+    "jobid": "28148116",
+    "total_steps": 703,
+    "max_err_pct": 0.0058,
+    "note": "forced via force_c6_1e3.py; strict baseline probe skipped (cap 3158 from 2026-09-03)"
+  }
+}

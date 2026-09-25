@@ -1,0 +1,47 @@
+{
+  "C8": {
+    "per_tolerance": [
+      {
+        "rtol": 0.001,
+        "eligible": true,
+        "n_found": 21,
+        "n_kept": 9,
+        "total_steps": 699,
+        "max_steps": 84,
+        "max_err_pct": 0.02993908197005466,
+        "baseline_steps": 84,
+        "error": null,
+        "seconds": 265.4,
+        "timeseries_rows": 10
+      },
+      {
+        "rtol": 0.0001,
+        "eligible": true,
+        "n_found": 21,
+        "n_kept": 9,
+        "total_steps": 867,
+        "max_steps": 113,
+        "max_err_pct": 0.012972048787580777,
+        "baseline_steps": 113,
+        "error": null,
+        "seconds": 259.2,
+        "timeseries_rows": 10
+      },
+      {
+        "rtol": 1e-05,
+        "eligible": true,
+        "n_found": 21,
+        "n_kept": 9,
+        "total_steps": 1056,
+        "max_steps": 152,
+        "max_err_pct": 0.004070956304905727,
+        "baseline_steps": 152,
+        "error": null,
+        "seconds": 264.2,
+        "timeseries_rows": 10
+      }
+    ],
+    "chosen_rtol": 0.001,
+    "promoted": true
+  }
+}
