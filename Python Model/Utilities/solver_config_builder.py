@@ -192,17 +192,23 @@ def build_free_kinetic_parameter_specs(
             item_index=index,
         )
 
+        prior_dist_params = {
+            "distribution": parameter_input["distribution"],
+            "lower": float(parameter_input["lower"]),
+            "upper": float(parameter_input["upper"]),
+            "mass": float(parameter_input.get("mass", 0.95)),
+            "fixed_stat": parameter_input.get("fixed_stat", None),
+        }
+        # Samples the parameter on u = sample_scale * x (Normal priors only; see
+        # inference_runner._ScaleTransform). d1's prior needs it to match a1's scale.
+        if parameter_input.get("sample_scale") is not None:
+            prior_dist_params["sample_scale"] = float(parameter_input["sample_scale"])
+
         free_kinetic_params.append(
             {
                 "rxn_name": parameter_input.get("rxn_name"),
                 "param_name": parameter_input["param_name"],
-                "prior_dist_params": {
-                    "distribution": parameter_input["distribution"],
-                    "lower": float(parameter_input["lower"]),
-                    "upper": float(parameter_input["upper"]),
-                    "mass": float(parameter_input.get("mass", 0.95)),
-                    "fixed_stat": parameter_input.get("fixed_stat", None),
-                },
+                "prior_dist_params": prior_dist_params,
             }
         )
 
@@ -263,8 +269,15 @@ def build_solver_params_config(
     calculation_module_path: str,
     path_base: str | Path | None = None,
     output_paths: Mapping[str, Any] | None = None,
+    *,
+    scaling_groups: Mapping[str, float],
 ) -> dict[str, Any]:
-    """Build the full solver_params.json payload from guided notebook inputs."""
+    """Build the full solver_params.json payload from guided notebook inputs.
+
+    ``scaling_groups`` gives the value of every scaling group the reactions use. It is
+    required because the inference runner refuses a config without it: ``d`` groups
+    are 0 at nominal and every multiplicative group is 1, so no default is safe.
+    """
     solver_params_config = {
         "free_kinetic_params": build_free_kinetic_parameter_specs(free_parameter_prior_inputs),
         "prior_sampling": dict(prior_sampling_settings),
@@ -280,6 +293,10 @@ def build_solver_params_config(
 
     if output_paths is not None:
         solver_params_config["output_paths"] = dict(output_paths)
+
+    solver_params_config["scaling_groups"] = {
+        name: float(value) for name, value in scaling_groups.items()
+    }
 
     return solver_params_config
 

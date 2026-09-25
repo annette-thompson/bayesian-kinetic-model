@@ -33,6 +33,8 @@ python build_tier1_configs.py --system C8 --params a1,c3  # one run
 ```
 Each run gets `Results/Tier1/<run>/solver_params.json`, the one file the inference runner reads. Its `path_base` points back to the `Python Model` folder, and every path inside is relative to that folder, so a config can move with its results folder. It records the data's truth as `tier1_truth`.
 
+To do the same interactively, **`Bayesian Inference/guided_solver_config_builder.ipynb`** builds the C8 `a1`+`c3` config (R0's) section by section and writes it to `Results/Guided Example - C8 a1c3/`. **`guided_bayesian_inference.ipynb`**, with `folder_name` set to that folder, then runs and plots the fit.
+
 ### 5. Pre-flight, then run
 ```bash
 python -u check_model_vs_data.py "Tier1 C8 - a1c3" --grad   # model reproduces its clean data; logp and gradient finite
