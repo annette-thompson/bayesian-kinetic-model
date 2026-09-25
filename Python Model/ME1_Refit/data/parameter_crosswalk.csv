@@ -1,0 +1,589 @@
+matlab_param,matlab_index,yaml_rate_key,reaction,scaling_group,value_at_published_pvec,reactants,products
+k10_1f,1,kon_B_AcACP,C4_FabB_binding_AcACP,,4.338673394484211,C4_AcACP + FabB,C4_FabB_AcACP
+k10_1f,2,kon_B_AcACP,C6_FabB_binding_AcACP,,4.338673394484211,C6_AcACP + FabB,C6_FabB_AcACP
+k10_1f,3,kon_B_AcACP,C8_FabB_binding_AcACP,,4.338673394484211,C8_AcACP + FabB,C8_FabB_AcACP
+k10_1f,4,C10_cis_kon_B_EnAcACP,C10_cis_FabB_binding_EnAcACP,,4.338673394484211,C10_cis3EnAcACP + FabB,C10_FabB_cis3EnAcACP
+k10_1f,4,kon_B_AcACP,C10_FabB_binding_AcACP,,4.338673394484211,C10_AcACP + FabB,C10_FabB_AcACP
+k10_1f,5,kon_B_AcACP,C12_FabB_binding_AcACP,,4.338673394484211,C12_AcACP + FabB,C12_FabB_AcACP
+k10_1f,5,kon_B_AcACP,C12_FabB_binding_AcACP_unsat,,4.338673394484211,C12_AcACP_unsat + FabB,C12_FabB_AcACP_unsat
+k10_1f,6,kon_B_AcACP,C14_FabB_binding_AcACP,,4.338673394484211,C14_AcACP + FabB,C14_FabB_AcACP
+k10_1f,6,kon_B_AcACP,C14_FabB_binding_AcACP_unsat,,4.338673394484211,C14_AcACP_unsat + FabB,C14_FabB_AcACP_unsat
+k10_1f,7,kon_B_AcACP,C16_FabB_binding_AcACP,,4.338673394484211,C16_AcACP + FabB,C16_FabB_AcACP
+k10_1f,7,kon_B_AcACP,C16_FabB_binding_AcACP_unsat,,4.338673394484211,C16_AcACP_unsat + FabB,C16_FabB_AcACP_unsat
+k10_1f,8,kon_B_AcACP,C18_FabB_binding_AcACP,,4.338673394484211,C18_AcACP + FabB,C18_FabB_AcACP
+k10_1f,8,kon_B_AcACP,C18_FabB_binding_AcACP_unsat,,4.338673394484211,C18_AcACP_unsat + FabB,C18_FabB_AcACP_unsat
+k10_1r,1,koff_B_AcACP,C4_FabB_binding_AcACP,a2,164.8695889904,C4_FabB_AcACP,C4_AcACP
+k10_1r,2,koff_B_AcACP,C6_FabB_binding_AcACP,a2,164.8695889904,C6_FabB_AcACP,C6_AcACP
+k10_1r,3,koff_B_AcACP,C8_FabB_binding_AcACP,a2,164.8695889904,C8_FabB_AcACP,C8_AcACP
+k10_1r,4,C10_cis_koff_B_EnAcACP,C10_cis_FabB_binding_EnAcACP,a2,164.8695889904,C10_FabB_cis3EnAcACP,C10_cis3EnAcACP
+k10_1r,4,koff_B_AcACP,C10_FabB_binding_AcACP,a2,164.8695889904,C10_FabB_AcACP,C10_AcACP
+k10_1r,5,koff_B_AcACP,C12_FabB_binding_AcACP,a2,164.8695889904,C12_FabB_AcACP,C12_AcACP
+k10_1r,5,koff_B_AcACP,C12_FabB_binding_AcACP_unsat,a2,164.8695889904,C12_FabB_AcACP_unsat,C12_AcACP_unsat
+k10_1r,6,koff_B_AcACP,C14_FabB_binding_AcACP,a2,164.8695889904,C14_FabB_AcACP,C14_AcACP
+k10_1r,6,koff_B_AcACP,C14_FabB_binding_AcACP_unsat,a2,164.8695889904,C14_FabB_AcACP_unsat,C14_AcACP_unsat
+k10_1r,7,koff_B_AcACP,C16_FabB_binding_AcACP,a2,164.8695889904,C16_FabB_AcACP,C16_AcACP
+k10_1r,7,koff_B_AcACP,C16_FabB_binding_AcACP_unsat,a2,164.8695889904,C16_FabB_AcACP_unsat,C16_AcACP_unsat
+k10_1r,8,koff_B_AcACP,C18_FabB_binding_AcACP,a2,164.8695889904,C18_FabB_AcACP,C18_AcACP
+k10_1r,8,koff_B_AcACP,C18_FabB_binding_AcACP_unsat,a2,164.8695889904,C18_FabB_AcACP_unsat,C18_AcACP_unsat
+k10_2f,1,kfwd_B_AcACP,C4_FabB_activation_release_ACP,(1/b3),1411.1030972777992,C4_FabB_AcACP,ACP + C4_FabB_Act
+k10_2f,2,kfwd_B_AcACP,C6_FabB_activation_release_ACP,(1/b3),1411.1030972777992,C6_FabB_AcACP,ACP + C6_FabB_Act
+k10_2f,3,kfwd_B_AcACP,C8_FabB_activation_release_ACP,(1/b3),1411.1030972777992,C8_FabB_AcACP,ACP + C8_FabB_Act
+k10_2f,4,kfwd_B_AcACP,C10_FabB_activation_release_ACP,(1/b3),1411.1030972777992,C10_FabB_AcACP,ACP + C10_FabB_Act
+k10_2f,4,C10_cis_kfwd_B_EnAcACP,C10_cis_FabB_activation_EnAcACP,(1/b3),1411.1030972777992,C10_FabB_cis3EnAcACP,ACP + C10_FabB_Act_cis3
+k10_2f,5,kfwd_B_AcACP,C12_FabB_activation_release_ACP,(1/b3),1411.1030972777992,C12_FabB_AcACP,ACP + C12_FabB_Act
+k10_2f,5,kfwd_B_AcACP,C12_FabB_activation_release_ACP_unsat,(1/b3),1411.1030972777992,C12_FabB_AcACP_unsat,ACP + C12_FabB_Act_unsat
+k10_2f,6,kfwd_B_AcACP,C14_FabB_activation_release_ACP,(1/b3),1411.1030972777992,C14_FabB_AcACP,ACP + C14_FabB_Act
+k10_2f,6,kfwd_B_AcACP,C14_FabB_activation_release_ACP_unsat,(1/b3),1411.1030972777992,C14_FabB_AcACP_unsat,ACP + C14_FabB_Act_unsat
+k10_2f,7,kfwd_B_AcACP,C16_FabB_activation_release_ACP,(1/b3),1411.1030972777992,C16_FabB_AcACP,ACP + C16_FabB_Act
+k10_2f,7,kfwd_B_AcACP,C16_FabB_activation_release_ACP_unsat,(1/b3),1411.1030972777992,C16_FabB_AcACP_unsat,ACP + C16_FabB_Act_unsat
+k10_2f,8,kfwd_B_AcACP,C18_FabB_activation_release_ACP,(1/b3),1411.1030972777992,C18_FabB_AcACP,ACP + C18_FabB_Act
+k10_2f,8,kfwd_B_AcACP,C18_FabB_activation_release_ACP_unsat,(1/b3),1411.1030972777992,C18_FabB_AcACP_unsat,ACP + C18_FabB_Act_unsat
+k10_2r,1,krvs_B_AcACP,C4_FabB_activation_release_ACP,b1,402.13929190000005,ACP + C4_FabB_Act,C4_FabB_AcACP
+k10_2r,2,krvs_B_AcACP,C6_FabB_activation_release_ACP,b1,402.13929190000005,ACP + C6_FabB_Act,C6_FabB_AcACP
+k10_2r,3,krvs_B_AcACP,C8_FabB_activation_release_ACP,b1,402.13929190000005,ACP + C8_FabB_Act,C8_FabB_AcACP
+k10_2r,4,krvs_B_AcACP,C10_FabB_activation_release_ACP,b1,402.13929190000005,ACP + C10_FabB_Act,C10_FabB_AcACP
+k10_2r,4,C10_cis_krvs_B_EnAcACP,C10_cis_FabB_activation_EnAcACP,b1,402.13929190000005,ACP + C10_FabB_Act_cis3,C10_FabB_cis3EnAcACP
+k10_2r,5,krvs_B_AcACP,C12_FabB_activation_release_ACP,b1,402.13929190000005,ACP + C12_FabB_Act,C12_FabB_AcACP
+k10_2r,5,krvs_B_AcACP,C12_FabB_activation_release_ACP_unsat,b1,402.13929190000005,ACP + C12_FabB_Act_unsat,C12_FabB_AcACP_unsat
+k10_2r,6,krvs_B_AcACP,C14_FabB_activation_release_ACP,b1,402.13929190000005,ACP + C14_FabB_Act,C14_FabB_AcACP
+k10_2r,6,krvs_B_AcACP,C14_FabB_activation_release_ACP_unsat,b1,402.13929190000005,ACP + C14_FabB_Act_unsat,C14_FabB_AcACP_unsat
+k10_2r,7,krvs_B_AcACP,C16_FabB_activation_release_ACP,b1,402.13929190000005,ACP + C16_FabB_Act,C16_FabB_AcACP
+k10_2r,7,krvs_B_AcACP,C16_FabB_activation_release_ACP_unsat,b1,402.13929190000005,ACP + C16_FabB_Act_unsat,C16_FabB_AcACP_unsat
+k10_2r,8,krvs_B_AcACP,C18_FabB_activation_release_ACP,b1,402.13929190000005,ACP + C18_FabB_Act,C18_FabB_AcACP
+k10_2r,8,krvs_B_AcACP,C18_FabB_activation_release_ACP_unsat,b1,402.13929190000005,ACP + C18_FabB_Act_unsat,C18_FabB_AcACP_unsat
+k10_3f,1,kon_B_Act_MalACP,C4_FabB_Act_binding_MalACP,,20.106047437853658,C3_MalACP + C4_FabB_Act,C7_FabB_Act_MalACP
+k10_3f,2,kon_B_Act_MalACP,C6_FabB_Act_binding_MalACP,,20.106047437853658,C3_MalACP + C6_FabB_Act,C9_FabB_Act_MalACP
+k10_3f,3,kon_B_Act_MalACP,C8_FabB_Act_binding_MalACP,,20.106047437853658,C3_MalACP + C8_FabB_Act,C11_FabB_Act_MalACP
+k10_3f,4,kon_B_Act_MalACP,C10_FabB_Act_binding_MalACP,,20.106047437853658,C10_FabB_Act + C3_MalACP,C13_FabB_Act_MalACP
+k10_3f,4,kon_B_Act_MalACP,C10_cis_FabB_Act_binding_MalACP,,20.106047437853658,C10_FabB_Act_cis3 + C3_MalACP,C13_FabB_Act_MalACP_cis3
+k10_3f,5,kon_B_Act_MalACP,C12_FabB_Act_binding_MalACP,,20.106047437853658,C12_FabB_Act + C3_MalACP,C15_FabB_Act_MalACP
+k10_3f,5,kon_B_Act_MalACP,C12_FabB_Act_binding_MalACP_unsat,,20.106047437853658,C12_FabB_Act_unsat + C3_MalACP,C15_FabB_Act_MalACP_unsat
+k10_3f,6,kon_B_Act_MalACP,C14_FabB_Act_binding_MalACP,,20.106047437853658,C14_FabB_Act + C3_MalACP,C17_FabB_Act_MalACP
+k10_3f,6,kon_B_Act_MalACP,C14_FabB_Act_binding_MalACP_unsat,,20.106047437853658,C14_FabB_Act_unsat + C3_MalACP,C17_FabB_Act_MalACP_unsat
+k10_3f,7,kon_B_Act_MalACP,C16_FabB_Act_binding_MalACP,,20.106047437853658,C16_FabB_Act + C3_MalACP,C19_FabB_Act_MalACP
+k10_3f,7,kon_B_Act_MalACP,C16_FabB_Act_binding_MalACP_unsat,,20.106047437853658,C16_FabB_Act_unsat + C3_MalACP,C19_FabB_Act_MalACP_unsat
+k10_3f,8,kon_B_Act_MalACP,C18_FabB_Act_binding_MalACP,,20.106047437853658,C18_FabB_Act + C3_MalACP,C21_FabB_Act_MalACP
+k10_3f,8,kon_B_Act_MalACP,C18_FabB_Act_binding_MalACP_unsat,,20.106047437853658,C18_FabB_Act_unsat + C3_MalACP,C21_FabB_Act_MalACP_unsat
+k10_3r,1,koff_B_Act_MalACP,C4_FabB_Act_binding_MalACP,a2,164.8695889904,C7_FabB_Act_MalACP,C3_MalACP + C4_FabB_Act
+k10_3r,2,koff_B_Act_MalACP,C6_FabB_Act_binding_MalACP,a2,164.8695889904,C9_FabB_Act_MalACP,C3_MalACP + C6_FabB_Act
+k10_3r,3,koff_B_Act_MalACP,C8_FabB_Act_binding_MalACP,a2,164.8695889904,C11_FabB_Act_MalACP,C3_MalACP + C8_FabB_Act
+k10_3r,4,koff_B_Act_MalACP,C10_FabB_Act_binding_MalACP,a2,164.8695889904,C13_FabB_Act_MalACP,C10_FabB_Act + C3_MalACP
+k10_3r,4,koff_B_Act_MalACP,C10_cis_FabB_Act_binding_MalACP,a2,164.8695889904,C13_FabB_Act_MalACP_cis3,C10_FabB_Act_cis3 + C3_MalACP
+k10_3r,5,koff_B_Act_MalACP,C12_FabB_Act_binding_MalACP,a2,164.8695889904,C15_FabB_Act_MalACP,C12_FabB_Act + C3_MalACP
+k10_3r,5,koff_B_Act_MalACP,C12_FabB_Act_binding_MalACP_unsat,a2,164.8695889904,C15_FabB_Act_MalACP_unsat,C12_FabB_Act_unsat + C3_MalACP
+k10_3r,6,koff_B_Act_MalACP,C14_FabB_Act_binding_MalACP,a2,164.8695889904,C17_FabB_Act_MalACP,C14_FabB_Act + C3_MalACP
+k10_3r,6,koff_B_Act_MalACP,C14_FabB_Act_binding_MalACP_unsat,a2,164.8695889904,C17_FabB_Act_MalACP_unsat,C14_FabB_Act_unsat + C3_MalACP
+k10_3r,7,koff_B_Act_MalACP,C16_FabB_Act_binding_MalACP,a2,164.8695889904,C19_FabB_Act_MalACP,C16_FabB_Act + C3_MalACP
+k10_3r,7,koff_B_Act_MalACP,C16_FabB_Act_binding_MalACP_unsat,a2,164.8695889904,C19_FabB_Act_MalACP_unsat,C16_FabB_Act_unsat + C3_MalACP
+k10_3r,8,koff_B_Act_MalACP,C18_FabB_Act_binding_MalACP,a2,164.8695889904,C21_FabB_Act_MalACP,C18_FabB_Act + C3_MalACP
+k10_3r,8,koff_B_Act_MalACP,C18_FabB_Act_binding_MalACP_unsat,a2,164.8695889904,C21_FabB_Act_MalACP_unsat,C18_FabB_Act_unsat + C3_MalACP
+k10_4f,,C2_kon_B_AcCoA,C2_FabB_binding_AcCoA,,284.9474476,C2_AcCoA + FabB,C2_FabB_AcCoA
+k10_4r,,C2_koff_B_AcCoA,C2_FabB_binding_AcCoA,,11397.8979,C2_FabB_AcCoA,C2_AcCoA
+k10_5f,,C2_kfwd_B_AcCoA,C2_FabB_AcCoA_activation,,1411.103097,C2_FabB_AcCoA,C2_FabB_Act + CoA
+k10_5r,,C2_krvs_B_AcCoA,C2_FabB_AcCoA_activation,x4,4484.089916471215,C2_FabB_Act + CoA,C2_FabB_AcCoA
+k10_6f,,C2_kon_B_Act_MalACP,C2_FabB_Act_binding_MalACP,,618.3359613,C2_FabB_Act + C3_MalACP,C5_FabB_Act_MalACP
+k10_6r,,C2_koff_B_Act_MalACP,C2_FabB_Act_binding_MalACP,,3091.679806,C5_FabB_Act_MalACP,C2_FabB_Act + C3_MalACP
+k10_7f,,kon_B_MalACP,FabB_binding_MalACP,,284.9474476,C3_MalACP + FabB,C3_FabB_MalACP
+k10_7r,,koff_B_MalACP,FabB_binding_MalACP,,11397.8979,C3_FabB_MalACP,C3_MalACP
+k10_8f,,kon_B_C2_AcACP,FabB_binding_C2_AcACP,,284.9474476,C2_AcACP + FabB,C2_FabB_AcACP
+k10_8r,,koff_B_C2_AcACP,FabB_binding_C2_AcACP,,11397.8979,C2_FabB_AcACP,C2_AcACP
+k10_9f,,kfwd_B_C2_AcACP,FabB_C2_AcACP_activation,,1411.103097,C2_FabB_AcACP,ACP + C2_FabB_Act
+k10_9r,,krvs_B_C2_AcACP,FabB_C2_AcACP_activation,,402.139291,ACP + C2_FabB_Act,C2_FabB_AcACP
+k10_inh_f,,kon_B_ACP,FabB_inhibition_by_ACP,,0.00241,ACP + FabB,FabB_ACP
+k10_inh_r,,koff_B_ACP,FabB_inhibition_by_ACP,,0.091574,FabB_ACP,ACP
+k2_1f,,kon_D_MalCoA,FabD_binding_MalCoA,,189.96496506666668,C3_MalCoA + FabD,C3_FabD_MalCoA
+k2_1r,,koff_D_MalCoA,FabD_binding_MalCoA,a1,11397.897904000001,C3_FabD_MalCoA,C3_MalCoA
+k2_2f,,kfwd_D_MalCoA,FabD_activation_release_CoA,(b1/b2),60222.860002345195,C3_FabD_MalCoA,C3_FabD_Act + CoA
+k2_2r,,krvs_D_MalCoA,FabD_activation_release_CoA,b1,402.13929190000005,C3_FabD_Act + CoA,C3_FabD_MalCoA
+k2_3f,,kon_D_Act_ACP,FabD_Act_binding_ACP,,77.29199516150001,ACP + C3_FabD_Act,C3_FabD_Act_ACP
+k2_3r,,koff_D_Act_ACP,FabD_Act_binding_ACP,a1,3091.6798064600002,C3_FabD_Act_ACP,ACP + C3_FabD_Act
+k2_4f,,kfwd_D_Act_ACP,FabD_catalysis_release_MalACP,(b1/b3),1411.1030972777992,C3_FabD_Act_ACP,C3_MalACP
+k2_4r,,krvs_D_Act_ACP,FabD_catalysis_release_MalACP,b1,402.13929190000005,C3_MalACP + FabD,C3_FabD_Act_ACP
+k3_1f,,C2_kon_H_AcCoA,C2_FabH_binding_AcCoA,,284.94744760000003,C2_AcCoA + FabH,C2_FabH_AcCoA
+k3_1r,,C2_koff_H_AcCoA,C2_FabH_binding_AcCoA,a1,11397.897904000001,C2_FabH_AcCoA,C2_AcCoA
+k3_2f,,kfwd_H_AcCoA,C2_FabH_activation_release_CoA,(b1/b3),1411.1030972777992,C2_FabH_AcCoA,C2_FabH_Act + CoA
+k3_2r,,krvs_H_AcCoA,C2_FabH_activation_release_CoA,b1,402.13929190000005,C2_FabH_Act + CoA,C2_FabH_AcCoA
+k3_3f,,kon_H_Act_MalACP,C2_FabH_Act_binding_MalACP,,618.3359612920001,C2_FabH_Act + C3_MalACP,C5_FabH_Act_MalACP
+k3_3r,,koff_H_Act_MalACP,C2_FabH_Act_binding_MalACP,a1,3091.6798064600002,C5_FabH_Act_MalACP,C2_FabH_Act + C3_MalACP
+k3_4f,1,kon_H_AcACP,C4_FabH_inhibition_by_AcACP,,0.3088,C4_AcACP + FabH,C4_FabH_AcACP
+k3_4f,2,kon_H_AcACP,C6_FabH_inhibition_by_AcACP,,0.3088,C6_AcACP + FabH,C6_FabH_AcACP
+k3_4f,3,kon_H_AcACP,C8_FabH_inhibition_by_AcACP,,0.3088,C8_AcACP + FabH,C8_FabH_AcACP
+k3_4f,4,kon_H_AcACP,C10_FabH_inhibition_by_AcACP,,0.3088,C10_AcACP + FabH,C10_FabH_AcACP
+k3_4f,5,kon_H_AcACP,C12_FabH_inhibition_by_AcACP,,0.3088,C12_AcACP + FabH,C12_FabH_AcACP
+k3_4f,5,kon_H_AcACP,C12_FabH_inhibition_by_AcACP_unsat,,0.3088,C12_AcACP_unsat + FabH,C12_FabH_AcACP_unsat
+k3_4f,6,kon_H_AcACP,C14_FabH_inhibition_by_AcACP,,0.3088,C14_AcACP + FabH,C14_FabH_AcACP
+k3_4f,6,kon_H_AcACP,C14_FabH_inhibition_by_AcACP_unsat,,0.3088,C14_AcACP_unsat + FabH,C14_FabH_AcACP_unsat
+k3_4f,7,kon_H_AcACP,C16_FabH_inhibition_by_AcACP,,0.3088,C16_AcACP + FabH,C16_FabH_AcACP
+k3_4f,7,kon_H_AcACP,C16_FabH_inhibition_by_AcACP_unsat,,0.3088,C16_AcACP_unsat + FabH,C16_FabH_AcACP_unsat
+k3_4f,8,kon_H_AcACP,C18_FabH_inhibition_by_AcACP,,0.3088,C18_AcACP + FabH,C18_FabH_AcACP
+k3_4f,8,kon_H_AcACP,C18_FabH_inhibition_by_AcACP_unsat,,0.3088,C18_AcACP_unsat + FabH,C18_FabH_AcACP_unsat
+k3_4f,9,kon_H_AcACP,C20_FabH_inhibition_by_AcACP,,0.3088,C20_AcACP + FabH,C20_FabH_AcACP
+k3_4f,9,kon_H_AcACP,C20_FabH_inhibition_by_AcACP_unsat,,0.3088,C20_AcACP_unsat + FabH,C20_FabH_AcACP_unsat
+k3_4r,1,C4_koff_H_AcACP,C4_FabH_inhibition_by_AcACP,(1/e),463.7496991784655,C4_FabH_AcACP,C4_AcACP
+k3_4r,2,C6_koff_H_AcACP,C6_FabH_inhibition_by_AcACP,(1/e),463.7496991784655,C6_FabH_AcACP,C6_AcACP
+k3_4r,3,C8_koff_H_AcACP,C8_FabH_inhibition_by_AcACP,(1/e),463.7496991784655,C8_FabH_AcACP,C8_AcACP
+k3_4r,4,C10_koff_H_AcACP,C10_FabH_inhibition_by_AcACP,(1/e),463.7496991784655,C10_FabH_AcACP,C10_AcACP
+k3_4r,5,C12_koff_H_AcACP,C12_FabH_inhibition_by_AcACP,(1/e),463.7496991784655,C12_FabH_AcACP,C12_AcACP
+k3_4r,5,C12_koff_H_AcACP,C12_FabH_inhibition_by_AcACP_unsat,(1/e),463.7496991784655,C12_FabH_AcACP_unsat,C12_AcACP_unsat
+k3_4r,6,C14_koff_H_AcACP,C14_FabH_inhibition_by_AcACP,(1/e),88.22375218566809,C14_FabH_AcACP,C14_AcACP
+k3_4r,6,C14_koff_H_AcACP,C14_FabH_inhibition_by_AcACP_unsat,(1/e),88.22375218566809,C14_FabH_AcACP_unsat,C14_AcACP_unsat
+k3_4r,7,C16_koff_H_AcACP,C16_FabH_inhibition_by_AcACP,(1/e),103.50003666743528,C16_FabH_AcACP,C16_AcACP
+k3_4r,7,C16_koff_H_AcACP,C16_FabH_inhibition_by_AcACP_unsat,(1/e),103.50003666743528,C16_FabH_AcACP_unsat,C16_AcACP_unsat
+k3_4r,8,C18_koff_H_AcACP,C18_FabH_inhibition_by_AcACP,(1/e),26.90680023007062,C18_FabH_AcACP,C18_AcACP
+k3_4r,8,C18_koff_H_AcACP,C18_FabH_inhibition_by_AcACP_unsat,(1/e),26.90680023007062,C18_FabH_AcACP_unsat,C18_AcACP_unsat
+k3_4r,9,C20_koff_H_AcACP,C20_FabH_inhibition_by_AcACP,(1/e),13.776469996932626,C20_FabH_AcACP,C20_AcACP
+k3_4r,9,C20_koff_H_AcACP,C20_FabH_inhibition_by_AcACP_unsat,(1/e),13.776469996932626,C20_FabH_AcACP_unsat,C20_AcACP_unsat
+k3_5f,1,C2_kon_H_Act_AcACP,C4_C2_FabH_Act_inhibition_by_AcACP,,1.552,C2_FabH_Act + C4_AcACP,C6_FabH_Act_AcACP
+k3_5f,2,C2_kon_H_Act_AcACP,C6_C2_FabH_Act_inhibition_by_AcACP,,1.552,C2_FabH_Act + C6_AcACP,C8_FabH_Act_AcACP
+k3_5f,3,C2_kon_H_Act_AcACP,C8_C2_FabH_Act_inhibition_by_AcACP,,1.552,C2_FabH_Act + C8_AcACP,C10_FabH_Act_AcACP
+k3_5f,4,C2_kon_H_Act_AcACP,C10_C2_FabH_Act_inhibition_by_AcACP,,1.552,C10_AcACP + C2_FabH_Act,C12_FabH_Act_AcACP
+k3_5f,5,C2_kon_H_Act_AcACP,C12_C2_FabH_Act_inhibition_by_AcACP,,1.552,C12_AcACP + C2_FabH_Act,C14_FabH_Act_AcACP
+k3_5f,5,C2_kon_H_Act_AcACP,C12_C2_FabH_Act_inhibition_by_AcACP_unsat,,1.552,C12_AcACP_unsat + C2_FabH_Act,C14_FabH_Act_AcACP_unsat
+k3_5f,6,C2_kon_H_Act_AcACP,C14_C2_FabH_Act_inhibition_by_AcACP,,1.552,C14_AcACP + C2_FabH_Act,C16_FabH_Act_AcACP
+k3_5f,6,C2_kon_H_Act_AcACP,C14_C2_FabH_Act_inhibition_by_AcACP_unsat,,1.552,C14_AcACP_unsat + C2_FabH_Act,C16_FabH_Act_AcACP_unsat
+k3_5f,7,C2_kon_H_Act_AcACP,C16_C2_FabH_Act_inhibition_by_AcACP,,1.552,C16_AcACP + C2_FabH_Act,C18_FabH_Act_AcACP
+k3_5f,7,C2_kon_H_Act_AcACP,C16_C2_FabH_Act_inhibition_by_AcACP_unsat,,1.552,C16_AcACP_unsat + C2_FabH_Act,C18_FabH_Act_AcACP_unsat
+k3_5f,8,C2_kon_H_Act_AcACP,C18_C2_FabH_Act_inhibition_by_AcACP,,1.552,C18_AcACP + C2_FabH_Act,C20_FabH_Act_AcACP
+k3_5f,8,C2_kon_H_Act_AcACP,C18_C2_FabH_Act_inhibition_by_AcACP_unsat,,1.552,C18_AcACP_unsat + C2_FabH_Act,C20_FabH_Act_AcACP_unsat
+k3_5f,9,C2_kon_H_Act_AcACP,C20_C2_FabH_Act_inhibition_by_AcACP,,1.552,C20_AcACP + C2_FabH_Act,C22_FabH_Act_AcACP
+k3_5f,9,C2_kon_H_Act_AcACP,C20_C2_FabH_Act_inhibition_by_AcACP_unsat,,1.552,C20_AcACP_unsat + C2_FabH_Act,C22_FabH_Act_AcACP_unsat
+k3_5r,1,C4_C2_koff_H_Act_AcACP,C4_C2_FabH_Act_inhibition_by_AcACP,(1/e),12.726301652839819,C6_FabH_Act_AcACP,C2_FabH_Act + C4_AcACP
+k3_5r,2,C6_C2_koff_H_Act_AcACP,C6_C2_FabH_Act_inhibition_by_AcACP,(1/e),12.726301652839819,C8_FabH_Act_AcACP,C2_FabH_Act + C6_AcACP
+k3_5r,3,C8_C2_koff_H_Act_AcACP,C8_C2_FabH_Act_inhibition_by_AcACP,(1/e),12.726301652839819,C10_FabH_Act_AcACP,C2_FabH_Act + C8_AcACP
+k3_5r,4,C10_C2_koff_H_Act_AcACP,C10_C2_FabH_Act_inhibition_by_AcACP,(1/e),12.726301652839819,C12_FabH_Act_AcACP,C10_AcACP + C2_FabH_Act
+k3_5r,5,C12_C2_koff_H_Act_AcACP,C12_C2_FabH_Act_inhibition_by_AcACP,(1/e),12.726301652839819,C14_FabH_Act_AcACP,C12_AcACP + C2_FabH_Act
+k3_5r,5,C12_C2_koff_H_Act_AcACP,C12_C2_FabH_Act_inhibition_by_AcACP_unsat,(1/e),12.726301652839819,C14_FabH_Act_AcACP_unsat,C12_AcACP_unsat + C2_FabH_Act
+k3_5r,6,C14_C2_koff_H_Act_AcACP,C14_C2_FabH_Act_inhibition_by_AcACP,(1/e),16.183425422495926,C16_FabH_Act_AcACP,C14_AcACP + C2_FabH_Act
+k3_5r,6,C14_C2_koff_H_Act_AcACP,C14_C2_FabH_Act_inhibition_by_AcACP_unsat,(1/e),16.183425422495926,C16_FabH_Act_AcACP_unsat,C14_AcACP_unsat + C2_FabH_Act
+k3_5r,7,C16_C2_koff_H_Act_AcACP,C16_C2_FabH_Act_inhibition_by_AcACP,(1/e),4.059297738865257,C18_FabH_Act_AcACP,C16_AcACP + C2_FabH_Act
+k3_5r,7,C16_C2_koff_H_Act_AcACP,C16_C2_FabH_Act_inhibition_by_AcACP_unsat,(1/e),4.059297738865257,C18_FabH_Act_AcACP_unsat,C16_AcACP_unsat + C2_FabH_Act
+k3_5r,8,C18_C2_koff_H_Act_AcACP,C18_C2_FabH_Act_inhibition_by_AcACP,(1/e),4.5614678167593175,C20_FabH_Act_AcACP,C18_AcACP + C2_FabH_Act
+k3_5r,8,C18_C2_koff_H_Act_AcACP,C18_C2_FabH_Act_inhibition_by_AcACP_unsat,(1/e),4.5614678167593175,C20_FabH_Act_AcACP_unsat,C18_AcACP_unsat + C2_FabH_Act
+k3_5r,9,C20_C2_koff_H_Act_AcACP,C20_C2_FabH_Act_inhibition_by_AcACP,(1/e),1.3489772220944278,C22_FabH_Act_AcACP,C20_AcACP + C2_FabH_Act
+k3_5r,9,C20_C2_koff_H_Act_AcACP,C20_C2_FabH_Act_inhibition_by_AcACP_unsat,(1/e),1.3489772220944278,C22_FabH_Act_AcACP_unsat,C20_AcACP_unsat + C2_FabH_Act
+k3_inh_f,,kon_H_ACP,FabH_inhibition_by_ACP,e,0.000695672449193,ACP + FabH,FabH_ACP
+k3_inh_r,,koff_H_ACP,FabH_inhibition_by_ACP,,0.091574,FabH_ACP,ACP
+k4_1f,1,kon_G_NADPH,FabG_binding_NADPH,,60.24957791216,FabG + NADPH,FabG_NADPH
+k4_1r,1,koff_G_NADPH,FabG_binding_NADPH,,602.4957791216,FabG_NADPH,NADPH
+k4_2f,1,kon_G_BKeAcACP,C4_FabG_binding_BKeAcACP,,9.698211117082352,C4_BKeAcACP + FabG_NADPH,C4_FabG_NADPH_BKeAcACP
+k4_2f,2,kon_G_BKeAcACP,C6_FabG_binding_BKeAcACP,,9.698211117082352,C6_BKeAcACP + FabG_NADPH,C6_FabG_NADPH_BKeAcACP
+k4_2f,3,kon_G_BKeAcACP,C8_FabG_binding_BKeAcACP,,9.698211117082352,C8_BKeAcACP + FabG_NADPH,C8_FabG_NADPH_BKeAcACP
+k4_2f,4,kon_G_BKeAcACP,C10_FabG_binding_BKeAcACP,,9.698211117082352,C10_BKeAcACP + FabG_NADPH,C10_FabG_NADPH_BKeAcACP
+k4_2f,5,kon_G_BKeAcACP,C12_FabG_binding_BKeAcACP,,9.698211117082352,C12_BKeAcACP + FabG_NADPH,C12_FabG_NADPH_BKeAcACP
+k4_2f,5,kon_G_BKeAcACP,C12_FabG_binding_BKeAcACP_unsat,,9.698211117082352,C12_BKeAcACP_unsat + FabG_NADPH,C12_FabG_NADPH_BKeAcACP_unsat
+k4_2f,6,kon_G_BKeAcACP,C14_FabG_binding_BKeAcACP,,9.698211117082352,C14_BKeAcACP + FabG_NADPH,C14_FabG_NADPH_BKeAcACP
+k4_2f,6,kon_G_BKeAcACP,C14_FabG_binding_BKeAcACP_unsat,,9.698211117082352,C14_BKeAcACP_unsat + FabG_NADPH,C14_FabG_NADPH_BKeAcACP_unsat
+k4_2f,7,kon_G_BKeAcACP,C16_FabG_binding_BKeAcACP,,9.698211117082352,C16_BKeAcACP + FabG_NADPH,C16_FabG_NADPH_BKeAcACP
+k4_2f,7,kon_G_BKeAcACP,C16_FabG_binding_BKeAcACP_unsat,,9.698211117082352,C16_BKeAcACP_unsat + FabG_NADPH,C16_FabG_NADPH_BKeAcACP_unsat
+k4_2f,8,kon_G_BKeAcACP,C18_FabG_binding_BKeAcACP,,9.698211117082352,C18_BKeAcACP + FabG_NADPH,C18_FabG_NADPH_BKeAcACP
+k4_2f,8,kon_G_BKeAcACP,C18_FabG_binding_BKeAcACP_unsat,,9.698211117082352,C18_BKeAcACP_unsat + FabG_NADPH,C18_FabG_NADPH_BKeAcACP_unsat
+k4_2f,9,kon_G_BKeAcACP,C20_FabG_binding_BKeAcACP,,9.698211117082352,C20_BKeAcACP + FabG_NADPH,C20_FabG_NADPH_BKeAcACP
+k4_2f,9,kon_G_BKeAcACP,C20_FabG_binding_BKeAcACP_unsat,,9.698211117082352,C20_BKeAcACP_unsat + FabG_NADPH,C20_FabG_NADPH_BKeAcACP_unsat
+k4_2r,1,koff_G_BKeAcACP,C4_FabG_binding_BKeAcACP,a2,164.8695889904,C4_FabG_NADPH_BKeAcACP,C4_BKeAcACP + FabG_NADPH
+k4_2r,2,koff_G_BKeAcACP,C6_FabG_binding_BKeAcACP,a2,164.8695889904,C6_FabG_NADPH_BKeAcACP,C6_BKeAcACP + FabG_NADPH
+k4_2r,3,koff_G_BKeAcACP,C8_FabG_binding_BKeAcACP,a2,164.8695889904,C8_FabG_NADPH_BKeAcACP,C8_BKeAcACP + FabG_NADPH
+k4_2r,4,koff_G_BKeAcACP,C10_FabG_binding_BKeAcACP,a2,164.8695889904,C10_FabG_NADPH_BKeAcACP,C10_BKeAcACP + FabG_NADPH
+k4_2r,5,koff_G_BKeAcACP,C12_FabG_binding_BKeAcACP,a2,164.8695889904,C12_FabG_NADPH_BKeAcACP,C12_BKeAcACP + FabG_NADPH
+k4_2r,5,koff_G_BKeAcACP,C12_FabG_binding_BKeAcACP_unsat,a2,164.8695889904,C12_FabG_NADPH_BKeAcACP_unsat,C12_BKeAcACP_unsat + FabG_NADPH
+k4_2r,6,koff_G_BKeAcACP,C14_FabG_binding_BKeAcACP,a2,164.8695889904,C14_FabG_NADPH_BKeAcACP,C14_BKeAcACP + FabG_NADPH
+k4_2r,6,koff_G_BKeAcACP,C14_FabG_binding_BKeAcACP_unsat,a2,164.8695889904,C14_FabG_NADPH_BKeAcACP_unsat,C14_BKeAcACP_unsat + FabG_NADPH
+k4_2r,7,koff_G_BKeAcACP,C16_FabG_binding_BKeAcACP,a2,164.8695889904,C16_FabG_NADPH_BKeAcACP,C16_BKeAcACP + FabG_NADPH
+k4_2r,7,koff_G_BKeAcACP,C16_FabG_binding_BKeAcACP_unsat,a2,164.8695889904,C16_FabG_NADPH_BKeAcACP_unsat,C16_BKeAcACP_unsat + FabG_NADPH
+k4_2r,8,koff_G_BKeAcACP,C18_FabG_binding_BKeAcACP,a2,164.8695889904,C18_FabG_NADPH_BKeAcACP,C18_BKeAcACP + FabG_NADPH
+k4_2r,8,koff_G_BKeAcACP,C18_FabG_binding_BKeAcACP_unsat,a2,164.8695889904,C18_FabG_NADPH_BKeAcACP_unsat,C18_BKeAcACP_unsat + FabG_NADPH
+k4_2r,9,koff_G_BKeAcACP,C20_FabG_binding_BKeAcACP,a2,164.8695889904,C20_FabG_NADPH_BKeAcACP,C20_BKeAcACP + FabG_NADPH
+k4_2r,9,koff_G_BKeAcACP,C20_FabG_binding_BKeAcACP_unsat,a2,164.8695889904,C20_FabG_NADPH_BKeAcACP_unsat,C20_BKeAcACP_unsat + FabG_NADPH
+k4_inh_f,,kon_G_ACP,FabG_inhibition_by_ACP,,0.00241,ACP + FabG,FabG_ACP
+k4_inh_r,,koff_G_ACP,FabG_inhibition_by_ACP,,0.091574,FabG_ACP,ACP
+k5_1f,1,C4_kon_Z_BHyAcACP,C4_FabZ_binding_BHyAcACP,,1.3807828077945998,C4_BHyAcACP + FabZ,C4_FabZ_BHyAcACP
+k5_1f,2,C6_kon_Z_BHyAcACP,C6_FabZ_binding_BHyAcACP,,2.9440998034,C6_BHyAcACP + FabZ,C6_FabZ_BHyAcACP
+k5_1f,3,C8_kon_Z_BHyAcACP,C8_FabZ_binding_BHyAcACP,,0.8714535418063999,C8_BHyAcACP + FabZ,C8_FabZ_BHyAcACP
+k5_1f,4,C10_kon_Z_BHyAcACP,C10_FabZ_binding_BHyAcACP,,1.0952051268648,C10_BHyAcACP + FabZ,C10_FabZ_BHyAcACP
+k5_1f,5,C12_kon_Z_BHyAcACP,C12_FabZ_binding_BHyAcACP,,0.58881996068,C12_BHyAcACP + FabZ,C12_FabZ_BHyAcACP
+k5_1f,5,C12_kon_Z_BHyAcACP,C12_FabZ_binding_BHyAcACP_unsat,,0.58881996068,C12_BHyAcACP_unsat + FabZ,C12_FabZ_BHyAcACP_unsat
+k5_1f,6,C14_kon_Z_BHyAcACP,C14_FabZ_binding_BHyAcACP,,0.16221989916734,C14_BHyAcACP + FabZ,C14_FabZ_BHyAcACP
+k5_1f,6,C14_kon_Z_BHyAcACP,C14_FabZ_binding_BHyAcACP_unsat,,0.16221989916734,C14_BHyAcACP_unsat + FabZ,C14_FabZ_BHyAcACP_unsat
+k5_1f,7,C16_kon_Z_BHyAcACP,C16_FabZ_binding_BHyAcACP,,0.309130479357,C16_BHyAcACP + FabZ,C16_FabZ_BHyAcACP
+k5_1f,7,C16_kon_Z_BHyAcACP,C16_FabZ_binding_BHyAcACP_unsat,,0.309130479357,C16_BHyAcACP_unsat + FabZ,C16_FabZ_BHyAcACP_unsat
+k5_1f,8,C18_kon_Z_BHyAcACP,C18_FabZ_binding_BHyAcACP,,0.309130479357,C18_BHyAcACP + FabZ,C18_FabZ_BHyAcACP
+k5_1f,8,C18_kon_Z_BHyAcACP,C18_FabZ_binding_BHyAcACP_unsat,,0.309130479357,C18_BHyAcACP_unsat + FabZ,C18_FabZ_BHyAcACP_unsat
+k5_1f,9,C20_kon_Z_BHyAcACP,C20_FabZ_binding_BHyAcACP,,0.309130479357,C20_BHyAcACP + FabZ,C20_FabZ_BHyAcACP
+k5_1f,9,C20_kon_Z_BHyAcACP,C20_FabZ_binding_BHyAcACP_unsat,,0.309130479357,C20_BHyAcACP_unsat + FabZ,C20_FabZ_BHyAcACP_unsat
+k5_1r,1,koff_Z_BHyAcACP,C4_FabZ_binding_BHyAcACP,a2,164.8695889904,C4_FabZ_BHyAcACP,C4_BHyAcACP
+k5_1r,2,koff_Z_BHyAcACP,C6_FabZ_binding_BHyAcACP,a2,164.8695889904,C6_FabZ_BHyAcACP,C6_BHyAcACP
+k5_1r,3,koff_Z_BHyAcACP,C8_FabZ_binding_BHyAcACP,a2,164.8695889904,C8_FabZ_BHyAcACP,C8_BHyAcACP
+k5_1r,4,koff_Z_BHyAcACP,C10_FabZ_binding_BHyAcACP,a2,164.8695889904,C10_FabZ_BHyAcACP,C10_BHyAcACP
+k5_1r,5,koff_Z_BHyAcACP,C12_FabZ_binding_BHyAcACP,a2,164.8695889904,C12_FabZ_BHyAcACP,C12_BHyAcACP
+k5_1r,5,koff_Z_BHyAcACP,C12_FabZ_binding_BHyAcACP_unsat,a2,164.8695889904,C12_FabZ_BHyAcACP_unsat,C12_BHyAcACP_unsat
+k5_1r,6,koff_Z_BHyAcACP,C14_FabZ_binding_BHyAcACP,a2,164.8695889904,C14_FabZ_BHyAcACP,C14_BHyAcACP
+k5_1r,6,koff_Z_BHyAcACP,C14_FabZ_binding_BHyAcACP_unsat,a2,164.8695889904,C14_FabZ_BHyAcACP_unsat,C14_BHyAcACP_unsat
+k5_1r,7,koff_Z_BHyAcACP,C16_FabZ_binding_BHyAcACP,a2,164.8695889904,C16_FabZ_BHyAcACP,C16_BHyAcACP
+k5_1r,7,koff_Z_BHyAcACP,C16_FabZ_binding_BHyAcACP_unsat,a2,164.8695889904,C16_FabZ_BHyAcACP_unsat,C16_BHyAcACP_unsat
+k5_1r,8,koff_Z_BHyAcACP,C18_FabZ_binding_BHyAcACP,a2,164.8695889904,C18_FabZ_BHyAcACP,C18_BHyAcACP
+k5_1r,8,koff_Z_BHyAcACP,C18_FabZ_binding_BHyAcACP_unsat,a2,164.8695889904,C18_FabZ_BHyAcACP_unsat,C18_BHyAcACP_unsat
+k5_1r,9,koff_Z_BHyAcACP,C20_FabZ_binding_BHyAcACP,a2,164.8695889904,C20_FabZ_BHyAcACP,C20_BHyAcACP
+k5_1r,9,koff_Z_BHyAcACP,C20_FabZ_binding_BHyAcACP_unsat,a2,164.8695889904,C20_FabZ_BHyAcACP_unsat,C20_BHyAcACP_unsat
+k5_2r,1,krvs_Z_dehyd,C4_FabZ_dehydration,c4,2376.25450763,C4_FabZ_EnAcACP,C4_FabZ_BHyAcACP
+k5_2r,2,krvs_Z_dehyd,C6_FabZ_dehydration,c4,2376.25450763,C6_FabZ_EnAcACP,C6_FabZ_BHyAcACP
+k5_2r,3,krvs_Z_dehyd,C8_FabZ_dehydration,c4,2376.25450763,C8_FabZ_EnAcACP,C8_FabZ_BHyAcACP
+k5_2r,4,krvs_Z_dehyd,C10_FabZ_dehydration,c4,2376.25450763,C10_FabZ_EnAcACP,C10_FabZ_BHyAcACP
+k5_2r,5,krvs_Z_dehyd,C12_FabZ_dehydration,c4,2376.25450763,C12_FabZ_EnAcACP,C12_FabZ_BHyAcACP
+k5_2r,5,krvs_Z_dehyd,C12_FabZ_dehydration_unsat,c4,2376.25450763,C12_FabZ_EnAcACP_unsat,C12_FabZ_BHyAcACP_unsat
+k5_2r,6,krvs_Z_dehyd,C14_FabZ_dehydration,c4,2376.25450763,C14_FabZ_EnAcACP,C14_FabZ_BHyAcACP
+k5_2r,6,krvs_Z_dehyd,C14_FabZ_dehydration_unsat,c4,2376.25450763,C14_FabZ_EnAcACP_unsat,C14_FabZ_BHyAcACP_unsat
+k5_2r,7,krvs_Z_dehyd,C16_FabZ_dehydration,c4,2376.25450763,C16_FabZ_EnAcACP,C16_FabZ_BHyAcACP
+k5_2r,7,krvs_Z_dehyd,C16_FabZ_dehydration_unsat,c4,2376.25450763,C16_FabZ_EnAcACP_unsat,C16_FabZ_BHyAcACP_unsat
+k5_2r,8,krvs_Z_dehyd,C18_FabZ_dehydration,c4,2376.25450763,C18_FabZ_EnAcACP,C18_FabZ_BHyAcACP
+k5_2r,8,krvs_Z_dehyd,C18_FabZ_dehydration_unsat,c4,2376.25450763,C18_FabZ_EnAcACP_unsat,C18_FabZ_BHyAcACP_unsat
+k5_2r,9,krvs_Z_dehyd,C20_FabZ_dehydration,c4,2376.25450763,C20_FabZ_EnAcACP,C20_FabZ_BHyAcACP
+k5_2r,9,krvs_Z_dehyd,C20_FabZ_dehydration_unsat,c4,2376.25450763,C20_FabZ_EnAcACP_unsat,C20_FabZ_BHyAcACP_unsat
+k5_3f,1,koff_Z_EnAcACP,C4_FabZ_release_EnAcACP,a2,164.8695889904,C4_FabZ_EnAcACP,C4_EnAcACP
+k5_3f,2,koff_Z_EnAcACP,C6_FabZ_release_EnAcACP,a2,164.8695889904,C6_FabZ_EnAcACP,C6_EnAcACP
+k5_3f,3,koff_Z_EnAcACP,C8_FabZ_release_EnAcACP,a2,164.8695889904,C8_FabZ_EnAcACP,C8_EnAcACP
+k5_3f,4,koff_Z_EnAcACP,C10_FabZ_release_EnAcACP,a2,164.8695889904,C10_FabZ_EnAcACP,C10_EnAcACP
+k5_3f,5,koff_Z_EnAcACP,C12_FabZ_release_EnAcACP,a2,164.8695889904,C12_FabZ_EnAcACP,C12_EnAcACP
+k5_3f,5,koff_Z_EnAcACP,C12_FabZ_release_EnAcACP_unsat,a2,164.8695889904,C12_FabZ_EnAcACP_unsat,C12_EnAcACP_unsat
+k5_3f,6,koff_Z_EnAcACP,C14_FabZ_release_EnAcACP,a2,164.8695889904,C14_FabZ_EnAcACP,C14_EnAcACP
+k5_3f,6,koff_Z_EnAcACP,C14_FabZ_release_EnAcACP_unsat,a2,164.8695889904,C14_FabZ_EnAcACP_unsat,C14_EnAcACP_unsat
+k5_3f,7,koff_Z_EnAcACP,C16_FabZ_release_EnAcACP,a2,164.8695889904,C16_FabZ_EnAcACP,C16_EnAcACP
+k5_3f,7,koff_Z_EnAcACP,C16_FabZ_release_EnAcACP_unsat,a2,164.8695889904,C16_FabZ_EnAcACP_unsat,C16_EnAcACP_unsat
+k5_3f,8,koff_Z_EnAcACP,C18_FabZ_release_EnAcACP,a2,164.8695889904,C18_FabZ_EnAcACP,C18_EnAcACP
+k5_3f,8,koff_Z_EnAcACP,C18_FabZ_release_EnAcACP_unsat,a2,164.8695889904,C18_FabZ_EnAcACP_unsat,C18_EnAcACP_unsat
+k5_3f,9,koff_Z_EnAcACP,C20_FabZ_release_EnAcACP,a2,164.8695889904,C20_FabZ_EnAcACP,C20_EnAcACP
+k5_3f,9,koff_Z_EnAcACP,C20_FabZ_release_EnAcACP_unsat,a2,164.8695889904,C20_FabZ_EnAcACP_unsat,C20_EnAcACP_unsat
+k5_3r,1,C4_kon_Z_EnAcACP,C4_FabZ_release_EnAcACP,,1.3807828077945998,C4_EnAcACP + FabZ,C4_FabZ_EnAcACP
+k5_3r,2,C6_kon_Z_EnAcACP,C6_FabZ_release_EnAcACP,,2.9440998034,C6_EnAcACP + FabZ,C6_FabZ_EnAcACP
+k5_3r,3,C8_kon_Z_EnAcACP,C8_FabZ_release_EnAcACP,,0.8714535418063999,C8_EnAcACP + FabZ,C8_FabZ_EnAcACP
+k5_3r,4,C10_kon_Z_EnAcACP,C10_FabZ_release_EnAcACP,,1.0952051268648,C10_EnAcACP + FabZ,C10_FabZ_EnAcACP
+k5_3r,5,C12_kon_Z_EnAcACP,C12_FabZ_release_EnAcACP,,0.58881996068,C12_EnAcACP + FabZ,C12_FabZ_EnAcACP
+k5_3r,5,C12_kon_Z_EnAcACP,C12_FabZ_release_EnAcACP_unsat,,0.58881996068,C12_EnAcACP_unsat + FabZ,C12_FabZ_EnAcACP_unsat
+k5_3r,6,C14_kon_Z_EnAcACP,C14_FabZ_release_EnAcACP,,0.16221989916734,C14_EnAcACP + FabZ,C14_FabZ_EnAcACP
+k5_3r,6,C14_kon_Z_EnAcACP,C14_FabZ_release_EnAcACP_unsat,,0.16221989916734,C14_EnAcACP_unsat + FabZ,C14_FabZ_EnAcACP_unsat
+k5_3r,7,C16_kon_Z_EnAcACP,C16_FabZ_release_EnAcACP,,0.309130479357,C16_EnAcACP + FabZ,C16_FabZ_EnAcACP
+k5_3r,7,C16_kon_Z_EnAcACP,C16_FabZ_release_EnAcACP_unsat,,0.309130479357,C16_EnAcACP_unsat + FabZ,C16_FabZ_EnAcACP_unsat
+k5_3r,8,C18_kon_Z_EnAcACP,C18_FabZ_release_EnAcACP,,0.309130479357,C18_EnAcACP + FabZ,C18_FabZ_EnAcACP
+k5_3r,8,C18_kon_Z_EnAcACP,C18_FabZ_release_EnAcACP_unsat,,0.309130479357,C18_EnAcACP_unsat + FabZ,C18_FabZ_EnAcACP_unsat
+k5_3r,9,C20_kon_Z_EnAcACP,C20_FabZ_release_EnAcACP,,0.309130479357,C20_EnAcACP + FabZ,C20_FabZ_EnAcACP
+k5_3r,9,C20_kon_Z_EnAcACP,C20_FabZ_release_EnAcACP_unsat,,0.309130479357,C20_EnAcACP_unsat + FabZ,C20_FabZ_EnAcACP_unsat
+k5_inh_f,,kon_Z_ACP,FabZ_inhibition_by_ACP,,0.00241,ACP + FabZ,FabZ_ACP
+k5_inh_r,,koff_Z_ACP,FabZ_inhibition_by_ACP,,0.091574,FabZ_ACP,ACP
+k6_1f,1,kon_I_NADH,FabI_binding_NADH,,30.12478895608,FabI + NADH,FabI_NADH
+k6_1r,1,koff_I_NADH,FabI_binding_NADH,,602.4957791216,FabI_NADH,NADH
+k6_2f,1,kon_I_EnAcACP,C4_FabI_binding_EnAcACP,,8.243479449519999,C4_EnAcACP + FabI_NADH,C4_FabI_NADH_EnAcACP
+k6_2f,2,kon_I_EnAcACP,C6_FabI_binding_EnAcACP,,8.243479449519999,C6_EnAcACP + FabI_NADH,C6_FabI_NADH_EnAcACP
+k6_2f,3,kon_I_EnAcACP,C8_FabI_binding_EnAcACP,,8.243479449519999,C8_EnAcACP + FabI_NADH,C8_FabI_NADH_EnAcACP
+k6_2f,4,kon_I_EnAcACP,C10_FabI_binding_EnAcACP,,8.243479449519999,C10_EnAcACP + FabI_NADH,C10_FabI_NADH_EnAcACP
+k6_2f,5,kon_I_EnAcACP,C12_FabI_binding_EnAcACP,,8.243479449519999,C12_EnAcACP + FabI_NADH,C12_FabI_NADH_EnAcACP
+k6_2f,5,kon_I_EnAcACP,C12_FabI_binding_EnAcACP_unsat,,8.243479449519999,C12_EnAcACP_unsat + FabI_NADH,C12_FabI_NADH_EnAcACP_unsat
+k6_2f,6,kon_I_EnAcACP,C14_FabI_binding_EnAcACP,,8.243479449519999,C14_EnAcACP + FabI_NADH,C14_FabI_NADH_EnAcACP
+k6_2f,6,kon_I_EnAcACP,C14_FabI_binding_EnAcACP_unsat,,8.243479449519999,C14_EnAcACP_unsat + FabI_NADH,C14_FabI_NADH_EnAcACP_unsat
+k6_2f,7,kon_I_EnAcACP,C16_FabI_binding_EnAcACP,,8.243479449519999,C16_EnAcACP + FabI_NADH,C16_FabI_NADH_EnAcACP
+k6_2f,7,kon_I_EnAcACP,C16_FabI_binding_EnAcACP_unsat,,8.243479449519999,C16_EnAcACP_unsat + FabI_NADH,C16_FabI_NADH_EnAcACP_unsat
+k6_2f,8,kon_I_EnAcACP,C18_FabI_binding_EnAcACP,,8.243479449519999,C18_EnAcACP + FabI_NADH,C18_FabI_NADH_EnAcACP
+k6_2f,8,kon_I_EnAcACP,C18_FabI_binding_EnAcACP_unsat,,8.243479449519999,C18_EnAcACP_unsat + FabI_NADH,C18_FabI_NADH_EnAcACP_unsat
+k6_2f,9,kon_I_EnAcACP,C20_FabI_binding_EnAcACP,,8.243479449519999,C20_EnAcACP + FabI_NADH,C20_FabI_NADH_EnAcACP
+k6_2f,9,kon_I_EnAcACP,C20_FabI_binding_EnAcACP_unsat,,8.243479449519999,C20_EnAcACP_unsat + FabI_NADH,C20_FabI_NADH_EnAcACP_unsat
+k6_2r,1,koff_I_EnAcACP,C4_FabI_binding_EnAcACP,a2,164.8695889904,C4_FabI_NADH_EnAcACP,C4_EnAcACP + FabI_NADH
+k6_2r,2,koff_I_EnAcACP,C6_FabI_binding_EnAcACP,a2,164.8695889904,C6_FabI_NADH_EnAcACP,C6_EnAcACP + FabI_NADH
+k6_2r,3,koff_I_EnAcACP,C8_FabI_binding_EnAcACP,a2,164.8695889904,C8_FabI_NADH_EnAcACP,C8_EnAcACP + FabI_NADH
+k6_2r,4,koff_I_EnAcACP,C10_FabI_binding_EnAcACP,a2,164.8695889904,C10_FabI_NADH_EnAcACP,C10_EnAcACP + FabI_NADH
+k6_2r,5,koff_I_EnAcACP,C12_FabI_binding_EnAcACP,a2,164.8695889904,C12_FabI_NADH_EnAcACP,C12_EnAcACP + FabI_NADH
+k6_2r,5,koff_I_EnAcACP,C12_FabI_binding_EnAcACP_unsat,a2,164.8695889904,C12_FabI_NADH_EnAcACP_unsat,C12_EnAcACP_unsat + FabI_NADH
+k6_2r,6,koff_I_EnAcACP,C14_FabI_binding_EnAcACP,a2,164.8695889904,C14_FabI_NADH_EnAcACP,C14_EnAcACP + FabI_NADH
+k6_2r,6,koff_I_EnAcACP,C14_FabI_binding_EnAcACP_unsat,a2,164.8695889904,C14_FabI_NADH_EnAcACP_unsat,C14_EnAcACP_unsat + FabI_NADH
+k6_2r,7,koff_I_EnAcACP,C16_FabI_binding_EnAcACP,a2,164.8695889904,C16_FabI_NADH_EnAcACP,C16_EnAcACP + FabI_NADH
+k6_2r,7,koff_I_EnAcACP,C16_FabI_binding_EnAcACP_unsat,a2,164.8695889904,C16_FabI_NADH_EnAcACP_unsat,C16_EnAcACP_unsat + FabI_NADH
+k6_2r,8,koff_I_EnAcACP,C18_FabI_binding_EnAcACP,a2,164.8695889904,C18_FabI_NADH_EnAcACP,C18_EnAcACP + FabI_NADH
+k6_2r,8,koff_I_EnAcACP,C18_FabI_binding_EnAcACP_unsat,a2,164.8695889904,C18_FabI_NADH_EnAcACP_unsat,C18_EnAcACP_unsat + FabI_NADH
+k6_2r,9,koff_I_EnAcACP,C20_FabI_binding_EnAcACP,a2,164.8695889904,C20_FabI_NADH_EnAcACP,C20_EnAcACP + FabI_NADH
+k6_2r,9,koff_I_EnAcACP,C20_FabI_binding_EnAcACP_unsat,a2,164.8695889904,C20_FabI_NADH_EnAcACP_unsat,C20_EnAcACP_unsat + FabI_NADH
+k6_inh_f,,kon_I_ACP,FabI_inhibition_by_ACP,,0.00241,ACP + FabI,FabI_ACP
+k6_inh_r,,koff_I_ACP,FabI_inhibition_by_ACP,,0.091574,FabI_ACP,ACP
+k7_1f,1,C4_kon_T_AcACP,C4_TesA_binding_AcACP,1/exp(12*d1+d2),0.0016306583672193245,C4_AcACP + TesA,C4_TesA_AcACP
+k7_1f,2,C6_kon_T_AcACP,C6_TesA_binding_AcACP,1/exp(12*d1+d2),0.0026243668176071473,C6_AcACP + TesA,C6_TesA_AcACP
+k7_1f,3,C8_kon_T_AcACP,C8_TesA_binding_AcACP,1/exp(12*d1+d2),0.014556701915501086,C8_AcACP + TesA,C8_TesA_AcACP
+k7_1f,4,C10_kon_T_AcACP,C10_TesA_binding_AcACP,1/exp(12*d1+d2),0.05215019659869781,C10_AcACP + TesA,C10_TesA_AcACP
+k7_1f,5,C12_kon_T_AcACP,C12_TesA_binding_AcACP,1/exp((2*12-12)*d1+d2),0.10048207437128671,C12_AcACP + TesA,C12_TesA_AcACP
+k7_1f,5,C12_kon_T_AcACP,C12_TesA_binding_AcACP_unsat,1/exp((2*12-12)*d1+d2),0.10048207437128671,C12_AcACP_unsat + TesA,C12_TesA_AcACP_unsat
+k7_1f,6,C14_kon_T_AcACP,C14_TesA_binding_AcACP,1/exp((2*14-12)*d1+d2),0.17792816708253872,C14_AcACP + TesA,C14_TesA_AcACP
+k7_1f,6,C14_kon_T_AcACP,C14_TesA_binding_AcACP_unsat,1/exp((2*14-12)*d1+d2),0.17792816708253872,C14_AcACP_unsat + TesA,C14_TesA_AcACP_unsat
+k7_1f,7,C16_kon_T_AcACP,C16_TesA_binding_AcACP,1/exp((2*16-12)*d1+d2),0.3150654764985463,C16_AcACP + TesA,C16_TesA_AcACP
+k7_1f,7,C16_kon_T_AcACP,C16_TesA_binding_AcACP_unsat,1/exp((2*16-12)*d1+d2),0.3150654764985463,C16_AcACP_unsat + TesA,C16_TesA_AcACP_unsat
+k7_1f,8,C18_kon_T_AcACP,C18_TesA_binding_AcACP,1/exp((2*18-12)*d1+d2),0.557900731002347,C18_AcACP + TesA,C18_TesA_AcACP
+k7_1f,8,C18_kon_T_AcACP,C18_TesA_binding_AcACP_unsat,1/exp((2*18-12)*d1+d2),0.557900731002347,C18_AcACP_unsat + TesA,C18_TesA_AcACP_unsat
+k7_1f,9,C20_kon_T_AcACP,C20_TesA_binding_AcACP,1/exp((2*20-12)*d1+d2),0.9879001314648606,C20_AcACP + TesA,C20_TesA_AcACP
+k7_1f,9,C20_kon_T_AcACP,C20_TesA_binding_AcACP_unsat,1/exp((2*20-12)*d1+d2),0.9879001314648606,C20_AcACP_unsat + TesA,C20_TesA_AcACP_unsat
+k7_1r,1,koff_T_AcACP,C4_TesA_binding_AcACP,a3,0.0928041717631,C4_TesA_AcACP,C4_AcACP
+k7_1r,2,koff_T_AcACP,C6_TesA_binding_AcACP,a3,0.0928041717631,C6_TesA_AcACP,C6_AcACP
+k7_1r,3,koff_T_AcACP,C8_TesA_binding_AcACP,a3,0.0928041717631,C8_TesA_AcACP,C8_AcACP
+k7_1r,4,koff_T_AcACP,C10_TesA_binding_AcACP,a3,0.0928041717631,C10_TesA_AcACP,C10_AcACP
+k7_1r,5,koff_T_AcACP,C12_TesA_binding_AcACP,a3,0.0928041717631,C12_TesA_AcACP,C12_AcACP
+k7_1r,5,koff_T_AcACP,C12_TesA_binding_AcACP_unsat,a3,0.0928041717631,C12_TesA_AcACP_unsat,C12_AcACP_unsat
+k7_1r,6,koff_T_AcACP,C14_TesA_binding_AcACP,a3,0.0928041717631,C14_TesA_AcACP,C14_AcACP
+k7_1r,6,koff_T_AcACP,C14_TesA_binding_AcACP_unsat,a3,0.0928041717631,C14_TesA_AcACP_unsat,C14_AcACP_unsat
+k7_1r,7,koff_T_AcACP,C16_TesA_binding_AcACP,a3,0.0928041717631,C16_TesA_AcACP,C16_AcACP
+k7_1r,7,koff_T_AcACP,C16_TesA_binding_AcACP_unsat,a3,0.0928041717631,C16_TesA_AcACP_unsat,C16_AcACP_unsat
+k7_1r,8,koff_T_AcACP,C18_TesA_binding_AcACP,a3,0.0928041717631,C18_TesA_AcACP,C18_AcACP
+k7_1r,8,koff_T_AcACP,C18_TesA_binding_AcACP_unsat,a3,0.0928041717631,C18_TesA_AcACP_unsat,C18_AcACP_unsat
+k7_1r,9,koff_T_AcACP,C20_TesA_binding_AcACP,a3,0.0928041717631,C20_TesA_AcACP,C20_AcACP
+k7_1r,9,koff_T_AcACP,C20_TesA_binding_AcACP_unsat,a3,0.0928041717631,C20_TesA_AcACP_unsat,C20_AcACP_unsat
+k7_inh_f,,kon_T_ACP,TesA_inhibition_by_ACP,,0.00241,ACP + TesA,TesA_ACP
+k7_inh_r,,koff_T_ACP,TesA_inhibition_by_ACP,,0.091574,TesA_ACP,ACP
+k8_1f,1,kon_F_AcACP,C4_FabF_binding_AcACP,,11.7763992136,C4_AcACP + FabF,C4_FabF_AcACP
+k8_1f,2,kon_F_AcACP,C6_FabF_binding_AcACP,,11.7763992136,C6_AcACP + FabF,C6_FabF_AcACP
+k8_1f,3,kon_F_AcACP,C8_FabF_binding_AcACP,,11.7763992136,C8_AcACP + FabF,C8_FabF_AcACP
+k8_1f,4,kon_F_AcACP,C10_FabF_binding_AcACP,,11.7763992136,C10_AcACP + FabF,C10_FabF_AcACP
+k8_1f,5,kon_F_AcACP,C12_FabF_binding_AcACP,,11.7763992136,C12_AcACP + FabF,C12_FabF_AcACP
+k8_1f,5,kon_F_AcACP,C12_FabF_binding_AcACP_unsat,,11.7763992136,C12_AcACP_unsat + FabF,C12_FabF_AcACP_unsat
+k8_1f,6,kon_F_AcACP,C14_FabF_binding_AcACP,,11.7763992136,C14_AcACP + FabF,C14_FabF_AcACP
+k8_1f,6,kon_F_AcACP,C14_FabF_binding_AcACP_unsat,,11.7763992136,C14_AcACP_unsat + FabF,C14_FabF_AcACP_unsat
+k8_1f,7,kon_F_AcACP,C16_FabF_binding_AcACP,,11.7763992136,C16_AcACP + FabF,C16_FabF_AcACP
+k8_1f,7,kon_F_AcACP,C16_FabF_binding_AcACP_unsat,,11.7763992136,C16_AcACP_unsat + FabF,C16_FabF_AcACP_unsat
+k8_1f,8,kon_F_AcACP,C18_FabF_binding_AcACP,,11.7763992136,C18_AcACP + FabF,C18_FabF_AcACP
+k8_1f,8,kon_F_AcACP,C18_FabF_binding_AcACP_unsat,,11.7763992136,C18_AcACP_unsat + FabF,C18_FabF_AcACP_unsat
+k8_1r,1,koff_F_AcACP,C4_FabF_binding_AcACP,a2,164.8695889904,C4_FabF_AcACP,C4_AcACP
+k8_1r,2,koff_F_AcACP,C6_FabF_binding_AcACP,a2,164.8695889904,C6_FabF_AcACP,C6_AcACP
+k8_1r,3,koff_F_AcACP,C8_FabF_binding_AcACP,a2,164.8695889904,C8_FabF_AcACP,C8_AcACP
+k8_1r,4,koff_F_AcACP,C10_FabF_binding_AcACP,a2,164.8695889904,C10_FabF_AcACP,C10_AcACP
+k8_1r,5,koff_F_AcACP,C12_FabF_binding_AcACP,a2,164.8695889904,C12_FabF_AcACP,C12_AcACP
+k8_1r,5,koff_F_AcACP,C12_FabF_binding_AcACP_unsat,a2,164.8695889904,C12_FabF_AcACP_unsat,C12_AcACP_unsat
+k8_1r,6,koff_F_AcACP,C14_FabF_binding_AcACP,a2,164.8695889904,C14_FabF_AcACP,C14_AcACP
+k8_1r,6,koff_F_AcACP,C14_FabF_binding_AcACP_unsat,a2,164.8695889904,C14_FabF_AcACP_unsat,C14_AcACP_unsat
+k8_1r,7,koff_F_AcACP,C16_FabF_binding_AcACP,a2,164.8695889904,C16_FabF_AcACP,C16_AcACP
+k8_1r,7,koff_F_AcACP,C16_FabF_binding_AcACP_unsat,a2,164.8695889904,C16_FabF_AcACP_unsat,C16_AcACP_unsat
+k8_1r,8,koff_F_AcACP,C18_FabF_binding_AcACP,a2,164.8695889904,C18_FabF_AcACP,C18_AcACP
+k8_1r,8,koff_F_AcACP,C18_FabF_binding_AcACP_unsat,a2,164.8695889904,C18_FabF_AcACP_unsat,C18_AcACP_unsat
+k8_2f,1,kfwd_F_AcACP,C4_FabF_activation_release_ACP,(b1/b3),1411.1030972777992,C4_FabF_AcACP,ACP + C4_FabF_Act
+k8_2f,2,kfwd_F_AcACP,C6_FabF_activation_release_ACP,(b1/b3),1411.1030972777992,C6_FabF_AcACP,ACP + C6_FabF_Act
+k8_2f,3,kfwd_F_AcACP,C8_FabF_activation_release_ACP,(b1/b3),1411.1030972777992,C8_FabF_AcACP,ACP + C8_FabF_Act
+k8_2f,4,kfwd_F_AcACP,C10_FabF_activation_release_ACP,(b1/b3),1411.1030972777992,C10_FabF_AcACP,ACP + C10_FabF_Act
+k8_2f,5,kfwd_F_AcACP,C12_FabF_activation_release_ACP,(b1/b3),1411.1030972777992,C12_FabF_AcACP,ACP + C12_FabF_Act
+k8_2f,5,kfwd_F_AcACP,C12_FabF_activation_release_ACP_unsat,(b1/b3),1411.1030972777992,C12_FabF_AcACP_unsat,ACP + C12_FabF_Act_unsat
+k8_2f,6,kfwd_F_AcACP,C14_FabF_activation_release_ACP,(b1/b3),1411.1030972777992,C14_FabF_AcACP,ACP + C14_FabF_Act
+k8_2f,6,kfwd_F_AcACP,C14_FabF_activation_release_ACP_unsat,(b1/b3),1411.1030972777992,C14_FabF_AcACP_unsat,ACP + C14_FabF_Act_unsat
+k8_2f,7,kfwd_F_AcACP,C16_FabF_activation_release_ACP,(b1/b3),1411.1030972777992,C16_FabF_AcACP,ACP + C16_FabF_Act
+k8_2f,7,kfwd_F_AcACP,C16_FabF_activation_release_ACP_unsat,(b1/b3),1411.1030972777992,C16_FabF_AcACP_unsat,ACP + C16_FabF_Act_unsat
+k8_2f,8,kfwd_F_AcACP,C18_FabF_activation_release_ACP,(b1/b3),1411.1030972777992,C18_FabF_AcACP,ACP + C18_FabF_Act
+k8_2f,8,kfwd_F_AcACP,C18_FabF_activation_release_ACP_unsat,(b1/b3),1411.1030972777992,C18_FabF_AcACP_unsat,ACP + C18_FabF_Act_unsat
+k8_2r,1,krvs_F_AcACP,C4_FabF_activation_release_ACP,b1,402.13929190000005,ACP + C4_FabF_Act,C4_FabF_AcACP
+k8_2r,2,krvs_F_AcACP,C6_FabF_activation_release_ACP,b1,402.13929190000005,ACP + C6_FabF_Act,C6_FabF_AcACP
+k8_2r,3,krvs_F_AcACP,C8_FabF_activation_release_ACP,b1,402.13929190000005,ACP + C8_FabF_Act,C8_FabF_AcACP
+k8_2r,4,krvs_F_AcACP,C10_FabF_activation_release_ACP,b1,402.13929190000005,ACP + C10_FabF_Act,C10_FabF_AcACP
+k8_2r,5,krvs_F_AcACP,C12_FabF_activation_release_ACP,b1,402.13929190000005,ACP + C12_FabF_Act,C12_FabF_AcACP
+k8_2r,5,krvs_F_AcACP,C12_FabF_activation_release_ACP_unsat,b1,402.13929190000005,ACP + C12_FabF_Act_unsat,C12_FabF_AcACP_unsat
+k8_2r,6,krvs_F_AcACP,C14_FabF_activation_release_ACP,b1,402.13929190000005,ACP + C14_FabF_Act,C14_FabF_AcACP
+k8_2r,6,krvs_F_AcACP,C14_FabF_activation_release_ACP_unsat,b1,402.13929190000005,ACP + C14_FabF_Act_unsat,C14_FabF_AcACP_unsat
+k8_2r,7,krvs_F_AcACP,C16_FabF_activation_release_ACP,b1,402.13929190000005,ACP + C16_FabF_Act,C16_FabF_AcACP
+k8_2r,7,krvs_F_AcACP,C16_FabF_activation_release_ACP_unsat,b1,402.13929190000005,ACP + C16_FabF_Act_unsat,C16_FabF_AcACP_unsat
+k8_2r,8,krvs_F_AcACP,C18_FabF_activation_release_ACP,b1,402.13929190000005,ACP + C18_FabF_Act,C18_FabF_AcACP
+k8_2r,8,krvs_F_AcACP,C18_FabF_activation_release_ACP_unsat,b1,402.13929190000005,ACP + C18_FabF_Act_unsat,C18_FabF_AcACP_unsat
+k8_3f,1,kon_F_Act_MalACP,C4_FabF_Act_binding_MalACP,,20.106047437853658,C3_MalACP + C4_FabF_Act,C7_FabF_Act_MalACP
+k8_3f,2,kon_F_Act_MalACP,C6_FabF_Act_binding_MalACP,,20.106047437853658,C3_MalACP + C6_FabF_Act,C9_FabF_Act_MalACP
+k8_3f,3,kon_F_Act_MalACP,C8_FabF_Act_binding_MalACP,,20.106047437853658,C3_MalACP + C8_FabF_Act,C11_FabF_Act_MalACP
+k8_3f,4,kon_F_Act_MalACP,C10_FabF_Act_binding_MalACP,,20.106047437853658,C10_FabF_Act + C3_MalACP,C13_FabF_Act_MalACP
+k8_3f,5,kon_F_Act_MalACP,C12_FabF_Act_binding_MalACP,,20.106047437853658,C12_FabF_Act + C3_MalACP,C15_FabF_Act_MalACP
+k8_3f,5,kon_F_Act_MalACP,C12_FabF_Act_binding_MalACP_unsat,,20.106047437853658,C12_FabF_Act_unsat + C3_MalACP,C15_FabF_Act_MalACP_unsat
+k8_3f,6,kon_F_Act_MalACP,C14_FabF_Act_binding_MalACP,,20.106047437853658,C14_FabF_Act + C3_MalACP,C17_FabF_Act_MalACP
+k8_3f,6,kon_F_Act_MalACP,C14_FabF_Act_binding_MalACP_unsat,,20.106047437853658,C14_FabF_Act_unsat + C3_MalACP,C17_FabF_Act_MalACP_unsat
+k8_3f,7,kon_F_Act_MalACP,C16_FabF_Act_binding_MalACP,,20.106047437853658,C16_FabF_Act + C3_MalACP,C19_FabF_Act_MalACP
+k8_3f,7,kon_F_Act_MalACP,C16_FabF_Act_binding_MalACP_unsat,,20.106047437853658,C16_FabF_Act_unsat + C3_MalACP,C19_FabF_Act_MalACP_unsat
+k8_3f,8,kon_F_Act_MalACP,C18_FabF_Act_binding_MalACP,,20.106047437853658,C18_FabF_Act + C3_MalACP,C21_FabF_Act_MalACP
+k8_3f,8,kon_F_Act_MalACP,C18_FabF_Act_binding_MalACP_unsat,,20.106047437853658,C18_FabF_Act_unsat + C3_MalACP,C21_FabF_Act_MalACP_unsat
+k8_3r,1,koff_F_Act_MalACP,C4_FabF_Act_binding_MalACP,a2,164.8695889904,C7_FabF_Act_MalACP,C3_MalACP + C4_FabF_Act
+k8_3r,2,koff_F_Act_MalACP,C6_FabF_Act_binding_MalACP,a2,164.8695889904,C9_FabF_Act_MalACP,C3_MalACP + C6_FabF_Act
+k8_3r,3,koff_F_Act_MalACP,C8_FabF_Act_binding_MalACP,a2,164.8695889904,C11_FabF_Act_MalACP,C3_MalACP + C8_FabF_Act
+k8_3r,4,koff_F_Act_MalACP,C10_FabF_Act_binding_MalACP,a2,164.8695889904,C13_FabF_Act_MalACP,C10_FabF_Act + C3_MalACP
+k8_3r,5,koff_F_Act_MalACP,C12_FabF_Act_binding_MalACP,a2,164.8695889904,C15_FabF_Act_MalACP,C12_FabF_Act + C3_MalACP
+k8_3r,5,koff_F_Act_MalACP,C12_FabF_Act_binding_MalACP_unsat,a2,164.8695889904,C15_FabF_Act_MalACP_unsat,C12_FabF_Act_unsat + C3_MalACP
+k8_3r,6,koff_F_Act_MalACP,C14_FabF_Act_binding_MalACP,a2,164.8695889904,C17_FabF_Act_MalACP,C14_FabF_Act + C3_MalACP
+k8_3r,6,koff_F_Act_MalACP,C14_FabF_Act_binding_MalACP_unsat,a2,164.8695889904,C17_FabF_Act_MalACP_unsat,C14_FabF_Act_unsat + C3_MalACP
+k8_3r,7,koff_F_Act_MalACP,C16_FabF_Act_binding_MalACP,a2,164.8695889904,C19_FabF_Act_MalACP,C16_FabF_Act + C3_MalACP
+k8_3r,7,koff_F_Act_MalACP,C16_FabF_Act_binding_MalACP_unsat,a2,164.8695889904,C19_FabF_Act_MalACP_unsat,C16_FabF_Act_unsat + C3_MalACP
+k8_3r,8,koff_F_Act_MalACP,C18_FabF_Act_binding_MalACP,a2,164.8695889904,C21_FabF_Act_MalACP,C18_FabF_Act + C3_MalACP
+k8_3r,8,koff_F_Act_MalACP,C18_FabF_Act_binding_MalACP_unsat,a2,164.8695889904,C21_FabF_Act_MalACP_unsat,C18_FabF_Act_unsat + C3_MalACP
+k8_6f,,C2_kon_F_Act_MalACP,C2_FabF_Act_binding_MalACP,,618.3359613,C2_FabF_Act + C3_MalACP,C5_FabF_Act_MalACP
+k8_6r,,C2_koff_F_Act_MalACP,C2_FabF_Act_binding_MalACP,,3091.679806,C5_FabF_Act_MalACP,C2_FabF_Act + C3_MalACP
+k8_7f,,kon_F_MalACP,FabF_binding_MalACP,,284.9474476,C3_MalACP + FabF,C3_FabF_MalACP
+k8_7r,,koff_F_MalACP,FabF_binding_MalACP,,11397.8979,C3_FabF_MalACP,C3_MalACP
+k8_8f,,kon_F_C2_AcACP,FabF_binding_C2_AcACP,,284.9474476,C2_AcACP + FabF,C2_FabF_AcACP
+k8_8r,,koff_F_C2_AcACP,FabF_binding_C2_AcACP,x3,393195.4484310902,C2_FabF_AcACP,C2_AcACP
+k8_9f,,kfwd_F_C2_AcACP,C2_FabF_AcACP_activation,,1411.103097,C2_FabF_AcACP,ACP + C2_FabF_Act
+k8_9r,,krvs_F_C2_AcACP,C2_FabF_AcACP_activation,,402.139291,ACP + C2_FabF_Act,C2_FabF_AcACP
+k8_inh_f,,kon_F_ACP,FabF_inhibition_by_ACP,e,0.00695672449193,ACP + FabF,FabF_ACP
+k8_inh_r,,koff_F_ACP,FabF_inhibition_by_ACP,,0.091574,FabF_ACP,ACP
+k9_1f,1,C4_kon_A_BHyAcACP,C4_FabA_binding_BHyAcACP,,0.24936525334798,C4_BHyAcACP + FabA,C4_FabA_BHyAcACP
+k9_1f,2,C6_kon_A_BHyAcACP,C6_FabA_binding_BHyAcACP,,0.9480001366948,C6_BHyAcACP + FabA,C6_FabA_BHyAcACP
+k9_1f,3,C8_kon_A_BHyAcACP,C8_FabA_binding_BHyAcACP,,2.1109195590378,C8_BHyAcACP + FabA,C8_FabA_BHyAcACP
+k9_1f,4,C10_kon_A_BHyAcACP,C10_FabA_binding_BHyAcACP,,2.9440998034,C10_BHyAcACP + FabA,C10_FabA_BHyAcACP
+k9_1f,5,C12_kon_A_BHyAcACP,C12_FabA_binding_BHyAcACP,,2.2110189523534,C12_BHyAcACP + FabA,C12_FabA_BHyAcACP
+k9_1f,6,C14_kon_A_BHyAcACP,C14_FabA_binding_BHyAcACP,,0.24936525334798,C14_BHyAcACP + FabA,C14_FabA_BHyAcACP
+k9_1f,7,C16_kon_A_BHyAcACP,C16_FabA_binding_BHyAcACP,,0.10981492266682,C16_BHyAcACP + FabA,C16_FabA_BHyAcACP
+k9_1f,8,C18_kon_A_BHyAcACP,C18_FabA_binding_BHyAcACP,,0.10981492266682,C18_BHyAcACP + FabA,C18_FabA_BHyAcACP
+k9_1f,9,C20_kon_A_BHyAcACP,C20_FabA_binding_BHyAcACP,,0.10981492266682,C20_BHyAcACP + FabA,C20_FabA_BHyAcACP
+k9_1f_un,5,C12_kon_A_BHyAcACP_unsat,C12_FabA_binding_BHyAcACP_unsat,,0.0791544784942517,C12_BHyAcACP_unsat + FabA,C12_FabA_BHyAcACP_unsat
+k9_1f_un,6,C14_kon_A_BHyAcACP_unsat,C14_FabA_binding_BHyAcACP_unsat,,0.00892727606985768,C14_BHyAcACP_unsat + FabA,C14_FabA_BHyAcACP_unsat
+k9_1f_un,7,C16_kon_A_BHyAcACP_unsat,C16_FabA_binding_BHyAcACP_unsat,,0.00393137423147216,C16_BHyAcACP_unsat + FabA,C16_FabA_BHyAcACP_unsat
+k9_1f_un,8,C18_kon_A_BHyAcACP_unsat,C18_FabA_binding_BHyAcACP_unsat,,0.00393137423147216,C18_BHyAcACP_unsat + FabA,C18_FabA_BHyAcACP_unsat
+k9_1f_un,9,C20_kon_A_BHyAcACP_unsat,C20_FabA_binding_BHyAcACP_unsat,,0.00393137423147216,C20_BHyAcACP_unsat + FabA,C20_FabA_BHyAcACP_unsat
+k9_1r,1,koff_A_BHyAcACP,C4_FabA_binding_BHyAcACP,a2,164.8695889904,C4_FabA_BHyAcACP,C4_BHyAcACP
+k9_1r,2,koff_A_BHyAcACP,C6_FabA_binding_BHyAcACP,a2,164.8695889904,C6_FabA_BHyAcACP,C6_BHyAcACP
+k9_1r,3,koff_A_BHyAcACP,C8_FabA_binding_BHyAcACP,a2,164.8695889904,C8_FabA_BHyAcACP,C8_BHyAcACP
+k9_1r,4,koff_A_BHyAcACP,C10_FabA_binding_BHyAcACP,a2,164.8695889904,C10_FabA_BHyAcACP,C10_BHyAcACP
+k9_1r,5,koff_A_BHyAcACP,C12_FabA_binding_BHyAcACP,a2,164.8695889904,C12_FabA_BHyAcACP,C12_BHyAcACP
+k9_1r,6,koff_A_BHyAcACP,C14_FabA_binding_BHyAcACP,a2,164.8695889904,C14_FabA_BHyAcACP,C14_BHyAcACP
+k9_1r,7,koff_A_BHyAcACP,C16_FabA_binding_BHyAcACP,a2,164.8695889904,C16_FabA_BHyAcACP,C16_BHyAcACP
+k9_1r,8,koff_A_BHyAcACP,C18_FabA_binding_BHyAcACP,a2,164.8695889904,C18_FabA_BHyAcACP,C18_BHyAcACP
+k9_1r,9,koff_A_BHyAcACP,C20_FabA_binding_BHyAcACP,a2,164.8695889904,C20_FabA_BHyAcACP,C20_BHyAcACP
+k9_1r_un,5,koff_A_BHyAcACP,C12_FabA_binding_BHyAcACP_unsat,a2,164.8695889904,C12_FabA_BHyAcACP_unsat,C12_BHyAcACP_unsat
+k9_1r_un,6,koff_A_BHyAcACP,C14_FabA_binding_BHyAcACP_unsat,a2,164.8695889904,C14_FabA_BHyAcACP_unsat,C14_BHyAcACP_unsat
+k9_1r_un,7,koff_A_BHyAcACP,C16_FabA_binding_BHyAcACP_unsat,a2,164.8695889904,C16_FabA_BHyAcACP_unsat,C16_BHyAcACP_unsat
+k9_1r_un,8,koff_A_BHyAcACP,C18_FabA_binding_BHyAcACP_unsat,a2,164.8695889904,C18_FabA_BHyAcACP_unsat,C18_BHyAcACP_unsat
+k9_1r_un,9,koff_A_BHyAcACP,C20_FabA_binding_BHyAcACP_unsat,a2,164.8695889904,C20_FabA_BHyAcACP_unsat,C20_BHyAcACP_unsat
+k9_2r,1,krvs_A_dehyd,C4_FabA_dehydration,c2,96.8849266856,C4_FabA_EnAcACP,C4_FabA_BHyAcACP
+k9_2r,2,krvs_A_dehyd,C6_FabA_dehydration,c2,96.8849266856,C6_FabA_EnAcACP,C6_FabA_BHyAcACP
+k9_2r,3,krvs_A_dehyd,C8_FabA_dehydration,c2,96.8849266856,C8_FabA_EnAcACP,C8_FabA_BHyAcACP
+k9_2r,4,krvs_A_dehyd,C10_FabA_dehydration,c2,96.8849266856,C10_FabA_EnAcACP,C10_FabA_BHyAcACP
+k9_2r,5,krvs_A_dehyd,C12_FabA_dehydration,c2,96.8849266856,C12_FabA_EnAcACP,C12_FabA_BHyAcACP
+k9_2r,5,krvs_A_dehyd,C12_FabA_dehydration_unsat,c2,96.8849266856,C12_FabA_EnAcACP_unsat,C12_FabA_BHyAcACP_unsat
+k9_2r,6,krvs_A_dehyd,C14_FabA_dehydration,c2,96.8849266856,C14_FabA_EnAcACP,C14_FabA_BHyAcACP
+k9_2r,6,krvs_A_dehyd,C14_FabA_dehydration_unsat,c2,96.8849266856,C14_FabA_EnAcACP_unsat,C14_FabA_BHyAcACP_unsat
+k9_2r,7,krvs_A_dehyd,C16_FabA_dehydration,c2,96.8849266856,C16_FabA_EnAcACP,C16_FabA_BHyAcACP
+k9_2r,7,krvs_A_dehyd,C16_FabA_dehydration_unsat,c2,96.8849266856,C16_FabA_EnAcACP_unsat,C16_FabA_BHyAcACP_unsat
+k9_2r,8,krvs_A_dehyd,C18_FabA_dehydration,c2,96.8849266856,C18_FabA_EnAcACP,C18_FabA_BHyAcACP
+k9_2r,8,krvs_A_dehyd,C18_FabA_dehydration_unsat,c2,96.8849266856,C18_FabA_EnAcACP_unsat,C18_FabA_BHyAcACP_unsat
+k9_2r,9,krvs_A_dehyd,C20_FabA_dehydration,c2,96.8849266856,C20_FabA_EnAcACP,C20_FabA_BHyAcACP
+k9_2r,9,krvs_A_dehyd,C20_FabA_dehydration_unsat,c2,96.8849266856,C20_FabA_EnAcACP_unsat,C20_FabA_BHyAcACP_unsat
+k9_2r_un,4,krvs_A_dehyd,C10_cis_FabA_dehydration,c2,96.8849266856,C10_FabA_cis3EnAcACP,C10_FabA_EnAcACP
+k9_3f,1,koff_A_EnAcACP,C4_FabA_release_EnAcACP,a2,164.8695889904,C4_FabA_EnAcACP,C4_EnAcACP
+k9_3f,2,koff_A_EnAcACP,C6_FabA_release_EnAcACP,a2,164.8695889904,C6_FabA_EnAcACP,C6_EnAcACP
+k9_3f,3,koff_A_EnAcACP,C8_FabA_release_EnAcACP,a2,164.8695889904,C8_FabA_EnAcACP,C8_EnAcACP
+k9_3f,4,koff_A_EnAcACP,C10_FabA_release_EnAcACP,a2,164.8695889904,C10_FabA_EnAcACP,C10_EnAcACP
+k9_3f,5,koff_A_EnAcACP,C12_FabA_release_EnAcACP,a2,164.8695889904,C12_FabA_EnAcACP,C12_EnAcACP
+k9_3f,5,koff_A_EnAcACP,C12_FabA_release_EnAcACP_unsat,a2,164.8695889904,C12_FabA_EnAcACP_unsat,C12_EnAcACP_unsat
+k9_3f,6,koff_A_EnAcACP,C14_FabA_release_EnAcACP,a2,164.8695889904,C14_FabA_EnAcACP,C14_EnAcACP
+k9_3f,6,koff_A_EnAcACP,C14_FabA_release_EnAcACP_unsat,a2,164.8695889904,C14_FabA_EnAcACP_unsat,C14_EnAcACP_unsat
+k9_3f,7,koff_A_EnAcACP,C16_FabA_release_EnAcACP,a2,164.8695889904,C16_FabA_EnAcACP,C16_EnAcACP
+k9_3f,7,koff_A_EnAcACP,C16_FabA_release_EnAcACP_unsat,a2,164.8695889904,C16_FabA_EnAcACP_unsat,C16_EnAcACP_unsat
+k9_3f,8,koff_A_EnAcACP,C18_FabA_release_EnAcACP,a2,164.8695889904,C18_FabA_EnAcACP,C18_EnAcACP
+k9_3f,8,koff_A_EnAcACP,C18_FabA_release_EnAcACP_unsat,a2,164.8695889904,C18_FabA_EnAcACP_unsat,C18_EnAcACP_unsat
+k9_3f,9,koff_A_EnAcACP,C20_FabA_release_EnAcACP,a2,164.8695889904,C20_FabA_EnAcACP,C20_EnAcACP
+k9_3f,9,koff_A_EnAcACP,C20_FabA_release_EnAcACP_unsat,a2,164.8695889904,C20_FabA_EnAcACP_unsat,C20_EnAcACP_unsat
+k9_3f_un,4,koff_A_EnAcACP,C10_cis_FabA_release_EnAcACP,a2,164.8695889904,C10_FabA_cis3EnAcACP,C10_cis3EnAcACP
+k9_3r,1,C4_kon_A_EnAcACP,C4_FabA_release_EnAcACP,,0.24936525334798,C4_EnAcACP + FabA,C4_FabA_EnAcACP
+k9_3r,2,C6_kon_A_EnAcACP,C6_FabA_release_EnAcACP,,0.9480001366948,C6_EnAcACP + FabA,C6_FabA_EnAcACP
+k9_3r,3,C8_kon_A_EnAcACP,C8_FabA_release_EnAcACP,,2.1109195590378,C8_EnAcACP + FabA,C8_FabA_EnAcACP
+k9_3r,4,C10_kon_A_EnAcACP,C10_FabA_release_EnAcACP,,2.9440998034,C10_EnAcACP + FabA,C10_FabA_EnAcACP
+k9_3r,5,C12_kon_A_EnAcACP,C12_FabA_release_EnAcACP,,2.2110189523534,C12_EnAcACP + FabA,C12_FabA_EnAcACP
+k9_3r,5,C12_kon_A_EnAcACP,C12_FabA_release_EnAcACP_unsat,,2.2110189523534,C12_EnAcACP_unsat + FabA,C12_FabA_EnAcACP_unsat
+k9_3r,6,C14_kon_A_EnAcACP,C14_FabA_release_EnAcACP,,0.24936525334798,C14_EnAcACP + FabA,C14_FabA_EnAcACP
+k9_3r,6,C14_kon_A_EnAcACP,C14_FabA_release_EnAcACP_unsat,,0.24936525334798,C14_EnAcACP_unsat + FabA,C14_FabA_EnAcACP_unsat
+k9_3r,7,C16_kon_A_EnAcACP,C16_FabA_release_EnAcACP,,0.10981492266682,C16_EnAcACP + FabA,C16_FabA_EnAcACP
+k9_3r,7,C16_kon_A_EnAcACP,C16_FabA_release_EnAcACP_unsat,,0.10981492266682,C16_EnAcACP_unsat + FabA,C16_FabA_EnAcACP_unsat
+k9_3r,8,C18_kon_A_EnAcACP,C18_FabA_release_EnAcACP,,0.10981492266682,C18_EnAcACP + FabA,C18_FabA_EnAcACP
+k9_3r,8,C18_kon_A_EnAcACP,C18_FabA_release_EnAcACP_unsat,,0.10981492266682,C18_EnAcACP_unsat + FabA,C18_FabA_EnAcACP_unsat
+k9_3r,9,C20_kon_A_EnAcACP,C20_FabA_release_EnAcACP,,0.10981492266682,C20_EnAcACP + FabA,C20_FabA_EnAcACP
+k9_3r,9,C20_kon_A_EnAcACP,C20_FabA_release_EnAcACP_unsat,,0.10981492266682,C20_EnAcACP_unsat + FabA,C20_FabA_EnAcACP_unsat
+k9_3r_un,4,C10_cis_kon_A_EnAcACP,C10_cis_FabA_release_EnAcACP,,2.9440998034,C10_cis3EnAcACP + FabA,C10_FabA_cis3EnAcACP
+k9_inh_f,,kon_A_ACP,FabA_inhibition_by_ACP,,0.00241,ACP + FabA,FabA_ACP
+k9_inh_r,,koff_A_ACP,FabA_inhibition_by_ACP,,0.091574,FabA_ACP,ACP
+kcat10,1,C6_kcat_B_BKeAcACP,C6_FabB_condensation_release_BKeAcACP,c2,162.633348951048,C7_FabB_Act_MalACP,C1_CO2 + C6_BKeAcACP
+kcat10,2,C8_kcat_B_BKeAcACP,C8_FabB_condensation_release_BKeAcACP,c2,162.633348951048,C9_FabB_Act_MalACP,C1_CO2 + C8_BKeAcACP
+kcat10,3,C10_kcat_B_BKeAcACP,C10_FabB_condensation_release_BKeAcACP,c2,185.45908213716,C11_FabB_Act_MalACP,C10_BKeAcACP + C1_CO2
+kcat10,4,C12_kcat_B_BKeAcACP,C12_FabB_condensation_release_BKeAcACP,c2,183.9373665914192,C13_FabB_Act_MalACP,C12_BKeAcACP + C1_CO2
+kcat10,5,C14_kcat_B_BKeAcACP,C14_FabB_condensation_release_BKeAcACP,c2,190.2144432176,C15_FabB_Act_MalACP,C14_BKeAcACP + C1_CO2
+kcat10,6,C16_kcat_B_BKeAcACP,C16_FabB_condensation_release_BKeAcACP,c2,23.7768054022,C17_FabB_Act_MalACP,C16_BKeAcACP + C1_CO2
+kcat10,7,C18_kcat_B_BKeAcACP,C18_FabB_condensation_release_BKeAcACP,c2,3.95646041892608,C19_FabB_Act_MalACP,C18_BKeAcACP + C1_CO2
+kcat10,8,C20_kcat_B_BKeAcACP,C20_FabB_condensation_release_BKeAcACP,c2,3.95646041892608,C21_FabB_Act_MalACP,C1_CO2 + C20_BKeAcACP
+kcat10_CO2,,kcat_B_MalACP_B_C2_AcACP,FabB_decarboxylating_MalACP,x2,0.7804541943042973,C3_FabB_MalACP,C1_CO2 + C2_FabB_AcACP
+kcat10_H,,C4_kcat_B_BKeAcACP,C4_FabB_Act_condensation_release_BKeAcACP,,14.54083748,C5_FabB_Act_MalACP,C1_CO2 + C4_BKeAcACP
+kcat10_un,4,C12_kcat_B_BKeAcACP_unsat,C12_FabB_condensation_release_BKeAcACP_unsat,c2,190.2144432176,C13_FabB_Act_MalACP_cis3,C12_BKeAcACP_unsat + C1_CO2
+kcat10_un,5,C14_kcat_B_BKeAcACP_unsat,C14_FabB_condensation_release_BKeAcACP_unsat,c2,190.2144432176,C15_FabB_Act_MalACP_unsat,C14_BKeAcACP_unsat + C1_CO2
+kcat10_un,6,C16_kcat_B_BKeAcACP_unsat,C16_FabB_condensation_release_BKeAcACP_unsat,c2,23.7768054022,C17_FabB_Act_MalACP_unsat,C16_BKeAcACP_unsat + C1_CO2
+kcat10_un,7,C18_kcat_B_BKeAcACP_unsat,C18_FabB_condensation_release_BKeAcACP_unsat,c2,4.35591074968304,C19_FabB_Act_MalACP_unsat,C18_BKeAcACP_unsat + C1_CO2
+kcat10_un,8,C20_kcat_B_BKeAcACP_unsat,C20_FabB_condensation_release_BKeAcACP_unsat,c2,4.35591074968304,C21_FabB_Act_MalACP_unsat,C1_CO2 + C20_BKeAcACP_unsat
+kcat3,,C4_kcat_H_BKeAcACP,C5_FabH_Act_condensation_release_BKeAcACP,c1,14.54083748114,C5_FabH_Act_MalACP,C1_CO2 + C4_BKeAcACP
+kcat4,1,kcat_G_BHyAcACP,C4_FabG_catalysis_to_BHyAcACP,c2,52.4422997656,C4_FabG_NADPH_BKeAcACP,C4_BHyAcACP
+kcat4,2,kcat_G_BHyAcACP,C6_FabG_catalysis_to_BHyAcACP,c2,52.4422997656,C6_FabG_NADPH_BKeAcACP,C6_BHyAcACP
+kcat4,3,kcat_G_BHyAcACP,C8_FabG_catalysis_to_BHyAcACP,c2,52.4422997656,C8_FabG_NADPH_BKeAcACP,C8_BHyAcACP
+kcat4,4,kcat_G_BHyAcACP,C10_FabG_catalysis_to_BHyAcACP,c2,52.4422997656,C10_FabG_NADPH_BKeAcACP,C10_BHyAcACP
+kcat4,5,kcat_G_BHyAcACP,C12_FabG_catalysis_to_BHyAcACP,c2,52.4422997656,C12_FabG_NADPH_BKeAcACP,C12_BHyAcACP
+kcat4,5,kcat_G_BHyAcACP,C12_FabG_catalysis_to_BHyAcACP_unsat,c2,52.4422997656,C12_FabG_NADPH_BKeAcACP_unsat,C12_BHyAcACP_unsat
+kcat4,6,kcat_G_BHyAcACP,C14_FabG_catalysis_to_BHyAcACP,c2,52.4422997656,C14_FabG_NADPH_BKeAcACP,C14_BHyAcACP
+kcat4,6,kcat_G_BHyAcACP,C14_FabG_catalysis_to_BHyAcACP_unsat,c2,52.4422997656,C14_FabG_NADPH_BKeAcACP_unsat,C14_BHyAcACP_unsat
+kcat4,7,kcat_G_BHyAcACP,C16_FabG_catalysis_to_BHyAcACP,c2,52.4422997656,C16_FabG_NADPH_BKeAcACP,C16_BHyAcACP
+kcat4,7,kcat_G_BHyAcACP,C16_FabG_catalysis_to_BHyAcACP_unsat,c2,52.4422997656,C16_FabG_NADPH_BKeAcACP_unsat,C16_BHyAcACP_unsat
+kcat4,8,kcat_G_BHyAcACP,C18_FabG_catalysis_to_BHyAcACP,c2,52.4422997656,C18_FabG_NADPH_BKeAcACP,C18_BHyAcACP
+kcat4,8,kcat_G_BHyAcACP,C18_FabG_catalysis_to_BHyAcACP_unsat,c2,52.4422997656,C18_FabG_NADPH_BKeAcACP_unsat,C18_BHyAcACP_unsat
+kcat4,9,kcat_G_BHyAcACP,C20_FabG_catalysis_to_BHyAcACP,c2,52.4422997656,C20_FabG_NADPH_BKeAcACP,C20_BHyAcACP
+kcat4,9,kcat_G_BHyAcACP,C20_FabG_catalysis_to_BHyAcACP_unsat,c2,52.4422997656,C20_FabG_NADPH_BKeAcACP_unsat,C20_BHyAcACP_unsat
+kcat5,1,kfwd_Z_dehyd,C4_FabZ_dehydration,c4,592.973601904,C4_FabZ_BHyAcACP,C4_FabZ_EnAcACP
+kcat5,2,kfwd_Z_dehyd,C6_FabZ_dehydration,c4,592.973601904,C6_FabZ_BHyAcACP,C6_FabZ_EnAcACP
+kcat5,3,kfwd_Z_dehyd,C8_FabZ_dehydration,c4,592.973601904,C8_FabZ_BHyAcACP,C8_FabZ_EnAcACP
+kcat5,4,kfwd_Z_dehyd,C10_FabZ_dehydration,c4,592.973601904,C10_FabZ_BHyAcACP,C10_FabZ_EnAcACP
+kcat5,5,kfwd_Z_dehyd,C12_FabZ_dehydration,c4,592.973601904,C12_FabZ_BHyAcACP,C12_FabZ_EnAcACP
+kcat5,5,kfwd_Z_dehyd,C12_FabZ_dehydration_unsat,c4,592.973601904,C12_FabZ_BHyAcACP_unsat,C12_FabZ_EnAcACP_unsat
+kcat5,6,kfwd_Z_dehyd,C14_FabZ_dehydration,c4,592.973601904,C14_FabZ_BHyAcACP,C14_FabZ_EnAcACP
+kcat5,6,kfwd_Z_dehyd,C14_FabZ_dehydration_unsat,c4,592.973601904,C14_FabZ_BHyAcACP_unsat,C14_FabZ_EnAcACP_unsat
+kcat5,7,kfwd_Z_dehyd,C16_FabZ_dehydration,c4,592.973601904,C16_FabZ_BHyAcACP,C16_FabZ_EnAcACP
+kcat5,7,kfwd_Z_dehyd,C16_FabZ_dehydration_unsat,c4,592.973601904,C16_FabZ_BHyAcACP_unsat,C16_FabZ_EnAcACP_unsat
+kcat5,8,kfwd_Z_dehyd,C18_FabZ_dehydration,c4,592.973601904,C18_FabZ_BHyAcACP,C18_FabZ_EnAcACP
+kcat5,8,kfwd_Z_dehyd,C18_FabZ_dehydration_unsat,c4,592.973601904,C18_FabZ_BHyAcACP_unsat,C18_FabZ_EnAcACP_unsat
+kcat5,9,kfwd_Z_dehyd,C20_FabZ_dehydration,c4,592.973601904,C20_FabZ_BHyAcACP,C20_FabZ_EnAcACP
+kcat5,9,kfwd_Z_dehyd,C20_FabZ_dehydration_unsat,c4,592.973601904,C20_FabZ_BHyAcACP_unsat,C20_FabZ_EnAcACP_unsat
+kcat6,1,kcat_I_AcACP,C4_FabI_catalysis_release_AcACP,c2,355.54101536,C4_FabI_NADH_EnAcACP,C4_AcACP
+kcat6,2,kcat_I_AcACP,C6_FabI_catalysis_release_AcACP,c2,355.54101536,C6_FabI_NADH_EnAcACP,C6_AcACP
+kcat6,3,kcat_I_AcACP,C8_FabI_catalysis_release_AcACP,c2,355.54101536,C8_FabI_NADH_EnAcACP,C8_AcACP
+kcat6,4,kcat_I_AcACP,C10_FabI_catalysis_release_AcACP,c2,355.54101536,C10_FabI_NADH_EnAcACP,C10_AcACP
+kcat6,5,kcat_I_AcACP,C12_FabI_catalysis_release_AcACP,c2,355.54101536,C12_FabI_NADH_EnAcACP,C12_AcACP
+kcat6,5,kcat_I_AcACP,C12_FabI_catalysis_release_AcACP_unsat,c2,355.54101536,C12_FabI_NADH_EnAcACP_unsat,C12_AcACP_unsat
+kcat6,6,kcat_I_AcACP,C14_FabI_catalysis_release_AcACP,c2,355.54101536,C14_FabI_NADH_EnAcACP,C14_AcACP
+kcat6,6,kcat_I_AcACP,C14_FabI_catalysis_release_AcACP_unsat,c2,355.54101536,C14_FabI_NADH_EnAcACP_unsat,C14_AcACP_unsat
+kcat6,7,kcat_I_AcACP,C16_FabI_catalysis_release_AcACP,c2,355.54101536,C16_FabI_NADH_EnAcACP,C16_AcACP
+kcat6,7,kcat_I_AcACP,C16_FabI_catalysis_release_AcACP_unsat,c2,355.54101536,C16_FabI_NADH_EnAcACP_unsat,C16_AcACP_unsat
+kcat6,8,kcat_I_AcACP,C18_FabI_catalysis_release_AcACP,c2,355.54101536,C18_FabI_NADH_EnAcACP,C18_AcACP
+kcat6,8,kcat_I_AcACP,C18_FabI_catalysis_release_AcACP_unsat,c2,355.54101536,C18_FabI_NADH_EnAcACP_unsat,C18_AcACP_unsat
+kcat6,9,kcat_I_AcACP,C20_FabI_catalysis_release_AcACP,c2,355.54101536,C20_FabI_NADH_EnAcACP,C20_AcACP
+kcat6,9,kcat_I_AcACP,C20_FabI_catalysis_release_AcACP_unsat,c2,355.54101536,C20_FabI_NADH_EnAcACP_unsat,C20_AcACP_unsat
+kcat7,1,C4_kcat_T_FA,C4_TesA_hydrolysis_release_FA,c3,0.0330538280256,C4_TesA_AcACP,ACP + C4_FA
+kcat7,2,C6_kcat_T_FA,C6_TesA_hydrolysis_release_FA,c3,0.029620419832800005,C6_TesA_AcACP,ACP + C6_FA
+kcat7,3,C8_kcat_T_FA,C8_TesA_hydrolysis_release_FA,c3,0.060230126772,C8_TesA_AcACP,ACP + C8_FA
+kcat7,4,C10_kcat_T_FA,C10_TesA_hydrolysis_release_FA,c3,0.009194550753600001,C10_TesA_AcACP,ACP + C10_FA
+kcat7,5,C12_kcat_T_FA,C12_TesA_hydrolysis_release_FA,c3,0.14697314799552003,C12_TesA_AcACP,ACP + C12_FA
+kcat7,5,C12_kcat_T_FA,C12_TesA_hydrolysis_release_FA_unsat,c3,0.14697314799552003,C12_TesA_AcACP_unsat,ACP + C12_FA_unsat
+kcat7,6,C14_kcat_T_FA,C14_TesA_hydrolysis_release_FA,c3,0.26663615251848,C14_TesA_AcACP,ACP + C14_FA
+kcat7,6,C14_kcat_T_FA,C14_TesA_hydrolysis_release_FA_unsat,c3,0.26663615251848,C14_TesA_AcACP_unsat,ACP + C14_FA_unsat
+kcat7,7,C16_kcat_T_FA,C16_TesA_hydrolysis_release_FA,c3,0.581933592,C16_TesA_AcACP,ACP + C16_FA
+kcat7,7,C16_kcat_T_FA,C16_TesA_hydrolysis_release_FA_unsat,c3,0.581933592,C16_TesA_AcACP_unsat,ACP + C16_FA_unsat
+kcat7,8,C18_kcat_T_FA,C18_TesA_hydrolysis_release_FA,c3,0.7105409158320001,C18_TesA_AcACP,ACP + C18_FA
+kcat7,8,C18_kcat_T_FA,C18_TesA_hydrolysis_release_FA_unsat,c3,0.7105409158320001,C18_TesA_AcACP_unsat,ACP + C18_FA_unsat
+kcat7,9,C20_kcat_T_FA,C20_TesA_hydrolysis_release_FA,c3,0.8943155441856,C20_TesA_AcACP,ACP + C20_FA
+kcat7,9,C20_kcat_T_FA,C20_TesA_hydrolysis_release_FA_unsat,c3,0.8943155441856,C20_TesA_AcACP_unsat,ACP + C20_FA_unsat
+kcat8,1,C6_kcat_F_BKeAcACP,C6_FabF_condensation_release_BKeAcACP,c2,254.2847118905488,C7_FabF_Act_MalACP,C1_CO2 + C6_BKeAcACP
+kcat8,2,C8_kcat_F_BKeAcACP,C8_FabF_condensation_release_BKeAcACP,c2,254.2847118905488,C9_FabF_Act_MalACP,C1_CO2 + C8_BKeAcACP
+kcat8,3,C10_kcat_F_BKeAcACP,C10_FabF_condensation_release_BKeAcACP,c2,250.66797091179922,C11_FabF_Act_MalACP,C10_BKeAcACP + C1_CO2
+kcat8,4,C12_kcat_F_BKeAcACP,C12_FabF_condensation_release_BKeAcACP,c2,278.2108445192,C13_FabF_Act_MalACP,C12_BKeAcACP + C1_CO2
+kcat8,5,C14_kcat_F_BKeAcACP,C14_FabF_condensation_release_BKeAcACP,c2,250.38976006728,C15_FabF_Act_MalACP,C14_BKeAcACP + C1_CO2
+kcat8,6,C16_kcat_F_BKeAcACP,C16_FabF_condensation_release_BKeAcACP,c2,80.4029340660488,C17_FabF_Act_MalACP,C16_BKeAcACP + C1_CO2
+kcat8,7,C18_kcat_F_BKeAcACP,C18_FabF_condensation_release_BKeAcACP,c2,6.17628074832624,C19_FabF_Act_MalACP,C18_BKeAcACP + C1_CO2
+kcat8,8,C20_kcat_F_BKeAcACP,C20_FabF_condensation_release_BKeAcACP,c2,6.17628074832624,C21_FabF_Act_MalACP,C1_CO2 + C20_BKeAcACP
+kcat8_CO2,,kcat_F_MalACP_F_C2_AcACP,FabF_decarboxylating_MalACP,x1,7.848508288126024,C3_FabF_MalACP,C1_CO2 + C2_FabF_AcACP
+kcat8_H,,C4_kcat_F_BKeAcACP,C4_FabF_Act_condensation_release_BKeAcACP,,14.54083748,C5_FabF_Act_MalACP,C1_CO2 + C4_BKeAcACP
+kcat8_un,5,C14_kcat_F_BKeAcACP_unsat,C14_FabF_condensation_release_BKeAcACP_unsat,c2,250.38976006728,C15_FabF_Act_MalACP_unsat,C14_BKeAcACP_unsat + C1_CO2
+kcat8_un,6,C16_kcat_F_BKeAcACP_unsat,C16_FabF_condensation_release_BKeAcACP_unsat,c2,80.4029340660488,C17_FabF_Act_MalACP_unsat,C16_BKeAcACP_unsat + C1_CO2
+kcat8_un,7,C18_kcat_F_BKeAcACP_unsat,C18_FabF_condensation_release_BKeAcACP_unsat,c2,94.591687136528,C19_FabF_Act_MalACP_unsat,C18_BKeAcACP_unsat + C1_CO2
+kcat8_un,8,C20_kcat_F_BKeAcACP_unsat,C20_FabF_condensation_release_BKeAcACP_unsat,c2,94.591687136528,C21_FabF_Act_MalACP_unsat,C1_CO2 + C20_BKeAcACP_unsat
+kcat9,1,kfwd_A_dehyd,C4_FabA_dehydration,c2,24.176789044480003,C4_FabA_BHyAcACP,C4_FabA_EnAcACP
+kcat9,2,kfwd_A_dehyd,C6_FabA_dehydration,c2,24.176789044480003,C6_FabA_BHyAcACP,C6_FabA_EnAcACP
+kcat9,3,kfwd_A_dehyd,C8_FabA_dehydration,c2,24.176789044480003,C8_FabA_BHyAcACP,C8_FabA_EnAcACP
+kcat9,4,kfwd_A_dehyd,C10_FabA_dehydration,c2,24.176789044480003,C10_FabA_BHyAcACP,C10_FabA_EnAcACP
+kcat9,5,kfwd_A_dehyd,C12_FabA_dehydration,c2,24.176789044480003,C12_FabA_BHyAcACP,C12_FabA_EnAcACP
+kcat9,5,kfwd_A_dehyd,C12_FabA_dehydration_unsat,c2,24.176789044480003,C12_FabA_BHyAcACP_unsat,C12_FabA_EnAcACP_unsat
+kcat9,6,kfwd_A_dehyd,C14_FabA_dehydration,c2,24.176789044480003,C14_FabA_BHyAcACP,C14_FabA_EnAcACP
+kcat9,6,kfwd_A_dehyd,C14_FabA_dehydration_unsat,c2,24.176789044480003,C14_FabA_BHyAcACP_unsat,C14_FabA_EnAcACP_unsat
+kcat9,7,kfwd_A_dehyd,C16_FabA_dehydration,c2,24.176789044480003,C16_FabA_BHyAcACP,C16_FabA_EnAcACP
+kcat9,7,kfwd_A_dehyd,C16_FabA_dehydration_unsat,c2,24.176789044480003,C16_FabA_BHyAcACP_unsat,C16_FabA_EnAcACP_unsat
+kcat9,8,kfwd_A_dehyd,C18_FabA_dehydration,c2,24.176789044480003,C18_FabA_BHyAcACP,C18_FabA_EnAcACP
+kcat9,8,kfwd_A_dehyd,C18_FabA_dehydration_unsat,c2,24.176789044480003,C18_FabA_BHyAcACP_unsat,C18_FabA_EnAcACP_unsat
+kcat9,9,kfwd_A_dehyd,C20_FabA_dehydration,c2,24.176789044480003,C20_FabA_BHyAcACP,C20_FabA_EnAcACP
+kcat9,9,kfwd_A_dehyd,C20_FabA_dehydration_unsat,c2,24.176789044480003,C20_FabA_BHyAcACP_unsat,C20_FabA_EnAcACP_unsat
+kcat9_un,4,C10_cis_kfwd_A_dehyd,C10_cis_FabA_dehydration,(f*c2),3211.884872409312,C10_FabA_EnAcACP,C10_FabA_cis3EnAcACP

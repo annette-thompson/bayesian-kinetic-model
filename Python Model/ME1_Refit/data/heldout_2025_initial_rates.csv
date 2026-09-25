@@ -1,0 +1,5 @@
+condition,measured_rate_uM_C16_per_min,standard_error,source,C20+unsat,C20+unsat+FBinit
+reference,10.334175,0.356016308,2025 initial rates (experiment at 100 uM acetyl-CoA),5.145516316078737,5.259782397282889
+no FabH,0.4291994,0.4291994,2025 initial rates (experiment at 100 uM acetyl-CoA),-1.443192095291327e-18,3.007544034630462
+no AcCoA,6.0427422,0.354713635,2025 initial rates (experiment at 100 uM acetyl-CoA),4.123443222348754,4.187115243351077
+"no AcCoA, no FabH",1.6198092,1.041001559,2025 initial rates (experiment at 100 uM acetyl-CoA),-7.795982507932325e-18,2.141107850975904

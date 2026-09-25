@@ -1,0 +1,8 @@
+condition,measured_rate_uM_C16_per_min,standard_error,replicates,source
+reference,4.655129552,0.195953656,3,ME1_Dataset_S1_Kinetics.csv S1A
+no FabH,2.41772584,0.329797,3,ME1_Dataset_S1_Kinetics.csv
+"no FabH, no FabF",1.796165966,0.153882,3,ME1_Dataset_S1_Kinetics.csv
+"no FabH, no FabB",2.976304272,0.145801,3,ME1_Dataset_S1_Kinetics.csv
+"no FabH, no AcCoA",2.91667542,0.175031,3,ME1_Dataset_S1_Kinetics.csv
+"no FabH, no FabF, no AcCoA",0.893110994,0.18879,3,ME1_Dataset_S1_Kinetics.csv
+"no FabH, no FabB, no AcCoA",2.428676471,0.106001,3,ME1_Dataset_S1_Kinetics.csv

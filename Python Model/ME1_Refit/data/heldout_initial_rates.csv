@@ -1,0 +1,7 @@
+condition,measured_rate_uM_C16_per_min,standard_error,source
+reference,3.928065914,0.13413399,Figure S1 New Initial Rates 4B.dgraph
+30 uM FabH,9.988285627,0.432089116,Figure S1 New Initial Rates 4B.dgraph
+10 uM FabF,2.268922882,0.25126254,Figure S1 New Initial Rates 4B.dgraph
+10 uM FabI,5.375452994,0.345411346,Figure S1 New Initial Rates 4B.dgraph
+no FabZ,0.841051733,0.088605706,Figure S1 New Initial Rates 4B.dgraph
+10 uM FabA + no FabZ,2.55181854,0.131355295,Figure S1 New Initial Rates 4B.dgraph
