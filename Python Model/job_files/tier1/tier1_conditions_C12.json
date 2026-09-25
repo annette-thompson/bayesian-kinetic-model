@@ -1,0 +1,190 @@
+{
+  "system": "C12",
+  "rtol": 0.001,
+  "min_c16_frac": 0.1,
+  "usable_conditions_including_baseline": 7,
+  "needed": 7,
+  "enough": true,
+  "min_log_diff": 0.0,
+  "n_non_converged": 0,
+  "n_below_c16_floor": 0,
+  "n_too_similar": 0,
+  "n_stiff_at_strict": 0,
+  "baseline_steps": 96,
+  "baseline_strict_steps": 1565,
+  "loose_cap": 144,
+  "strict_cap": 2348,
+  "baseline_out": [
+    0.21884549480579904,
+    0.324881468130127,
+    2.723520624199042,
+    2.017749764949603,
+    42.630642174975556
+  ],
+  "targets": [
+    "C4_FA",
+    "C6_FA",
+    "C8_FA",
+    "C10_FA",
+    "C12_FA"
+  ],
+  "baseline_c16_equivalents": 34.77237747067494,
+  "kept_steps": [
+    88,
+    92,
+    94,
+    94,
+    95,
+    95
+  ],
+  "kept_c16_frac_of_baseline": [
+    0.438088219575944,
+    0.3260300881950463,
+    0.9058853752098496,
+    0.9783694452218162,
+    0.1969385273157612,
+    0.9511985076184328
+  ],
+  "kept_max_err_pct": 0.06335763529222062,
+  "kept_labels": [
+    "FabH x0.1",
+    "ACP x0.1",
+    "FabF x0.1",
+    "FabB x0.1",
+    "C3_MalCoA x0.1",
+    "TesA x0.1"
+  ],
+  "all_usable_labels": [
+    "FabH x0.1",
+    "ACP x0.1",
+    "FabF x0.1",
+    "FabB x0.1",
+    "C3_MalCoA x0.1",
+    "TesA x0.1"
+  ],
+  "all_usable_c16_frac_of_baseline": [
+    0.438088219575944,
+    0.3260300881950463,
+    0.9058853752098496,
+    0.9783694452218162,
+    0.1969385273157612,
+    0.9511985076184328
+  ],
+  "end_time_s": 720.0,
+  "requested_conditions": "FabH x0.1,ACP x0.1,C3_MalCoA x0.1,FabF x0.1,FabB x0.1,TesA x0.1",
+  "strict_reference": [
+    1e-09,
+    1e-11
+  ],
+  "candidate_sweep": "titration",
+  "titration_factors": [
+    0.5,
+    2.0,
+    0.2,
+    5.0,
+    0.1,
+    10.0
+  ],
+  "candidate_log": [
+    {
+      "label": "FabH x0.1",
+      "result": "kept",
+      "steps": 88,
+      "strict_steps": 1188,
+      "out": [
+        0.047279610869105274,
+        0.07025511023342759,
+        0.6167856707323903,
+        0.4769177038572134,
+        19.451649289625184
+      ],
+      "total_frac_of_baseline": 0.438088219575944
+    },
+    {
+      "label": "ACP x0.1",
+      "result": "kept",
+      "steps": 92,
+      "strict_steps": 1192,
+      "out": [
+        0.020543334254483802,
+        0.0308760569780991,
+        0.27543297440619086,
+        0.21246834224783703,
+        14.732823649969587
+      ],
+      "total_frac_of_baseline": 0.3260300881950463
+    },
+    {
+      "label": "FabF x0.1",
+      "result": "kept",
+      "steps": 94,
+      "strict_steps": 1538,
+      "out": [
+        1.3538010903993638,
+        1.9432185028147009,
+        12.082527502914248,
+        7.133264295018297,
+        26.577436086615965
+      ],
+      "total_frac_of_baseline": 0.9058853752098496
+    },
+    {
+      "label": "FabB x0.1",
+      "result": "kept",
+      "steps": 94,
+      "strict_steps": 1509,
+      "out": [
+        0.209929544146446,
+        0.31118055143742374,
+        2.615866907279353,
+        1.9386465575151146,
+        41.7752920134874
+      ],
+      "total_frac_of_baseline": 0.9783694452218162
+    },
+    {
+      "label": "C3_MalCoA x0.1",
+      "result": "kept",
+      "steps": 95,
+      "strict_steps": 1366,
+      "out": [
+        0.5505706495128183,
+        0.6412432032997633,
+        2.3265499353151773,
+        1.8052207789455985,
+        5.571165322971029
+      ],
+      "total_frac_of_baseline": 0.1969385273157612
+    },
+    {
+      "label": "TesA x0.1",
+      "result": "kept",
+      "steps": 95,
+      "strict_steps": 1506,
+      "out": [
+        0.012343338891052602,
+        0.018487241089356867,
+        0.16742707617452263,
+        0.13010951725486147,
+        43.867177359930665
+      ],
+      "total_frac_of_baseline": 0.9511985076184328
+    }
+  ],
+  "timeseries_times_s": [
+    5.219029755416978,
+    9.246728859483321,
+    16.177988801941783,
+    26.81192894457945,
+    37.74537249534436,
+    63.8050451544057,
+    110.94235606349622,
+    217.34006171112992,
+    368.56703123521993,
+    720.0
+  ],
+  "noise_seed": 51887289,
+  "noise_mode": "pointwise",
+  "noise_floor": 0.01,
+  "seconds": 89.1
+}

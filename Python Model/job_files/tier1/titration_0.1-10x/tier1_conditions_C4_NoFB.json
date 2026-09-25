@@ -1,0 +1,732 @@
+{
+  "system": "C4_NoFB",
+  "rtol": 0.001,
+  "min_c16_frac": 0.1,
+  "usable_conditions_including_baseline": 6,
+  "needed": 10,
+  "enough": false,
+  "n_non_converged": 0,
+  "n_below_c16_floor": 0,
+  "n_too_similar": 55,
+  "n_stiff_at_strict": 0,
+  "baseline_steps": 81,
+  "baseline_strict_steps": 1084,
+  "loose_cap": 122,
+  "strict_cap": 1626,
+  "baseline_out": [
+    23.107020682212244
+  ],
+  "targets": [
+    "C4_FA"
+  ],
+  "baseline_c16_equivalents": 5.776755170553061,
+  "kept_steps": [
+    80,
+    81,
+    81,
+    81,
+    81
+  ],
+  "kept_c16_frac_of_baseline": [
+    0.10832537784435345,
+    0.5362522729991381,
+    1.7176621351630048,
+    0.21658738796448118,
+    2.7239550399878807
+  ],
+  "kept_max_err_pct": 0.00013327460083418892,
+  "kept_labels": [
+    "ACP x0.1",
+    "TesA x0.5",
+    "TesA x2",
+    "ACP x0.2",
+    "TesA x5"
+  ],
+  "all_usable_labels": [
+    "ACP x0.1",
+    "TesA x0.5",
+    "TesA x2",
+    "ACP x0.2",
+    "TesA x5"
+  ],
+  "all_usable_c16_frac_of_baseline": [
+    0.10832537784435345,
+    0.5362522729991381,
+    1.7176621351630048,
+    0.21658738796448118,
+    2.7239550399878807
+  ],
+  "end_time_s": 720.0,
+  "requested_conditions": null,
+  "strict_reference": [
+    1e-09,
+    1e-11
+  ],
+  "candidate_sweep": "titration",
+  "titration_factors": [
+    0.5,
+    2.0,
+    0.2,
+    5.0,
+    0.1,
+    10.0
+  ],
+  "candidate_log": [
+    {
+      "label": "FabD x10",
+      "result": "too similar",
+      "steps": 77,
+      "strict_steps": 955,
+      "out": [
+        22.94568093298656
+      ],
+      "total_frac_of_baseline": 0.9930177173663117,
+      "nearest_log_distance": 0.003043002777751047
+    },
+    {
+      "label": "FabH x0.2",
+      "result": "too similar",
+      "steps": 79,
+      "strict_steps": 1104,
+      "out": [
+        21.039129117411388
+      ],
+      "total_frac_of_baseline": 0.9105080835283661,
+      "nearest_log_distance": 0.04071619416760042
+    },
+    {
+      "label": "FabD x5",
+      "result": "too similar",
+      "steps": 79,
+      "strict_steps": 1039,
+      "out": [
+        23.041202269891848
+      ],
+      "total_frac_of_baseline": 0.9971515837880794,
+      "nearest_log_distance": 0.0012388166144523538
+    },
+    {
+      "label": "FabD x0.1",
+      "result": "too similar",
+      "steps": 79,
+      "strict_steps": 1088,
+      "out": [
+        23.0602161870037
+      ],
+      "total_frac_of_baseline": 0.9979744469937409,
+      "nearest_log_distance": 0.0008805786241403712
+    },
+    {
+      "label": "FabH x0.1",
+      "result": "too similar",
+      "steps": 79,
+      "strict_steps": 1067,
+      "out": [
+        19.13276521363291
+      ],
+      "total_frac_of_baseline": 0.8280065819286383,
+      "nearest_log_distance": 0.08196621093984624
+    },
+    {
+      "label": "FabH x0.5",
+      "result": "too similar",
+      "steps": 80,
+      "strict_steps": 1095,
+      "out": [
+        22.552469475679594
+      ],
+      "total_frac_of_baseline": 0.9760007482505287,
+      "nearest_log_distance": 0.010549849381513932
+    },
+    {
+      "label": "C3_MalCoA x0.5",
+      "result": "too similar",
+      "steps": 80,
+      "strict_steps": 1086,
+      "out": [
+        22.84748414210648
+      ],
+      "total_frac_of_baseline": 0.9887680656162846,
+      "nearest_log_distance": 0.004905568499789625
+    },
+    {
+      "label": "C2_AcCoA x0.5",
+      "result": "too similar",
+      "steps": 80,
+      "strict_steps": 1082,
+      "out": [
+        23.068366434868622
+      ],
+      "total_frac_of_baseline": 0.9983271643767827,
+      "nearest_log_distance": 0.0007271116191067684
+    },
+    {
+      "label": "FabD x2",
+      "result": "too similar",
+      "steps": 80,
+      "strict_steps": 1075,
+      "out": [
+        23.09309653321003
+      ],
+      "total_frac_of_baseline": 0.9993974061306427,
+      "nearest_log_distance": 0.00026178207435112455
+    },
+    {
+      "label": "FabD x0.2",
+      "result": "too similar",
+      "steps": 80,
+      "strict_steps": 1096,
+      "out": [
+        23.093311474810967
+      ],
+      "total_frac_of_baseline": 0.9994067081347345,
+      "nearest_log_distance": 0.000257739848283034
+    },
+    {
+      "label": "FabG x0.2",
+      "result": "too similar",
+      "steps": 80,
+      "strict_steps": 1108,
+      "out": [
+        22.934530943313312
+      ],
+      "total_frac_of_baseline": 0.9925351804860021,
+      "nearest_log_distance": 0.003254090690629541
+    },
+    {
+      "label": "C3_MalCoA x0.2",
+      "result": "too similar",
+      "steps": 80,
+      "strict_steps": 1121,
+      "out": [
+        22.03830639639382
+      ],
+      "total_frac_of_baseline": 0.9537493690546995,
+      "nearest_log_distance": 0.02056573634102432
+    },
+    {
+      "label": "FabG x0.1",
+      "result": "too similar",
+      "steps": 80,
+      "strict_steps": 1114,
+      "out": [
+        22.71710708754701
+      ],
+      "total_frac_of_baseline": 0.9831257521240984,
+      "nearest_log_distance": 0.007390927782699563
+    },
+    {
+      "label": "FabD x0.5",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1089,
+      "out": [
+        23.108767197598848
+      ],
+      "total_frac_of_baseline": 1.000075583754852,
+      "nearest_log_distance": 3.282436717499948e-05
+    },
+    {
+      "label": "FabG x0.5",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1096,
+      "out": [
+        23.064303909109526
+      ],
+      "total_frac_of_baseline": 0.998151350895029,
+      "nearest_log_distance": 0.000803601122583153
+    },
+    {
+      "label": "FabZ x0.5",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1096,
+      "out": [
+        22.815396273125277
+      ],
+      "total_frac_of_baseline": 0.9873794024293465,
+      "nearest_log_distance": 0.005515936772735541
+    },
+    {
+      "label": "FabI x0.5",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1085,
+      "out": [
+        23.018889888211525
+      ],
+      "total_frac_of_baseline": 0.9961859732930191,
+      "nearest_log_distance": 0.0016595776049683764
+    },
+    {
+      "label": "FabA x0.5",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1085,
+      "out": [
+        23.095860591438925
+      ],
+      "total_frac_of_baseline": 0.9995170259754902,
+      "nearest_log_distance": 0.00020980362267652986
+    },
+    {
+      "label": "ACP x0.5",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 968,
+      "out": [
+        12.213532166210129
+      ],
+      "total_frac_of_baseline": 0.5285636921427993,
+      "nearest_log_distance": 0.006271818569017595
+    },
+    {
+      "label": "FabG x2",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1074,
+      "out": [
+        23.128156003205348
+      ],
+      "total_frac_of_baseline": 1.0009146709687837,
+      "nearest_log_distance": 0.00039705499483089213
+    },
+    {
+      "label": "FabZ x2",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1081,
+      "out": [
+        23.26865048336679
+      ],
+      "total_frac_of_baseline": 1.0069948351792046,
+      "nearest_log_distance": 0.0030272430869608957
+    },
+    {
+      "label": "FabI x2",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1084,
+      "out": [
+        23.151218972587017
+      ],
+      "total_frac_of_baseline": 1.001912764565481,
+      "nearest_log_distance": 0.0008299096378832083
+    },
+    {
+      "label": "FabA x2",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1083,
+      "out": [
+        23.126545135382266
+      ],
+      "total_frac_of_baseline": 1.0008449576186622,
+      "nearest_log_distance": 0.00036680548549661296
+    },
+    {
+      "label": "ACP x2",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1207,
+      "out": [
+        41.045158286730576
+      ],
+      "total_frac_of_baseline": 1.7763068138995126,
+      "nearest_log_distance": 0.014580239759748315
+    },
+    {
+      "label": "FabZ x0.2",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1117,
+      "out": [
+        22.161359315097886
+      ],
+      "total_frac_of_baseline": 0.9590747167226831,
+      "nearest_log_distance": 0.01814755779663324
+    },
+    {
+      "label": "FabI x0.2",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1094,
+      "out": [
+        22.75763872420969
+      ],
+      "total_frac_of_baseline": 0.98487983531899,
+      "nearest_log_distance": 0.006616754315990958
+    },
+    {
+      "label": "FabA x0.2",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1085,
+      "out": [
+        23.088653119698993
+      ],
+      "total_frac_of_baseline": 0.9992051090114187,
+      "nearest_log_distance": 0.00034535404765723143
+    },
+    {
+      "label": "C2_AcCoA x0.2",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1095,
+      "out": [
+        22.919882777164283
+      ],
+      "total_frac_of_baseline": 0.9919012534059823,
+      "nearest_log_distance": 0.003531560946108403
+    },
+    {
+      "label": "FabG x5",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1070,
+      "out": [
+        23.140651613178587
+      ],
+      "total_frac_of_baseline": 1.0014554421112467,
+      "nearest_log_distance": 0.000631630937929506
+    },
+    {
+      "label": "FabZ x5",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1081,
+      "out": [
+        23.360364978437385
+      ],
+      "total_frac_of_baseline": 1.0109639533243748,
+      "nearest_log_distance": 0.004735670772598732
+    },
+    {
+      "label": "FabI x5",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1085,
+      "out": [
+        23.17759119104291
+      ],
+      "total_frac_of_baseline": 1.00305407217145,
+      "nearest_log_distance": 0.0013243453960034568
+    },
+    {
+      "label": "FabA x5",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1081,
+      "out": [
+        23.168548373240444
+      ],
+      "total_frac_of_baseline": 1.0026627271371062,
+      "nearest_log_distance": 0.0011548708309490063
+    },
+    {
+      "label": "ACP x5",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1376,
+      "out": [
+        73.60575004383003
+      ],
+      "total_frac_of_baseline": 3.185427972568166,
+      "nearest_log_distance": 0.06796785437340658
+    },
+    {
+      "label": "FabI x0.1",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1108,
+      "out": [
+        22.332930155566824
+      ],
+      "total_frac_of_baseline": 0.9664997691700984,
+      "nearest_log_distance": 0.014798245358309092
+    },
+    {
+      "label": "FabA x0.1",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1086,
+      "out": [
+        23.086159241234437
+      ],
+      "total_frac_of_baseline": 0.9990971817066029,
+      "nearest_log_distance": 0.0003922661021462659
+    },
+    {
+      "label": "C3_MalCoA x0.1",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1166,
+      "out": [
+        20.57610126232231
+      ],
+      "total_frac_of_baseline": 0.8904696778222806,
+      "nearest_log_distance": 0.05038086449795354
+    },
+    {
+      "label": "C2_AcCoA x0.1",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1140,
+      "out": [
+        22.50195847341359
+      ],
+      "total_frac_of_baseline": 0.9738147891448234,
+      "nearest_log_distance": 0.011523634190188758
+    },
+    {
+      "label": "FabG x10",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1071,
+      "out": [
+        23.144625402377056
+      ],
+      "total_frac_of_baseline": 1.0016274153505977,
+      "nearest_log_distance": 0.0007062030194491253
+    },
+    {
+      "label": "FabZ x10",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1082,
+      "out": [
+        23.37166447350875
+      ],
+      "total_frac_of_baseline": 1.0114529603334033,
+      "nearest_log_distance": 0.004945689832801081
+    },
+    {
+      "label": "FabI x10",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1084,
+      "out": [
+        23.18604209061311
+      ],
+      "total_frac_of_baseline": 1.0034198008253699,
+      "nearest_log_distance": 0.0014826668575165236
+    },
+    {
+      "label": "TesA x10",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1277,
+      "out": [
+        70.46426997283224
+      ],
+      "total_frac_of_baseline": 3.049474484050449,
+      "nearest_log_distance": 0.04902506873641754
+    },
+    {
+      "label": "FabA x10",
+      "result": "too similar",
+      "steps": 81,
+      "strict_steps": 1079,
+      "out": [
+        23.205560690045143
+      ],
+      "total_frac_of_baseline": 1.004264505112455,
+      "nearest_log_distance": 0.0018481131891758817
+    },
+    {
+      "label": "FabH x2",
+      "result": "too similar",
+      "steps": 82,
+      "strict_steps": 1094,
+      "out": [
+        23.29527480202495
+      ],
+      "total_frac_of_baseline": 1.0081470528979801,
+      "nearest_log_distance": 0.0035238848914003196
+    },
+    {
+      "label": "C3_MalCoA x2",
+      "result": "too similar",
+      "steps": 82,
+      "strict_steps": 1097,
+      "out": [
+        23.23509432088946
+      ],
+      "total_frac_of_baseline": 1.005542628815657,
+      "nearest_log_distance": 0.0024004867348255132
+    },
+    {
+      "label": "C2_AcCoA x2",
+      "result": "too similar",
+      "steps": 82,
+      "strict_steps": 1107,
+      "out": [
+        23.124653711156387
+      ],
+      "total_frac_of_baseline": 1.0007631026598647,
+      "nearest_log_distance": 0.0003312848881855679
+    },
+    {
+      "label": "TesA x0.2",
+      "result": "too similar",
+      "steps": 82,
+      "strict_steps": 1027,
+      "out": [
+        5.153769182667618
+      ],
+      "total_frac_of_baseline": 0.22303910372292104,
+      "nearest_log_distance": 0.012747847466594298
+    },
+    {
+      "label": "FabH x5",
+      "result": "too similar",
+      "steps": 82,
+      "strict_steps": 1125,
+      "out": [
+        23.051601562479387
+      ],
+      "total_frac_of_baseline": 0.9976016328329372,
+      "nearest_log_distance": 0.0010428486937537063
+    },
+    {
+      "label": "FabZ x0.1",
+      "result": "too similar",
+      "steps": 82,
+      "strict_steps": 1130,
+      "out": [
+        21.496016602853544
+      ],
+      "total_frac_of_baseline": 0.9302807531306341,
+      "nearest_log_distance": 0.031385964204386996
+    },
+    {
+      "label": "TesA x0.1",
+      "result": "too similar",
+      "steps": 82,
+      "strict_steps": 1023,
+      "out": [
+        2.609009130729941
+      ],
+      "total_frac_of_baseline": 0.11290980202992387,
+      "nearest_log_distance": 0.018001433384908005
+    },
+    {
+      "label": "FabH x10",
+      "result": "too similar",
+      "steps": 83,
+      "strict_steps": 1190,
+      "out": [
+        22.398630031787782
+      ],
+      "total_frac_of_baseline": 0.969343055508243,
+      "nearest_log_distance": 0.013522496687674579
+    },
+    {
+      "label": "ACP x10",
+      "result": "too similar",
+      "steps": 83,
+      "strict_steps": 1515,
+      "out": [
+        94.05148181726264
+      ],
+      "total_frac_of_baseline": 4.070255664316921,
+      "nearest_log_distance": 0.1744217542630595
+    },
+    {
+      "label": "C2_AcCoA x5",
+      "result": "too similar",
+      "steps": 84,
+      "strict_steps": 1138,
+      "out": [
+        23.13472517367459
+      ],
+      "total_frac_of_baseline": 1.0011989642387638,
+      "nearest_log_distance": 0.0005203916497071859
+    },
+    {
+      "label": "C3_MalCoA x5",
+      "result": "too similar",
+      "steps": 85,
+      "strict_steps": 1121,
+      "out": [
+        23.311440107607147
+      ],
+      "total_frac_of_baseline": 1.0088466370548699,
+      "nearest_log_distance": 0.0038251506342343866
+    },
+    {
+      "label": "C2_AcCoA x10",
+      "result": "too similar",
+      "steps": 85,
+      "strict_steps": 1156,
+      "out": [
+        23.138000125908256
+      ],
+      "total_frac_of_baseline": 1.0013406939874279,
+      "nearest_log_distance": 0.0005818660356113892
+    },
+    {
+      "label": "C3_MalCoA x10",
+      "result": "too similar",
+      "steps": 86,
+      "strict_steps": 1140,
+      "out": [
+        23.336810366338067
+      ],
+      "total_frac_of_baseline": 1.0099445829597027,
+      "nearest_log_distance": 0.004297544104330031
+    },
+    {
+      "label": "ACP x0.1",
+      "result": "kept",
+      "steps": 80,
+      "strict_steps": 735,
+      "out": [
+        2.503076746257931
+      ],
+      "total_frac_of_baseline": 0.10832537784435345
+    },
+    {
+      "label": "TesA x0.5",
+      "result": "kept",
+      "steps": 81,
+      "strict_steps": 1047,
+      "out": [
+        12.391192363074412
+      ],
+      "total_frac_of_baseline": 0.5362522729991381
+    },
+    {
+      "label": "TesA x2",
+      "result": "kept",
+      "steps": 81,
+      "strict_steps": 1151,
+      "out": [
+        39.690054482264394
+      ],
+      "total_frac_of_baseline": 1.7176621351630048
+    },
+    {
+      "label": "ACP x0.2",
+      "result": "kept",
+      "steps": 81,
+      "strict_steps": 827,
+      "out": [
+        5.004689253201594
+      ],
+      "total_frac_of_baseline": 0.21658738796448118
+    },
+    {
+      "label": "TesA x5",
+      "result": "kept",
+      "steps": 81,
+      "strict_steps": 1234,
+      "out": [
+        62.942485446416235
+      ],
+      "total_frac_of_baseline": 2.7239550399878807
+    }
+  ],
+  "seconds": 35.6
+}
