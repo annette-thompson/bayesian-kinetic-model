@@ -50,6 +50,8 @@ try:
     # directory on sys.path, so its sibling module is importable by its bare name.
     from reaction_model_builder import (
         build_ode_system_from_reactions,
+        discover_scaling_groups,
+        nominal_scaling_group_values,
         set_scaling_group_values,
     )
 except ModuleNotFoundError:
@@ -58,6 +60,8 @@ except ModuleNotFoundError:
     # itself, so the sibling module has to be found via the package instead.
     from Utilities.reaction_model_builder import (
         build_ode_system_from_reactions,
+        discover_scaling_groups,
+        nominal_scaling_group_values,
         set_scaling_group_values,
     )
 
@@ -182,7 +186,11 @@ def _init_worker(
     atol: float,
 ) -> None:
     """Build one worker's own copy of the network (cheap: YAML parsing, no heavy compute)."""
-    network, *_ = build_ode_system_from_reactions(reactions_path)
+    # theta (carrying the real scaling values) is passed to the solver separately,
+    # so the build itself only needs to be a no-op.
+    network, *_ = build_ode_system_from_reactions(
+        reactions_path,
+        scaling_group=nominal_scaling_group_values(discover_scaling_groups(reactions_path)))
     _worker_state["network"] = network
     _worker_state["theta"] = jnp.array(theta_list, dtype=jnp.float64)
     _worker_state["time_range"] = time_range
@@ -401,7 +409,9 @@ def run_from_config(config_path: str | Path) -> tuple[pd.DataFrame, dict[str, An
     reactions_path = _resolve_path(path_base, config["reactions_path"])
 
     print(f"==> Loading reactions from {reactions_path}")
-    network, species, params, param_values, scaling_groups = build_ode_system_from_reactions(reactions_path)
+    network, species, params, param_values, scaling_groups = build_ode_system_from_reactions(
+        reactions_path,
+        scaling_group=nominal_scaling_group_values(discover_scaling_groups(reactions_path)))
     species_idx = {name: i for i, name in enumerate(species)}
 
     theta = jnp.array([param_values[p] for p in params], dtype=jnp.float64)

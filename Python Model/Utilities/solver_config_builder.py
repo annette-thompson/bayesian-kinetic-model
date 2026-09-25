@@ -28,11 +28,18 @@ def discover_observable_names(
         sys.path.insert(0, utilities_dir)
 
     from experiment_framework import load_observable_definitions
-    from reaction_model_builder import build_ode_system_from_reactions
+    from reaction_model_builder import (
+        build_ode_system_from_reactions, discover_scaling_groups,
+        nominal_scaling_group_values,
+    )
 
     module_path = _resolve_path(base_dir, calculation_module_path)
     reactions_path = _resolve_path(base_dir, reactions_source)
-    _, species_names, _, _, _ = build_ode_system_from_reactions(reactions_path)
+    # Only species names are read, which are structural -- independent of the
+    # scaling values -- and this builds a config rather than reading one.
+    _, species_names, _, _, _ = build_ode_system_from_reactions(
+        reactions_path,
+        scaling_group=nominal_scaling_group_values(discover_scaling_groups(reactions_path)))
     return list(load_observable_definitions(module_path, species_names=species_names).keys())
 
 

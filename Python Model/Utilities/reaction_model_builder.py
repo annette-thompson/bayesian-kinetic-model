@@ -414,6 +414,24 @@ def discover_scaling_groups(
     return names
 
 
+def nominal_scaling_group_values(scaling_groups: "Sequence[str]") -> dict[str, float]:
+    """The no-op value for each group: 1.0 multiplicative, 0.0 for 'd'-prefixed.
+
+    'd' groups are additive inside exp() (TesA's 1/exp(12*d1+d2)), so their no-op
+    value is 0, not 1. Giving them 1 does not fail loudly -- it silently rescales
+    TesA by ~4.4e5x at C12 and ~4e12x at C20. That is the bug
+    build_ode_system_from_reactions' explicit-value requirement exists to catch,
+    which is why the rule lives here next to it rather than being retyped at each
+    call site.
+
+    Only for callers that genuinely need a no-op build (structural queries, or
+    builds whose values are overridden afterwards from a config or posterior).
+    Anything that solves with these values should pass the authoritative
+    'scaling_groups' block from its solver params instead.
+    """
+    return {g: (0.0 if g.startswith("d") else 1.0) for g in scaling_groups}
+
+
 def _resolve_scaling_value(name: str, scaling_group) -> float:
     """Look up one scaling group's value, refusing to invent a default.
 

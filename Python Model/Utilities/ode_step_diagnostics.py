@@ -55,7 +55,7 @@ def profile_ode_steps(solver_params_file: str, n_samples: int = 20, seed: int = 
     imported = import_solver_params(solver_params_file)
     sp = imported.solver_params
     ode_system, species_names, param_names, param_values, _scaling = build_ode_system_from_reactions(
-        imported.reactions_source
+        imported.reactions_source, scaling_group=sp.get("scaling_groups")
     )
     validate_experiment_config(
         solver_params=sp, solver_params_file=str(imported.solver_params_file), species_names=species_names
