@@ -1,0 +1,1801 @@
+{
+ "Chain Scaling Tests/Chain C10 - a1_0.05-20_floor": {
+  "run": "Chain C10 - a1_0.05-20_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C10 - a1_0.05-20_no_floor": {
+  "run": "Chain C10 - a1_0.05-20_no_floor",
+  "chains": 8,
+  "sampling_done": 1205,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.7273,
+    "ess": 13.3
+   },
+   {
+    "draws": 200,
+    "rhat": 1.705,
+    "ess": 13.0
+   },
+   {
+    "draws": 300,
+    "rhat": 1.6951,
+    "ess": 12.9
+   },
+   {
+    "draws": 400,
+    "rhat": 1.6965,
+    "ess": 12.7
+   },
+   {
+    "draws": 500,
+    "rhat": 1.6941,
+    "ess": 12.7
+   },
+   {
+    "draws": 600,
+    "rhat": 1.6946,
+    "ess": 12.6
+   },
+   {
+    "draws": 700,
+    "rhat": 1.6943,
+    "ess": 12.6
+   },
+   {
+    "draws": 800,
+    "rhat": 1.6941,
+    "ess": 12.6
+   },
+   {
+    "draws": 900,
+    "rhat": 1.6943,
+    "ess": 12.6
+   },
+   {
+    "draws": 1000,
+    "rhat": 1.6944,
+    "ess": 12.6
+   },
+   {
+    "draws": 1100,
+    "rhat": 1.6948,
+    "ess": 12.6
+   },
+   {
+    "draws": 1200,
+    "rhat": 1.6942,
+    "ess": 12.6
+   }
+  ],
+  "ess_at_end": 12.6,
+  "rhat_at_end": 1.6942,
+  "converged_old": false,
+  "draw_old": null,
+  "first_ok_old": null,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": null,
+  "plot_draw_new": null,
+  "projected": false,
+  "verdict": "never converged under either rule"
+ },
+ "Chain Scaling Tests/Chain C10 - a1_0.1-10_floor": {
+  "run": "Chain C10 - a1_0.1-10_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C10 - a1_0.1-10_no_floor": {
+  "run": "Chain C10 - a1_0.1-10_no_floor",
+  "chains": 8,
+  "sampling_done": 500,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.033,
+    "ess": 244.0
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0111,
+    "ess": 506.2
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0031,
+    "ess": 799.1
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0023,
+    "ess": 1104.6
+   },
+   {
+    "draws": 500,
+    "rhat": 1.0019,
+    "ess": 1347.7
+   }
+  ],
+  "ess_at_end": 1347.7,
+  "rhat_at_end": 1.0019,
+  "converged_old": true,
+  "draw_old": 500,
+  "first_ok_old": 300,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 400,
+  "plot_draw_new": 600,
+  "projected": true,
+  "extra_draws_needed": 100,
+  "verdict": "500 draws on disk, rule needs a confirmation block past them (ESS 1347.7 >= 800 from draw 400)"
+ },
+ "Chain Scaling Tests/Chain C10 - a1c2_no_floor": {
+  "run": "Chain C10 - a1c2_no_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": false,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C10 - a1c3_no_floor": {
+  "run": "Chain C10 - a1c3_no_floor",
+  "chains": 8,
+  "sampling_done": 600,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": false,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.027,
+    "ess": 270.9
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0111,
+    "ess": 618.8
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0134,
+    "ess": 928.6
+   },
+   {
+    "draws": 400,
+    "rhat": 1.007,
+    "ess": 1278.7
+   },
+   {
+    "draws": 500,
+    "rhat": 1.0028,
+    "ess": 1513.6
+   },
+   {
+    "draws": 600,
+    "rhat": 1.0032,
+    "ess": 1831.9
+   }
+  ],
+  "ess_at_end": 1831.9,
+  "rhat_at_end": 1.0032,
+  "converged_old": true,
+  "draw_old": 600,
+  "first_ok_old": 400,
+  "converged_new": true,
+  "draw_new": 600,
+  "first_ok_new": 400,
+  "plot_draw_new": 600,
+  "projected": false,
+  "verdict": "unchanged"
+ },
+ "Chain Scaling Tests/Chain C10 - a1c3a2_no_floor": {
+  "run": "Chain C10 - a1c3a2_no_floor",
+  "chains": 8,
+  "sampling_done": 600,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": false,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0443,
+    "ess": 232.0
+   },
+   {
+    "draws": 200,
+    "rhat": 1.021,
+    "ess": 414.5
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0102,
+    "ess": 524.9
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0076,
+    "ess": 736.7
+   },
+   {
+    "draws": 500,
+    "rhat": 1.0073,
+    "ess": 905.3
+   },
+   {
+    "draws": 600,
+    "rhat": 1.0071,
+    "ess": 1054.9
+   }
+  ],
+  "ess_at_end": 1054.9,
+  "rhat_at_end": 1.0071,
+  "converged_old": true,
+  "draw_old": 600,
+  "first_ok_old": 400,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 500,
+  "plot_draw_new": 700,
+  "projected": true,
+  "extra_draws_needed": 100,
+  "verdict": "600 draws on disk, rule needs a confirmation block past them (ESS 1054.9 >= 800 from draw 500)"
+ },
+ "Chain Scaling Tests/Chain C10 - a1c3d1_no_floor": {
+  "run": "Chain C10 - a1c3d1_no_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": false,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C12 - a1_0.1-10_floor": {
+  "run": "Chain C12 - a1_0.1-10_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C12 - a1_0.1-10_no_floor": {
+  "run": "Chain C12 - a1_0.1-10_no_floor",
+  "chains": 8,
+  "sampling_done": 400,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0185,
+    "ess": 341.7
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0049,
+    "ess": 648.7
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0026,
+    "ess": 956.3
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0025,
+    "ess": 1339.0
+   }
+  ],
+  "ess_at_end": 1339.0,
+  "rhat_at_end": 1.0025,
+  "converged_old": true,
+  "draw_old": 400,
+  "first_ok_old": 200,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": true,
+  "extra_draws_needed": 100,
+  "verdict": "400 draws on disk, rule needs a confirmation block past them (ESS 1339 >= 800 from draw 300)"
+ },
+ "Chain Scaling Tests/Chain C12+unsat - a1_0.1-10_floor": {
+  "run": "Chain C12+unsat - a1_0.1-10_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C12+unsat - a1_0.1-10_no_floor": {
+  "run": "Chain C12+unsat - a1_0.1-10_no_floor",
+  "chains": 8,
+  "sampling_done": 500,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0262,
+    "ess": 320.8
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0133,
+    "ess": 621.1
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0038,
+    "ess": 917.8
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0021,
+    "ess": 1256.1
+   },
+   {
+    "draws": 500,
+    "rhat": 1.0022,
+    "ess": 1542.5
+   }
+  ],
+  "ess_at_end": 1542.5,
+  "rhat_at_end": 1.0022,
+  "converged_old": true,
+  "draw_old": 500,
+  "first_ok_old": 300,
+  "converged_new": true,
+  "draw_new": 500,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": false,
+  "verdict": "unchanged"
+ },
+ "Chain Scaling Tests/Chain C14 - a1_0.05-20_no_floor": {
+  "run": "Chain C14 - a1_0.05-20_no_floor",
+  "chains": 8,
+  "sampling_done": 500,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.019,
+    "ess": 298.4
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0121,
+    "ess": 586.8
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0074,
+    "ess": 908.8
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0057,
+    "ess": 1259.2
+   },
+   {
+    "draws": 500,
+    "rhat": 1.004,
+    "ess": 1506.9
+   }
+  ],
+  "ess_at_end": 1506.9,
+  "rhat_at_end": 1.004,
+  "converged_old": true,
+  "draw_old": 500,
+  "first_ok_old": 300,
+  "converged_new": true,
+  "draw_new": 500,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": false,
+  "verdict": "unchanged"
+ },
+ "Chain Scaling Tests/Chain C14 - a1_0.1-10_floor": {
+  "run": "Chain C14 - a1_0.1-10_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C14 - a1_0.1-10_no_floor": {
+  "run": "Chain C14 - a1_0.1-10_no_floor",
+  "chains": 8,
+  "sampling_done": 400,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0221,
+    "ess": 333.0
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0083,
+    "ess": 677.7
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0022,
+    "ess": 958.4
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0053,
+    "ess": 1252.4
+   }
+  ],
+  "ess_at_end": 1252.4,
+  "rhat_at_end": 1.0053,
+  "converged_old": true,
+  "draw_old": 400,
+  "first_ok_old": 200,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": true,
+  "extra_draws_needed": 100,
+  "verdict": "400 draws on disk, rule needs a confirmation block past them (ESS 1252.4 >= 800 from draw 300)"
+ },
+ "Chain Scaling Tests/Chain C14 - a1c2_no_floor": {
+  "run": "Chain C14 - a1c2_no_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": false,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C14 - a1c3_no_floor": {
+  "run": "Chain C14 - a1c3_no_floor",
+  "chains": 8,
+  "sampling_done": 300,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": false,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0074,
+    "ess": 524.5
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0032,
+    "ess": 914.3
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0046,
+    "ess": 1318.2
+   }
+  ],
+  "ess_at_end": 1318.2,
+  "rhat_at_end": 1.0046,
+  "converged_old": true,
+  "draw_old": 300,
+  "first_ok_old": 100,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 200,
+  "plot_draw_new": 400,
+  "projected": true,
+  "extra_draws_needed": 100,
+  "verdict": "300 draws on disk, rule needs a confirmation block past them (ESS 1318.2 >= 800 from draw 200)"
+ },
+ "Chain Scaling Tests/Chain C14 - a1c3a2_no_floor": {
+  "run": "Chain C14 - a1c3a2_no_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": false,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C14 - a1c3d1_no_floor": {
+  "run": "Chain C14 - a1c3d1_no_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": false,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C14+unsat - a1_0.1-10_floor": {
+  "run": "Chain C14+unsat - a1_0.1-10_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C14+unsat - a1_0.1-10_no_floor": {
+  "run": "Chain C14+unsat - a1_0.1-10_no_floor",
+  "chains": 8,
+  "sampling_done": 400,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0138,
+    "ess": 347.7
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0046,
+    "ess": 664.7
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0033,
+    "ess": 964.4
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0028,
+    "ess": 1306.7
+   }
+  ],
+  "ess_at_end": 1306.7,
+  "rhat_at_end": 1.0028,
+  "converged_old": true,
+  "draw_old": 400,
+  "first_ok_old": 200,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": true,
+  "extra_draws_needed": 100,
+  "verdict": "400 draws on disk, rule needs a confirmation block past them (ESS 1306.7 >= 800 from draw 300)"
+ },
+ "Chain Scaling Tests/Chain C16 - a1_0.1-10_floor": {
+  "run": "Chain C16 - a1_0.1-10_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C16 - a1_0.1-10_no_floor": {
+  "run": "Chain C16 - a1_0.1-10_no_floor",
+  "chains": 8,
+  "sampling_done": 400,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0229,
+    "ess": 262.6
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0096,
+    "ess": 549.5
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0049,
+    "ess": 848.6
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0033,
+    "ess": 1186.1
+   }
+  ],
+  "ess_at_end": 1186.1,
+  "rhat_at_end": 1.0033,
+  "converged_old": true,
+  "draw_old": 400,
+  "first_ok_old": 200,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": true,
+  "extra_draws_needed": 100,
+  "verdict": "400 draws on disk, rule needs a confirmation block past them (ESS 1186.1 >= 800 from draw 300)"
+ },
+ "Chain Scaling Tests/Chain C16+unsat - a1_0.1-10_floor": {
+  "run": "Chain C16+unsat - a1_0.1-10_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C16+unsat - a1_0.1-10_no_floor": {
+  "run": "Chain C16+unsat - a1_0.1-10_no_floor",
+  "chains": 8,
+  "sampling_done": 400,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0189,
+    "ess": 324.8
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0077,
+    "ess": 667.2
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0058,
+    "ess": 1008.2
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0017,
+    "ess": 1370.5
+   }
+  ],
+  "ess_at_end": 1370.5,
+  "rhat_at_end": 1.0017,
+  "converged_old": true,
+  "draw_old": 400,
+  "first_ok_old": 200,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": true,
+  "extra_draws_needed": 100,
+  "verdict": "400 draws on disk, rule needs a confirmation block past them (ESS 1370.5 >= 800 from draw 300)"
+ },
+ "Chain Scaling Tests/Chain C18 - a1_0.1-10_floor": {
+  "run": "Chain C18 - a1_0.1-10_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C18 - a1_0.1-10_no_floor": {
+  "run": "Chain C18 - a1_0.1-10_no_floor",
+  "chains": 8,
+  "sampling_done": 400,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0185,
+    "ess": 342.7
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0066,
+    "ess": 600.3
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0013,
+    "ess": 998.6
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0019,
+    "ess": 1303.4
+   }
+  ],
+  "ess_at_end": 1303.4,
+  "rhat_at_end": 1.0019,
+  "converged_old": true,
+  "draw_old": 400,
+  "first_ok_old": 200,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": true,
+  "extra_draws_needed": 100,
+  "verdict": "400 draws on disk, rule needs a confirmation block past them (ESS 1303.4 >= 800 from draw 300)"
+ },
+ "Chain Scaling Tests/Chain C18+unsat - a1_0.1-10_floor": {
+  "run": "Chain C18+unsat - a1_0.1-10_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C18+unsat - a1_0.1-10_no_floor": {
+  "run": "Chain C18+unsat - a1_0.1-10_no_floor",
+  "chains": 8,
+  "sampling_done": 400,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0176,
+    "ess": 309.8
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0093,
+    "ess": 618.8
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0059,
+    "ess": 934.4
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0055,
+    "ess": 1288.1
+   }
+  ],
+  "ess_at_end": 1288.1,
+  "rhat_at_end": 1.0055,
+  "converged_old": true,
+  "draw_old": 400,
+  "first_ok_old": 200,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": true,
+  "extra_draws_needed": 100,
+  "verdict": "400 draws on disk, rule needs a confirmation block past them (ESS 1288.1 >= 800 from draw 300)"
+ },
+ "Chain Scaling Tests/Chain C20 - a1_0.1-10_floor": {
+  "run": "Chain C20 - a1_0.1-10_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C20 - a1_0.1-10_no_floor": {
+  "run": "Chain C20 - a1_0.1-10_no_floor",
+  "chains": 8,
+  "sampling_done": 400,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0194,
+    "ess": 303.2
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0055,
+    "ess": 597.1
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0031,
+    "ess": 906.6
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0018,
+    "ess": 1244.2
+   }
+  ],
+  "ess_at_end": 1244.2,
+  "rhat_at_end": 1.0018,
+  "converged_old": true,
+  "draw_old": 400,
+  "first_ok_old": 200,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": true,
+  "extra_draws_needed": 100,
+  "verdict": "400 draws on disk, rule needs a confirmation block past them (ESS 1244.2 >= 800 from draw 300)"
+ },
+ "Chain Scaling Tests/Chain C20+unsat - a1_0.1-10_floor": {
+  "run": "Chain C20+unsat - a1_0.1-10_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C20+unsat - a1_0.1-10_no_floor": {
+  "run": "Chain C20+unsat - a1_0.1-10_no_floor",
+  "chains": 8,
+  "sampling_done": 400,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0265,
+    "ess": 286.0
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0067,
+    "ess": 564.9
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0053,
+    "ess": 832.6
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0048,
+    "ess": 1131.8
+   }
+  ],
+  "ess_at_end": 1131.8,
+  "rhat_at_end": 1.0048,
+  "converged_old": true,
+  "draw_old": 400,
+  "first_ok_old": 200,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": true,
+  "extra_draws_needed": 100,
+  "verdict": "400 draws on disk, rule needs a confirmation block past them (ESS 1131.8 >= 800 from draw 300)"
+ },
+ "Chain Scaling Tests/Chain C4_NoFB - a1_0.05-20_floor": {
+  "run": "Chain C4_NoFB - a1_0.05-20_floor",
+  "chains": 8,
+  "sampling_done": 605,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0495,
+    "ess": 111.2
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0169,
+    "ess": 361.0
+   },
+   {
+    "draws": 300,
+    "rhat": 1.01,
+    "ess": 580.5
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0052,
+    "ess": 763.6
+   },
+   {
+    "draws": 500,
+    "rhat": 1.007,
+    "ess": 934.4
+   },
+   {
+    "draws": 600,
+    "rhat": 1.005,
+    "ess": 1131.5
+   }
+  ],
+  "ess_at_end": 1131.5,
+  "rhat_at_end": 1.005,
+  "converged_old": true,
+  "draw_old": 600,
+  "first_ok_old": 400,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 500,
+  "plot_draw_new": 700,
+  "projected": true,
+  "extra_draws_needed": 95,
+  "verdict": "605 draws on disk, rule needs a confirmation block past them (ESS 1131.5 >= 800 from draw 500)"
+ },
+ "Chain Scaling Tests/Chain C4_NoFB - a1_0.05-20_no_floor": {
+  "run": "Chain C4_NoFB - a1_0.05-20_no_floor",
+  "chains": 8,
+  "sampling_done": 700,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0565,
+    "ess": 153.0
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0156,
+    "ess": 323.3
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0116,
+    "ess": 525.2
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0059,
+    "ess": 715.9
+   },
+   {
+    "draws": 500,
+    "rhat": 1.0071,
+    "ess": 890.0
+   },
+   {
+    "draws": 600,
+    "rhat": 1.0082,
+    "ess": 1085.9
+   },
+   {
+    "draws": 700,
+    "rhat": 1.006,
+    "ess": 1337.8
+   }
+  ],
+  "ess_at_end": 1337.8,
+  "rhat_at_end": 1.006,
+  "converged_old": true,
+  "draw_old": 600,
+  "first_ok_old": 400,
+  "converged_new": true,
+  "draw_new": 700,
+  "first_ok_new": 500,
+  "plot_draw_new": 700,
+  "projected": false,
+  "verdict": "moves 600 -> 700"
+ },
+ "Chain Scaling Tests/Chain C4_NoFB - a1_0.1-10_floor": {
+  "run": "Chain C4_NoFB - a1_0.1-10_floor",
+  "chains": 8,
+  "sampling_done": 800,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0271,
+    "ess": 195.6
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0237,
+    "ess": 332.7
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0127,
+    "ess": 530.4
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0161,
+    "ess": 613.8
+   },
+   {
+    "draws": 500,
+    "rhat": 1.0139,
+    "ess": 775.3
+   },
+   {
+    "draws": 600,
+    "rhat": 1.0095,
+    "ess": 937.3
+   },
+   {
+    "draws": 700,
+    "rhat": 1.0093,
+    "ess": 1107.8
+   },
+   {
+    "draws": 800,
+    "rhat": 1.0084,
+    "ess": 1273.6
+   }
+  ],
+  "ess_at_end": 1273.6,
+  "rhat_at_end": 1.0084,
+  "converged_old": true,
+  "draw_old": 800,
+  "first_ok_old": 600,
+  "converged_new": true,
+  "draw_new": 800,
+  "first_ok_new": 600,
+  "plot_draw_new": 800,
+  "projected": false,
+  "verdict": "unchanged"
+ },
+ "Chain Scaling Tests/Chain C4_NoFB - a1_0.1-10_no_floor": {
+  "run": "Chain C4_NoFB - a1_0.1-10_no_floor",
+  "chains": 8,
+  "sampling_done": 700,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0381,
+    "ess": 168.4
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0161,
+    "ess": 335.0
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0151,
+    "ess": 442.4
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0104,
+    "ess": 647.5
+   },
+   {
+    "draws": 500,
+    "rhat": 1.0084,
+    "ess": 815.7
+   },
+   {
+    "draws": 600,
+    "rhat": 1.0057,
+    "ess": 988.7
+   },
+   {
+    "draws": 700,
+    "rhat": 1.0043,
+    "ess": 1215.1
+   }
+  ],
+  "ess_at_end": 1215.1,
+  "rhat_at_end": 1.0043,
+  "converged_old": true,
+  "draw_old": 700,
+  "first_ok_old": 500,
+  "converged_new": true,
+  "draw_new": 700,
+  "first_ok_new": 500,
+  "plot_draw_new": 700,
+  "projected": false,
+  "verdict": "unchanged"
+ },
+ "Chain Scaling Tests/Chain C6 - a1 narrowest nofloor-eqxnan": {
+  "run": "Chain C6 - a1 narrowest nofloor-eqxnan",
+  "chains": 8,
+  "sampling_done": 400,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.5277,
+    "ess": 16.1
+   },
+   {
+    "draws": 200,
+    "rhat": 1.5122,
+    "ess": 15.5
+   },
+   {
+    "draws": 300,
+    "rhat": 1.5006,
+    "ess": 15.4
+   },
+   {
+    "draws": 400,
+    "rhat": 1.5003,
+    "ess": 15.5
+   }
+  ],
+  "ess_at_end": 15.5,
+  "rhat_at_end": 1.5003,
+  "converged_old": false,
+  "draw_old": null,
+  "first_ok_old": null,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": null,
+  "plot_draw_new": null,
+  "projected": false,
+  "verdict": "never converged under either rule"
+ },
+ "Chain Scaling Tests/Chain C6 - a1_0.1-10_floor": {
+  "run": "Chain C6 - a1_0.1-10_floor",
+  "chains": 8,
+  "sampling_done": 400,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0096,
+    "ess": 371.6
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0072,
+    "ess": 729.3
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0054,
+    "ess": 1047.8
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0026,
+    "ess": 1368.2
+   }
+  ],
+  "ess_at_end": 1368.2,
+  "rhat_at_end": 1.0026,
+  "converged_old": true,
+  "draw_old": 400,
+  "first_ok_old": 200,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": true,
+  "extra_draws_needed": 100,
+  "verdict": "400 draws on disk, rule needs a confirmation block past them (ESS 1368.2 >= 800 from draw 300)"
+ },
+ "Chain Scaling Tests/Chain C6 - a1_0.1-10_no_floor": {
+  "run": "Chain C6 - a1_0.1-10_no_floor",
+  "chains": 8,
+  "sampling_done": 400,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0176,
+    "ess": 381.3
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0081,
+    "ess": 682.0
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0064,
+    "ess": 1085.9
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0048,
+    "ess": 1383.9
+   }
+  ],
+  "ess_at_end": 1383.9,
+  "rhat_at_end": 1.0048,
+  "converged_old": true,
+  "draw_old": 400,
+  "first_ok_old": 200,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": true,
+  "extra_draws_needed": 100,
+  "verdict": "400 draws on disk, rule needs a confirmation block past them (ESS 1383.9 >= 800 from draw 300)"
+ },
+ "Chain Scaling Tests/Chain C6 - a1c2_no_floor": {
+  "run": "Chain C6 - a1c2_no_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": false,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C6 - a1c3_no_floor": {
+  "run": "Chain C6 - a1c3_no_floor",
+  "chains": 8,
+  "sampling_done": 500,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": false,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0078,
+    "ess": 352.2
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0144,
+    "ess": 714.3
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0007,
+    "ess": 1066.1
+   },
+   {
+    "draws": 400,
+    "rhat": 1.003,
+    "ess": 1381.5
+   },
+   {
+    "draws": 500,
+    "rhat": 1.0028,
+    "ess": 1716.8
+   }
+  ],
+  "ess_at_end": 1716.8,
+  "rhat_at_end": 1.0028,
+  "converged_old": true,
+  "draw_old": 500,
+  "first_ok_old": 300,
+  "converged_new": true,
+  "draw_new": 500,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": false,
+  "verdict": "unchanged"
+ },
+ "Chain Scaling Tests/Chain C6 - a1c3a2_no_floor": {
+  "run": "Chain C6 - a1c3a2_no_floor",
+  "chains": 8,
+  "sampling_done": 600,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": false,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0376,
+    "ess": 182.7
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0286,
+    "ess": 331.0
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0107,
+    "ess": 479.6
+   },
+   {
+    "draws": 400,
+    "rhat": 1.009,
+    "ess": 658.0
+   },
+   {
+    "draws": 500,
+    "rhat": 1.0091,
+    "ess": 791.4
+   },
+   {
+    "draws": 600,
+    "rhat": 1.0105,
+    "ess": 956.5
+   }
+  ],
+  "ess_at_end": 956.5,
+  "rhat_at_end": 1.0105,
+  "converged_old": true,
+  "draw_old": 600,
+  "first_ok_old": 400,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": null,
+  "plot_draw_new": null,
+  "projected": false,
+  "verdict": "no check passes the new rule: r-hat 1.0105 > 1.01 at the last draw"
+ },
+ "Chain Scaling Tests/Chain C6 - a1c3d1_no_floor": {
+  "run": "Chain C6 - a1c3d1_no_floor",
+  "chains": 8,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": false,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Scaling Tests/Chain C8 - a1_0.1-10_floor": {
+  "run": "Chain C8 - a1_0.1-10_floor",
+  "chains": 8,
+  "sampling_done": 400,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0182,
+    "ess": 304.8
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0046,
+    "ess": 694.4
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0031,
+    "ess": 1043.5
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0049,
+    "ess": 1287.2
+   }
+  ],
+  "ess_at_end": 1287.2,
+  "rhat_at_end": 1.0049,
+  "converged_old": true,
+  "draw_old": 400,
+  "first_ok_old": 200,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": true,
+  "extra_draws_needed": 100,
+  "verdict": "400 draws on disk, rule needs a confirmation block past them (ESS 1287.2 >= 800 from draw 300)"
+ },
+ "Chain Scaling Tests/Chain C8 - a1_0.1-10_no_floor": {
+  "run": "Chain C8 - a1_0.1-10_no_floor",
+  "chains": 8,
+  "sampling_done": 3000,
+  "phase": "done",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": true,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.3029,
+    "ess": 22.0
+   },
+   {
+    "draws": 200,
+    "rhat": 1.3032,
+    "ess": 21.3
+   },
+   {
+    "draws": 300,
+    "rhat": 1.299,
+    "ess": 21.2
+   },
+   {
+    "draws": 400,
+    "rhat": 1.2975,
+    "ess": 21.3
+   },
+   {
+    "draws": 500,
+    "rhat": 1.2955,
+    "ess": 21.1
+   },
+   {
+    "draws": 600,
+    "rhat": 1.2971,
+    "ess": 21.3
+   },
+   {
+    "draws": 700,
+    "rhat": 1.2963,
+    "ess": 21.4
+   },
+   {
+    "draws": 800,
+    "rhat": 1.2961,
+    "ess": 21.4
+   },
+   {
+    "draws": 900,
+    "rhat": 1.2967,
+    "ess": 21.3
+   },
+   {
+    "draws": 1000,
+    "rhat": 1.2956,
+    "ess": 21.2
+   },
+   {
+    "draws": 1100,
+    "rhat": 1.2955,
+    "ess": 21.1
+   },
+   {
+    "draws": 1200,
+    "rhat": 1.2952,
+    "ess": 21.1
+   },
+   {
+    "draws": 1300,
+    "rhat": 1.2952,
+    "ess": 21.1
+   },
+   {
+    "draws": 1400,
+    "rhat": 1.2953,
+    "ess": 20.9
+   },
+   {
+    "draws": 1500,
+    "rhat": 1.296,
+    "ess": 20.9
+   },
+   {
+    "draws": 1600,
+    "rhat": 1.2953,
+    "ess": 20.7
+   },
+   {
+    "draws": 1700,
+    "rhat": 1.2953,
+    "ess": 20.8
+   },
+   {
+    "draws": 1800,
+    "rhat": 1.2952,
+    "ess": 20.7
+   },
+   {
+    "draws": 1900,
+    "rhat": 1.2951,
+    "ess": 20.8
+   },
+   {
+    "draws": 2000,
+    "rhat": 1.2946,
+    "ess": 20.7
+   },
+   {
+    "draws": 2100,
+    "rhat": 1.2946,
+    "ess": 20.6
+   },
+   {
+    "draws": 2200,
+    "rhat": 1.2943,
+    "ess": 20.6
+   },
+   {
+    "draws": 2300,
+    "rhat": 1.2944,
+    "ess": 20.7
+   },
+   {
+    "draws": 2400,
+    "rhat": 1.2942,
+    "ess": 20.7
+   },
+   {
+    "draws": 2500,
+    "rhat": 1.2943,
+    "ess": 20.6
+   },
+   {
+    "draws": 2600,
+    "rhat": 1.2945,
+    "ess": 20.6
+   },
+   {
+    "draws": 2700,
+    "rhat": 1.2945,
+    "ess": 20.6
+   },
+   {
+    "draws": 2800,
+    "rhat": 1.2945,
+    "ess": 20.6
+   },
+   {
+    "draws": 2900,
+    "rhat": 1.2946,
+    "ess": 20.6
+   },
+   {
+    "draws": 3000,
+    "rhat": 1.2951,
+    "ess": 20.5
+   }
+  ],
+  "ess_at_end": 20.5,
+  "rhat_at_end": 1.2951,
+  "converged_old": false,
+  "draw_old": null,
+  "first_ok_old": null,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": null,
+  "plot_draw_new": null,
+  "projected": false,
+  "verdict": "never converged under either rule"
+ },
+ "Chain Count Test/Chain C12 - a1c3_16chains": {
+  "run": "Chain C12 - a1c3_16chains",
+  "chains": 16,
+  "sampling_done": 240,
+  "phase": "sampling",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 1600.0,
+  "early_stopping_was_on": false,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0153,
+    "ess": 1286.3
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0067,
+    "ess": 2088.3
+   }
+  ],
+  "ess_at_end": 2088.3,
+  "rhat_at_end": 1.0067,
+  "converged_old": false,
+  "draw_old": null,
+  "first_ok_old": 200,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 200,
+  "plot_draw_new": 400,
+  "projected": true,
+  "extra_draws_needed": 160,
+  "verdict": "240 draws on disk, rule needs a confirmation block past them (ESS 2088.3 >= 1600 from draw 200)"
+ },
+ "Chain Count Test/Chain C12 - a1c3_32chains": {
+  "run": "Chain C12 - a1c3_32chains",
+  "chains": 32,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 3200.0,
+  "early_stopping_was_on": false,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Count Test/Chain C12 - a1c3_4chains": {
+  "run": "Chain C12 - a1c3_4chains",
+  "chains": 4,
+  "sampling_done": 415,
+  "phase": "sampling",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 400.0,
+  "early_stopping_was_on": false,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0482,
+    "ess": 272.1
+   },
+   {
+    "draws": 200,
+    "rhat": 1.0073,
+    "ess": 544.0
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0039,
+    "ess": 901.4
+   },
+   {
+    "draws": 400,
+    "rhat": 1.0042,
+    "ess": 1190.7
+   }
+  ],
+  "ess_at_end": 1190.7,
+  "rhat_at_end": 1.0042,
+  "converged_old": true,
+  "draw_old": 400,
+  "first_ok_old": 200,
+  "converged_new": true,
+  "draw_new": 400,
+  "first_ok_new": 200,
+  "plot_draw_new": 400,
+  "projected": false,
+  "verdict": "unchanged"
+ },
+ "Chain Count Test/Chain C12 - a1c3_64chains": {
+  "run": "Chain C12 - a1c3_64chains",
+  "chains": 64,
+  "sampling_done": 0,
+  "phase": "warmup",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 6400.0,
+  "early_stopping_was_on": false,
+  "verdict": "no sampling draws yet (phase warmup)"
+ },
+ "Chain Count Test/Chain C12 - a1c3_8chains": {
+  "run": "Chain C12 - a1c3_8chains",
+  "chains": 8,
+  "sampling_done": 390,
+  "phase": "sampling",
+  "block": 100,
+  "ess_required_old": 400.0,
+  "ess_required_new": 800.0,
+  "early_stopping_was_on": false,
+  "checks": [
+   {
+    "draws": 100,
+    "rhat": 1.0188,
+    "ess": 572.5
+   },
+   {
+    "draws": 200,
+    "rhat": 1.013,
+    "ess": 971.7
+   },
+   {
+    "draws": 300,
+    "rhat": 1.0073,
+    "ess": 1473.0
+   }
+  ],
+  "ess_at_end": 1473.0,
+  "rhat_at_end": 1.0073,
+  "converged_old": false,
+  "draw_old": null,
+  "first_ok_old": 300,
+  "converged_new": false,
+  "draw_new": null,
+  "first_ok_new": 300,
+  "plot_draw_new": 500,
+  "projected": true,
+  "extra_draws_needed": 110,
+  "verdict": "390 draws on disk, rule needs a confirmation block past them (ESS 1473 >= 800 from draw 300)"
+ }
+}
