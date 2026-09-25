@@ -239,14 +239,21 @@ in appendix D):
     numerics also shift between jax versions (toy seed 0: r-hat 1.74 on 0.7.0, 1.61 on
     0.7.2), so results will not reproduce bit for bit across the pending pin change.
 
-Still to do before R0:
-- On the cluster, before pushing `job_files/`, rename `job_files/masking_check` to
-  `chain_scaling_tests` and `job_files/bench` to `multiparam_tests`. The scripts' paths now
-  use the local names, and nothing is running on the cluster.
-- Sync the new files to the cluster, including `Utilities/inference_runner.py`,
-  `Utilities/model_error_runner.py`, `Calculation Files/`, `Data/Tier1_rates/` and
-  `Results/Tier1/`.
-- Pin `environment.yml` and `requirements.txt` to Alpine's stack once Alpine is back.
+Done 2026-09-25, once CURC was back:
+- On the cluster, renamed `job_files/masking_check` → `chain_scaling_tests`, `bench` →
+  `multiparam_tests` and `scaling_rank` → `chain_system_sensitivity_analysis`, and updated
+  the paths inside them.
+- Synced: 441 files pushed and checksum-verified. `--update` left alone the 5 files that were
+  newer on the cluster, and those were then pulled into git.
+- Cleaned up the cluster (verified duplicates deleted, cluster-only studies archived and
+  mirrored in git, loose logs tarred).
+- R0 submitted: Blanca job 28506399 runs it on an A100 (`bgpu-biokem2`), and the Alpine twin
+  was cancelled.
+
+Still open: pinning `environment.yml` and `requirements.txt`. Alpine's working stack cannot be
+reinstalled from pins as it stands. It runs pymc 6.0.1 with pytensor 3.1.2, but pymc 6.0.1
+declares pytensor < 3.1 (`pip check` flags it there), and conda-forge will not solve that pair.
+pymc 6.1.0 declares pytensor ≥ 3.1.2, < 3.2.
 
 **Stage 1: R0 (~2.5 A100-h).** Checks plumbing: resume, stopping on r-hat + ESS, finalize,
 figures, `recovery_report.py`. It also decides the replicate system. Nothing else is queued
