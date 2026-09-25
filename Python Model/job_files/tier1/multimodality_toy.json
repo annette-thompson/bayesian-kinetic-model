@@ -1,0 +1,183 @@
+{
+  "truth": {
+    "k1": 0.3,
+    "k2": 3.0
+  },
+  "replicates": 10,
+  "replicates_with_chains_in_both_modes": 10,
+  "of_those_flagged_by_rhat_gt_1.01": 10,
+  "replicates_with_any_chain_flagged_stranded": 0,
+  "replicates_with_a_chain_crossing_modes": 3,
+  "rows": [
+    {
+      "seed": 0,
+      "chains_per_mode": {
+        "k1 slow": 2,
+        "k2 slow": 2
+      },
+      "any_chain_crossed_modes": false,
+      "rhat_k1": 1.736,
+      "lp_gap_nats": [
+        0.0,
+        0.1,
+        0.01,
+        0.03
+      ],
+      "flagged_as_stranded": [],
+      "divergences": 0
+    },
+    {
+      "seed": 1,
+      "chains_per_mode": {
+        "k1 slow": 2,
+        "k2 slow": 2
+      },
+      "any_chain_crossed_modes": false,
+      "rhat_k1": 1.734,
+      "lp_gap_nats": [
+        0.07,
+        0.0,
+        0.02,
+        0.06
+      ],
+      "flagged_as_stranded": [],
+      "divergences": 0
+    },
+    {
+      "seed": 2,
+      "chains_per_mode": {
+        "k1 slow": 1,
+        "k2 slow": 3
+      },
+      "any_chain_crossed_modes": false,
+      "rhat_k1": 1.529,
+      "lp_gap_nats": [
+        0.04,
+        0.13,
+        0.0,
+        0.0
+      ],
+      "flagged_as_stranded": [],
+      "divergences": 0
+    },
+    {
+      "seed": 3,
+      "chains_per_mode": {
+        "k1 slow": 2,
+        "k2 slow": 2
+      },
+      "any_chain_crossed_modes": false,
+      "rhat_k1": 1.735,
+      "lp_gap_nats": [
+        0.08,
+        0.03,
+        0.18,
+        0.0
+      ],
+      "flagged_as_stranded": [],
+      "divergences": 0
+    },
+    {
+      "seed": 4,
+      "chains_per_mode": {
+        "k1 slow": 2,
+        "k2 slow": 2
+      },
+      "any_chain_crossed_modes": true,
+      "rhat_k1": 1.598,
+      "lp_gap_nats": [
+        0.13,
+        0.18,
+        0.0,
+        0.14
+      ],
+      "flagged_as_stranded": [],
+      "divergences": 0
+    },
+    {
+      "seed": 5,
+      "chains_per_mode": {
+        "k1 slow": 2,
+        "k2 slow": 2
+      },
+      "any_chain_crossed_modes": true,
+      "rhat_k1": 1.327,
+      "lp_gap_nats": [
+        0.11,
+        0.05,
+        0.0,
+        0.15
+      ],
+      "flagged_as_stranded": [],
+      "divergences": 0
+    },
+    {
+      "seed": 6,
+      "chains_per_mode": {
+        "k1 slow": 1,
+        "k2 slow": 3
+      },
+      "any_chain_crossed_modes": false,
+      "rhat_k1": 1.528,
+      "lp_gap_nats": [
+        0.0,
+        0.09,
+        0.07,
+        0.07
+      ],
+      "flagged_as_stranded": [],
+      "divergences": 0
+    },
+    {
+      "seed": 7,
+      "chains_per_mode": {
+        "k1 slow": 2,
+        "k2 slow": 2
+      },
+      "any_chain_crossed_modes": false,
+      "rhat_k1": 1.735,
+      "lp_gap_nats": [
+        0.07,
+        0.0,
+        0.09,
+        0.02
+      ],
+      "flagged_as_stranded": [],
+      "divergences": 0
+    },
+    {
+      "seed": 8,
+      "chains_per_mode": {
+        "k1 slow": 1,
+        "k2 slow": 3
+      },
+      "any_chain_crossed_modes": false,
+      "rhat_k1": 1.53,
+      "lp_gap_nats": [
+        0.0,
+        0.07,
+        0.1,
+        0.05
+      ],
+      "flagged_as_stranded": [],
+      "divergences": 0
+    },
+    {
+      "seed": 9,
+      "chains_per_mode": {
+        "k1 slow": 3,
+        "k2 slow": 1
+      },
+      "any_chain_crossed_modes": true,
+      "rhat_k1": 1.299,
+      "lp_gap_nats": [
+        0.06,
+        0.0,
+        0.12,
+        0.18
+      ],
+      "flagged_as_stranded": [],
+      "divergences": 0
+    }
+  ]
+}
