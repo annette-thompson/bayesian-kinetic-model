@@ -24,17 +24,17 @@
             "observable": {
                 "type": "total_production"
             },
-            "mean": 41.175133116121664,
-            "std": 1.3222953520295542,
-            "relative_std": 0.03211393022823827
+            "mean": 41.17513289875019,
+            "std": 1.3222953318110247,
+            "relative_std": 0.03211392990673652
         },
         "mean_chain_length": {
             "observable": {
                 "type": "mean_chain_length"
             },
-            "mean": 13.220613741123424,
-            "std": 0.10583690704174845,
-            "relative_std": 0.00800544582227201
+            "mean": 13.220613570173741,
+            "std": 0.10583690095005353,
+            "relative_std": 0.008005445465014274
         }
     }
 }
