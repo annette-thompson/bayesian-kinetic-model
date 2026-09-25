@@ -1,8 +1,7 @@
+# Build output of the retired Sync/make_utils32.sh (a 32-bit copy of Utilities/).
+# The script is gone, but old copies of the tree may still sit in working copies.
 Utilities32/
 
-# Benchmark harness output. The JSONL/CSV summaries ARE worth keeping -- they are
-# the artifact. The per-run netcdf and zarr checkpoints are regenerable bulk
-# (Stage 3 writes ~50 of them) and would otherwise land in git, since Results/ is
-# otherwise fully tracked.
-Results/Benchmarks/runs/**/*.nc
-Results/Benchmarks/runs/**/checkpoint/
+# Resumable-sampler checkpoints (zarr draw stores plus resume state). They belong with
+# the run that wrote them, and one run's store is hundreds of chunk files.
+Results/**/checkpoint/
