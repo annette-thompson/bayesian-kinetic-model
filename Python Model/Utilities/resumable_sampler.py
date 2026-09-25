@@ -60,6 +60,51 @@ _STAT_SPECS: dict[str, tuple[Callable[[Any, Any, Any], Any], str]] = {
 }
 _STAT_NAMES = list(_STAT_SPECS)
 
+# Sampling throughput of each GPU model relative to an A100 (A100 = 1.00), measured
+# on the chain ladder by three cross-checked methods (dead-run cost law, within-run
+# device overlap, stage-curve regression; Notes/full_audit_request_v3_annotated.md).
+# Substring match, first hit wins, so the more specific names come first. Time caps
+# count compute in A100-equivalent hours through these, so a run that lands on a
+# slower card gets proportionally more wall time for the same cap.
+GPU_SPEED_VS_A100 = (
+    ("H100 NVL", 1.37),
+    ("MIG 3g.40gb", 0.90),
+    ("A100", 1.00),
+    ("V100-SXM2", 0.67),
+    ("V100", 0.75),
+)
+_ACCEPT_IDX = _STAT_NAMES.index("acceptance_rate")
+# A chain whose mean acceptance over a whole chunk is below this is rejecting
+# every proposal, so its position cannot move. Measured margin: the closest a
+# healthy run on the chain ladder ever came was 0.0096 (C20+unsat no-floor),
+# ~9600x above this, while dead runs sit at exactly 0.
+_DEAD_ACCEPT_EPS = 1e-6
+
+
+def gpu_model_name() -> str | None:
+    """The GPU this process sees, from $GPU_MODEL or nvidia-smi; None if neither works."""
+    name = os.environ.get("GPU_MODEL")
+    if name:
+        return name
+    try:
+        import subprocess
+        proc = subprocess.run(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
+                              stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=20, check=True)
+        lines = [ln.strip() for ln in proc.stdout.decode().splitlines() if ln.strip()]
+        return lines[0] if lines else None
+    except Exception:
+        return None
+
+
+def gpu_speed_vs_a100(name: str | None) -> float | None:
+    """Measured speed factor for a GPU model name, or None if it was never measured."""
+    if not name:
+        return None
+    for key, factor in GPU_SPEED_VS_A100:
+        if key in name:
+            return factor
+    return None
+
 
 @dataclass(frozen=True)
 class SamplerSpec:
@@ -69,11 +114,54 @@ class SamplerSpec:
     n_draws: int
     n_chains: int
     target_accept: float = 0.8
+    # Consecutive checkpoints with every chain at zero acceptance before the run
+    # gives up. 2 rather than 1 guards against a transient; no healthy run in the
+    # ladder produced even one such checkpoint in ~1100 observations, and the one
+    # broken configuration was dead from its first checkpoint and never recovered.
+    # A chain whose mean log-posterior sits this far below the best chain is not
+    # in a competing mode, it is stranded: e^-20 is 2e-9 of the mass, so it
+    # contributes nothing but keeps r-hat pinned forever. Excluded from the
+    # convergence diagnostic (and reported), not from the saved draws.
+    # None disables the check.
+    lp_exclusion_nats: float | None = 20.0
+    # Never declare convergence on fewer than this many surviving chains -- a
+    # between-chain diagnostic needs chains to compare.
+    min_chains_for_convergence: int = 4
+    dead_chain_patience: int = 2
+    # Safety multiplier applied to the last chunk's duration when deciding
+    # whether the next one fits in the remaining budget.
+    time_guard_factor: float = 1.2
+    # Hard ceiling on A100-EQUIVALENT compute (wall seconds x GPU_SPEED_VS_A100 of
+    # the card each segment ran on) summed across every segment of the run --
+    # NOT this invocation's own max_seconds, which is only this segment's
+    # budget. Checked reactively at the same checkpoint boundaries as the
+    # per-segment budget: once crossed, the run saves its next checkpoint and
+    # stops (stopped_reason="total_time_budget") instead of continuing to
+    # re-queue itself across further segments. None disables it.
+    #
+    # Until 2026-09-14 this was wall-clock since the first checkpoint, which
+    # counts queue waits, outages, and idle gaps as if they were spent work: six
+    # runs that had used ~12h of compute read as ~69h after a broken resubmission
+    # left them idle, and would have stopped the moment they were resumed.
+    # Checkpoints written before then carry no counter and start it at zero.
+    max_total_hours: float | None = 24.0
+    # Ceiling on SAMPLING-phase A100-equivalent compute only, counted from the end of warmup, so
+    # runs whose warmup costs differ (e.g. different chain counts) get the same
+    # sampling time. Reached -> checkpoint and stop with
+    # stopped_reason="sampling_time_budget"; the run is not marked done, so
+    # nothing finalizes it. None disables it.
+    max_sampling_hours: float | None = None
     is_mass_matrix_diagonal: bool = True
     initial_step_size: float = 1.0
     checkpoint_every: int = 50
     random_seed: int = 0
     rhat_threshold: float | None = None
+    # Bulk-ESS floor paired with rhat_threshold (Vehtari et al. 2021's
+    # recommended >=400). Was a hardcoded literal until 2026-09-09; None drops
+    # the ESS requirement entirely, leaving r-hat as the sole criterion --
+    # useful for a fast pilot willing to revisit convergence later if ESS
+    # turns out to actually bind in a case that matters.
+    ess_threshold: float | None = 400.0
     rhat_check_every: int = 100
     posterior_burn_in_draws: int = 0
     post_convergence_checks: int = 0
@@ -149,8 +237,13 @@ class RunStatus:
     sampling_done: int
     n_tune: int
     n_draws: int
-    stopped_reason: str  # "completed" | "converged" | "time_budget" | "nothing_to_do"
+    stopped_reason: str  # "completed" | "converged" | "time_budget" | "total_time_budget" | "sampling_time_budget" | "not_sampling" | "nothing_to_do"
+                         # | "nothing_to_do" | "not_sampling"
     n_invocations: int = 0  # how many run() calls (i.e. job segments) so far
+    # Chains excluded from the convergence diagnostic for sitting in a
+    # low-posterior basin. They remain in the saved draws -- this records that
+    # the reported r-hat/ESS describe the surviving chains only.
+    stranded_chains: list[int] = dataclasses.field(default_factory=list)
 
     @property
     def is_done(self) -> bool:
@@ -332,6 +425,17 @@ class ResumableSampler:
             self._device_kind = jax.devices()[0].device_kind
         except Exception:
             self._device_kind = "unknown"
+        # device_kind is the card's model name on a GPU ("NVIDIA A100-PCIE-40GB", with the
+        # slice for MIG: "... MIG 3g.20gb"), "cpu" on CPU -- not the word "gpu". It wins
+        # over nvidia-smi, which reports only the parent card of a MIG slice.
+        on_gpu = self._device_kind not in ("cpu", "unknown")
+        generic = self._device_kind.lower() in ("gpu", "cuda")
+        self._gpu_name = ((gpu_model_name() if generic else self._device_kind) if on_gpu else None)
+        speed = gpu_speed_vs_a100(self._gpu_name)
+        if on_gpu and speed is None:
+            print(f"==> WARNING: no measured speed factor for GPU {self._gpu_name!r}; "
+                  "counting its compute at A100 rate (1.00)")
+        self._speed_vs_a100 = speed if speed is not None else 1.0
 
         self._warmup_chunk, self._adapt_init, self._adapt_final = _make_warmup_chunk(
             logdensity_fn, spec.target_accept, spec.is_mass_matrix_diagonal
@@ -359,7 +463,26 @@ class ResumableSampler:
             )
         return ckpt
 
+    def _compute_so_far(self) -> float:
+        """Compute seconds across every segment: what earlier segments had
+        banked when this one loaded the checkpoint, plus this segment's own."""
+        start = getattr(self, "_segment_start", None)
+        own = time.perf_counter() - start if start is not None else 0.0
+        return getattr(self, "_compute_base", 0.0) + own
+
+    def _a100_equiv_so_far(self) -> float:
+        """Compute across every segment in A100-equivalent seconds: each segment's
+        wall compute scaled by its own card's GPU_SPEED_VS_A100. Checkpoints written
+        before this counter existed start it from their raw compute_seconds."""
+        start = getattr(self, "_segment_start", None)
+        own = time.perf_counter() - start if start is not None else 0.0
+        return getattr(self, "_a100_equiv_base", 0.0) + own * self._speed_vs_a100
+
     def _write_checkpoint(self, ckpt: dict[str, Any]) -> None:
+        # Refreshed on every write, so a segment killed mid-run still banks the
+        # compute up to its last checkpoint rather than losing it.
+        ckpt["compute_seconds"] = self._compute_so_far()
+        ckpt["a100_equiv_seconds"] = self._a100_equiv_so_far()
         tmp = self._ckpt_path.with_suffix(".pkl.tmp")
         with open(tmp, "wb") as fh:
             pickle.dump(ckpt, fh, protocol=pickle.HIGHEST_PROTOCOL)
@@ -373,6 +496,12 @@ class ResumableSampler:
             "n_chains": self._spec.n_chains,
             "config_hash": self._config_hash,
             "updated": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            # Plain JSON so resubmit_if_needed.sh can read it with bare python3;
+            # the pickle above needs numpy to open.
+            "compute_seconds": round(ckpt["compute_seconds"], 1),
+            "a100_equiv_seconds": round(ckpt["a100_equiv_seconds"], 1),
+            "gpu": self._gpu_name,
+            "gpu_speed_vs_a100": self._speed_vs_a100,
         }
         with open(self._run_dir / self.META, "w", encoding="utf-8") as fh:
             json.dump(meta, fh, indent=2)
@@ -387,6 +516,7 @@ class ResumableSampler:
                 "warmup_done": ckpt["warmup_done"],
                 "sampling_done": ckpt["sampling_done"],
                 "device": self._device_kind,
+                "gpu": self._gpu_name,
             }) + "\n")
 
     def _fresh_state(self) -> dict[str, Any]:
@@ -413,6 +543,7 @@ class ResumableSampler:
             "n_tune": self._spec.n_tune,
             "n_draws": self._spec.n_draws,
             "config_hash": self._config_hash,
+            "first_started_at": time.time(),
             "nuts_state": _to_numpy(nuts_state),
             "adapt_state": _to_numpy(adapt_state),
             "tuned_step_size": tuned_step_size,
@@ -421,6 +552,38 @@ class ResumableSampler:
         }
 
     # -- convergence early-stop --------------------------------------------- #
+    def _stranded_chains(self, min_draws: int) -> tuple[list[int], np.ndarray]:
+        """Chains whose mean log-posterior is far below the best chain.
+
+        Cheap by construction: one mean over the (chains, draws) lp array that
+        the store already holds, and it runs BEFORE the r-hat/ESS work rather
+        than after -- excluding a chain shrinks every array the expensive
+        diagnostics then touch, so this usually makes the check faster, not
+        slower.
+
+        Log-posterior is the discriminator because nothing else separates a
+        stranded chain from a healthy one. On the C8 no-floor run the stranded
+        chain had acceptance 0.931, zero divergences, and E-BFMI 1.155 -- inside
+        the healthy range of 1.005-1.309 -- while sitting 533 nats down. BFMI
+        and acceptance measure how well a chain explores where it already is;
+        only lp says whether that is anywhere worth being.
+        """
+        if self._spec.lp_exclusion_nats is None:
+            return [], np.empty(0)
+        try:
+            lp = self._store.read_stats("sampling").get("lp")
+        except Exception:
+            return [], np.empty(0)
+        if lp is None or lp.ndim != 2 or lp.shape[1] <= min_draws + 1:
+            return [], np.empty(0)
+        window = lp[:, min_draws:]
+        means = np.nanmean(window, axis=1)
+        if not np.isfinite(means).any():
+            return [], np.empty(0)
+        gaps = np.nanmax(means) - means
+        stranded = [int(c) for c in np.where(gaps > self._spec.lp_exclusion_nats)[0]]
+        return stranded, gaps
+
     def _check_converged(self) -> tuple[bool, float, float, float, float]:
         """Rank-normalized r-hat/bulk-ESS over sampling-phase draws so far
         (per-chain), worst case across free parameters. This is the standard
@@ -453,6 +616,17 @@ class ResumableSampler:
         min_draws = self._spec.posterior_burn_in_draws
         worst_rhat, worst_ess = 0.0, float("inf")
         nan = float("nan")
+
+        # Drop stranded chains before anything expensive runs.
+        stranded, gaps = self._stranded_chains(min_draws)
+        self._last_stranded = stranded
+        self._last_lp_gaps = gaps
+        n_chains_total = self._spec.n_chains
+        if stranded and (n_chains_total - len(stranded)) < self._spec.min_chains_for_convergence:
+            # Too few left to compare. Report rather than silently converge on
+            # a handful of chains.
+            return False, nan, nan, nan, nan
+        keep = [c for c in range(n_chains_total) if c not in set(stranded)]
         arrays: dict[str, np.ndarray] = {}
         ess_by_name: dict[str, float] = {}
         for name in self._var_names:
@@ -460,6 +634,8 @@ class ResumableSampler:
             if arr is None:
                 return False, nan, nan, nan, nan
             arr = arr[:, min_draws:]
+            if stranded and arr.shape[0] == n_chains_total:
+                arr = arr[keep, :]
             if arr.shape[1] < 2:
                 return False, nan, nan, nan, nan
             rhat = float(az.rhat({name: arr})[name].values)
@@ -470,7 +646,8 @@ class ResumableSampler:
             arrays[name] = arr
             ess_by_name[name] = min(ess, tail_ess)
 
-        basic_ok = worst_rhat < self._spec.rhat_threshold and worst_ess >= 400
+        basic_ok = worst_rhat < self._spec.rhat_threshold and (
+            self._spec.ess_threshold is None or worst_ess >= self._spec.ess_threshold)
         if self._spec.rank_ecdf_prob is None:
             return basic_ok, worst_rhat, worst_ess, nan, nan
 
@@ -512,6 +689,9 @@ class ResumableSampler:
         """
         start = time.perf_counter()
         ckpt = self._load_checkpoint() or self._fresh_state()
+        self._segment_start = start
+        self._compute_base = float(ckpt.get("compute_seconds", 0.0))
+        self._a100_equiv_base = float(ckpt.get("a100_equiv_seconds", self._compute_base))
         ckpt["n_invocations"] = ckpt.get("n_invocations", 0) + 1
         ckpt.setdefault("last_rhat_check", 0)
         ckpt.setdefault("converged_early", False)
@@ -548,9 +728,19 @@ class ResumableSampler:
             streak = (ckpt.get("consecutive_passes", 0) + 1) if passed else 0
             ckpt["consecutive_passes"] = streak
             converged = passed and streak >= need
+            stranded = getattr(self, "_last_stranded", [])
+            ess_note = (f"ess>={self._spec.ess_threshold:g}" if self._spec.ess_threshold is not None
+                       else "ess ignored")
             msg = (f"==> r_hat/ESS check at {n} sampling draws: "
                    f"r_hat={rhat:.4f} ess_bulk={ess:.1f} "
-                   f"(threshold r_hat<{self._spec.rhat_threshold}, ess>=400)")
+                   f"(threshold r_hat<{self._spec.rhat_threshold}, {ess_note})")
+            if stranded:
+                g = getattr(self, "_last_lp_gaps", None)
+                detail = ", ".join(
+                    f"{c}({g[c]:.0f} nats)" if g is not None and len(g) > c else str(c)
+                    for c in stranded)
+                msg += (f" | EXCLUDED {len(stranded)}/{self._spec.n_chains} stranded "
+                        f"chain(s): {detail}")
             if self._spec.rank_ecdf_prob is not None and np.isfinite(rank_stat):
                 msg += (f" | rank-ECDF max dev={rank_stat:.4f} "
                         f"(crit={rank_crit:.4f} @ {self._spec.rank_ecdf_prob:.2f})")
@@ -587,15 +777,75 @@ class ResumableSampler:
         schedule = np.asarray(_wa.build_schedule(self._spec.n_tune)) if self._spec.n_tune else None
 
         did_work = False
+        last_chunk_s = 0.0
+        dead_streak = 0
+        aborted_not_sampling = False
+        hit_total_cap = False
+        hit_sampling_cap = False
 
         def can_run() -> bool:
+            nonlocal hit_total_cap, hit_sampling_cap
             # Always make at least one chunk of progress per invocation so a
-            # chain of dependent jobs never stalls; then honor the budget. The
-            # budget is checked between chunks, so a call may overrun by up to
-            # one chunk -- size max_hours with margin (a chunk is small).
+            # chain of dependent jobs never stalls; then honor the budget.
+            #
+            # The test is PREDICTIVE: it asks whether the next chunk will fit,
+            # not whether the budget is already spent. Checking retrospectively
+            # means every job overruns by up to one whole chunk and that work is
+            # lost, because it never reaches the checkpoint write -- at C10 a
+            # chunk was 45 minutes.
             if not did_work:
                 return True
-            return max_seconds is None or (time.perf_counter() - start) < max_seconds
+            # Total-run ceiling, checked REACTIVELY (has it already been
+            # crossed?) rather than predictively like max_seconds below -- the
+            # point is "stop within a chunk or two of the cap", not precision.
+            # Counts compute banked across segments, not wall-clock, so time a
+            # run spent queued or idle doesn't count against it.
+            if self._spec.max_total_hours is not None:
+                total_h = self._a100_equiv_so_far() / 3600.0
+                if total_h >= self._spec.max_total_hours:
+                    hit_total_cap = True
+                    print(f"==> Total A100-equivalent compute {total_h:.1f}h >= cap "
+                          f"{self._spec.max_total_hours}h -- saving checkpoint and "
+                          "stopping for review (not resubmitting)")
+                    return False
+            if self._spec.max_sampling_hours is not None and ckpt["phase"] == "sampling":
+                if ckpt.get("sampling_start_a100_equiv") is None:
+                    # A checkpoint that entered sampling before this counter existed.
+                    ckpt["sampling_start_a100_equiv"] = self._a100_equiv_so_far()
+                sampling_h = (self._a100_equiv_so_far() - ckpt["sampling_start_a100_equiv"]) / 3600.0
+                if sampling_h >= self._spec.max_sampling_hours:
+                    hit_sampling_cap = True
+                    print(f"==> Sampling A100-equivalent compute {sampling_h:.2f}h >= cap "
+                          f"{self._spec.max_sampling_hours}h -- saving checkpoint and stopping")
+                    return False
+            if max_seconds is None:
+                return True
+            elapsed = time.perf_counter() - start
+            projected = elapsed + last_chunk_s * self._spec.time_guard_factor
+            return projected < max_seconds
+
+        def _dead_chunk(stats) -> bool:
+            """True once every chain has accepted nothing for `patience` chunks.
+
+            ``stats[_ACCEPT_IDX]`` is (chains, chunk) and is already on the host
+            -- the chunk call is followed by block_until_ready and the draw store
+            converts it -- so this adds host arithmetic over a few dozen floats
+            and no device sync (measured: ~36 us per checkpoint).
+
+            Deliberately requires ALL chains to be dead. Partial death may still
+            be recoverable, and because chains are vmapped a single stuck chain
+            already sets the pace for the batch, so timing cannot distinguish the
+            two cases -- per-chain acceptance can.
+            """
+            nonlocal dead_streak
+            acc = np.asarray(stats[_ACCEPT_IDX])
+            if acc.ndim != 2:
+                acc = acc.reshape(1, -1)
+            if bool((acc.mean(axis=1) < _DEAD_ACCEPT_EPS).all()):
+                dead_streak += 1
+            else:
+                dead_streak = 0
+            return dead_streak >= self._spec.dead_chain_patience
 
         # ---- warmup phase ---- #
         while ckpt["phase"] == "warmup" and ckpt["warmup_done"] < ckpt["n_tune"] and can_run():
@@ -605,10 +855,12 @@ class ResumableSampler:
             nuts_state = _to_jax(ckpt["nuts_state"])
             adapt_state = _to_jax(ckpt["adapt_state"])
             keys = jnp.asarray(ckpt["rng_keys"])
+            _t0 = time.perf_counter()
             fns, fast, fkeys, positions, stats = self._warmup_chunk(
                 nuts_state, adapt_state, keys, sched_chunk
             )
             jax.block_until_ready(fns)
+            last_chunk_s = time.perf_counter() - _t0
             self._store.append("warmup", [np.asarray(p) for p in positions], [np.asarray(s_) for s_ in stats])
             ckpt.update(
                 nuts_state=_to_numpy(fns),
@@ -618,17 +870,22 @@ class ResumableSampler:
             )
             self._write_checkpoint(ckpt)
             did_work = True
+            if _dead_chunk(stats):
+                aborted_not_sampling = True
+                break
             if _maybe_converge():
                 break
 
         # ---- warmup -> sampling transition (freeze tuned params) ---- #
-        if ckpt["phase"] == "warmup" and ckpt["warmup_done"] >= ckpt["n_tune"]:
+        if (not aborted_not_sampling
+                and ckpt["phase"] == "warmup" and ckpt["warmup_done"] >= ckpt["n_tune"]):
             adapt_state = _to_jax(ckpt["adapt_state"])
             step_sizes, imms = jax.vmap(self._adapt_final)(adapt_state)
             ckpt.update(
                 phase="sampling",
                 tuned_step_size=np.asarray(step_sizes),
                 tuned_imm=np.asarray(imms),
+                sampling_start_a100_equiv=self._a100_equiv_so_far(),
             )
             self._write_checkpoint(ckpt)
 
@@ -639,10 +896,12 @@ class ResumableSampler:
             keys = jnp.asarray(ckpt["rng_keys"])
             step_sizes = jnp.asarray(ckpt["tuned_step_size"])
             imms = jnp.asarray(ckpt["tuned_imm"])
+            _t0 = time.perf_counter()
             fns, fkeys, positions, stats = self._sampling_chunk(
                 nuts_state, keys, step_sizes, imms, length
             )
             jax.block_until_ready(fns)
+            last_chunk_s = time.perf_counter() - _t0
             self._store.append("sampling", [np.asarray(p) for p in positions], [np.asarray(s_) for s_ in stats])
             ckpt.update(
                 nuts_state=_to_numpy(fns),
@@ -651,6 +910,9 @@ class ResumableSampler:
             )
             self._write_checkpoint(ckpt)
             did_work = True
+            if _dead_chunk(stats):
+                aborted_not_sampling = True
+                break
             if _maybe_converge():
                 break
 
@@ -658,10 +920,18 @@ class ResumableSampler:
             ckpt["phase"] = "done"
             self._write_checkpoint(ckpt)
 
-        if ckpt["phase"] == "done":
+        if aborted_not_sampling:
+            # Left deliberately NOT "done": the run is abandoned, not finished,
+            # and nothing downstream should treat its draws as a posterior.
+            reason = "not_sampling"
+        elif ckpt["phase"] == "done":
             reason = "converged" if ckpt.get("converged_early") else "completed"
         elif not did_work:
             reason = "nothing_to_do"
+        elif hit_total_cap:
+            reason = "total_time_budget"
+        elif hit_sampling_cap:
+            reason = "sampling_time_budget"
         else:
             reason = "time_budget"
 
@@ -673,6 +943,7 @@ class ResumableSampler:
             n_draws=ckpt["n_draws"],
             stopped_reason=reason,
             n_invocations=ckpt["n_invocations"],
+            stranded_chains=list(getattr(self, "_last_stranded", [])),
         )
         with open(self._run_dir / "status.json", "w", encoding="utf-8") as fh:
             json.dump(status.to_json_dict(), fh, indent=2)

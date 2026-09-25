@@ -134,6 +134,8 @@ python "Utilities/benchmark_throughput.py" --solver_params_file "Results/<folder
 
 Each segment samples within `--max-hours` (default 23.5), checkpoints, and exits; the run finalizes (writes the netcdf outputs) once the draw target is met, and any remaining queued segments become a fast no-op.
 
+> **This 5-segment chain can silently stop early.** `resumable_sampler.py`'s `SamplerSpec.max_total_hours` is a *separate*, total-wall-clock-since-first-checkpoint ceiling (default **24.0 h**), independent of each segment's own `--max-hours`. It exists so an unattended run can't quietly re-queue itself for days, but a 5×23.5h chain — built for exactly the case of needing *more* than 24h — will hit that default around segment 2 and stop there, saving its checkpoint but not converging, with no error. Set `posterior_sampling.max_total_hours` explicitly in `solver_params.json` (a larger number, or `null` to disable it) before submitting a chain meant to run past 24h total.
+
 **3. Run longer** — if that wasn't enough, submit more segments (add `--extra-draws N` on the new batch to raise the target):
 
 ```bash
@@ -145,6 +147,8 @@ Each segment samples within `--max-hours` (default 23.5), checkpoints, and exits
 ```bash
 python "Utilities/finalize_window.py" --solver_params_file "Results/<folder_name>/solver_params.json" --burn_in 800
 ```
+
+If a chain got stuck in a much-lower-posterior basin than its siblings (`lp_exclusion_nats` in `resumable_sampler.py`; recorded per run in `checkpoint/status.json` as `stranded_chains`), both the live auto-finalize path and `finalize_window.py` exclude it from the written netcdf by default — the same chain the live r-hat/ESS check already excluded from its convergence decision, so a "converged" run's saved posterior/posterior-predictive/LOO no longer silently blend in a chain that never contributed useful mass. Pass `--include_stranded` to deliberately get the unfiltered, all-chains artifact instead.
 
 **5. Plot diagnostics** (optional) — three standalone scripts, all recomputed from the saved posterior netcdf, none of them need the notebook or a re-run on Alpine/Blanca:
 

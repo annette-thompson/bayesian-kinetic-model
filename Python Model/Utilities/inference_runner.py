@@ -497,7 +497,26 @@ def run_bayesian_inference(
     initial_step = float(posterior_config.get("initial_step_size", 1.0))
     rhat_threshold = posterior_config.get("rhat_threshold", None)
     rhat_threshold = float(rhat_threshold) if rhat_threshold is not None else None
+    # Historically a hardcoded >=400 literal inside _check_converged; now a
+    # config knob so a run can drop the ESS requirement (null) and converge on
+    # r-hat alone -- see SamplerSpec.ess_threshold.
+    ess_threshold = posterior_config.get("ess_threshold", 400.0)
+    ess_threshold = float(ess_threshold) if ess_threshold is not None else None
+    # Vehtari et al. 2021 state the ESS requirement per split chain, not as one number:
+    # "we only recommend relying on the R-hat estimate ... if each of the split chains has
+    # an average ESS estimate of at least 50. In our minimum recommended setup of four
+    # parallel chains, the total ESS should be at least 400". Each chain is split in two, so
+    # the threshold scales as 2 x chains x ess_per_split_chain -- 400 at 4 chains, 800 at 8,
+    # and so on. Setting this overrides a flat ess_threshold.
+    ess_per_split = posterior_config.get("ess_per_split_chain")
+    if ess_per_split is not None:
+        ess_threshold = 2.0 * n_chains * float(ess_per_split)
     rhat_check_every = int(posterior_config.get("rhat_check_every", 100))
+    # How many chains must survive the stranded-chain exclusion before convergence may be
+    # declared (SamplerSpec.min_chains_for_convergence). At 4 chains with the default floor
+    # of 4, a single stranded chain blocks convergence for the whole run; lowering it trades
+    # r-hat's power to see chains disagree for the ability to finish such a run.
+    min_chains_conv = int(posterior_config.get("min_chains_for_convergence", 4))
     posterior_burn_in = int(posterior_config.get("posterior_burn_in_draws", 0))
     post_convergence_checks = int(posterior_config.get("post_convergence_checks", 0))
     # Optional third convergence criterion (rank-normalized ECDF mixing check).
@@ -508,6 +527,17 @@ def run_bayesian_inference(
     rank_ecdf_prob = float(rank_ecdf_prob) if rank_ecdf_prob is not None else None
     rank_ecdf_simulations = int(posterior_config.get("rank_ecdf_simulations", 300))
     convergence_consecutive_checks = int(posterior_config.get("convergence_consecutive_checks", 1))
+    # Total COMPUTE ceiling summed across every segment, independent of this
+    # invocation's own max_hours (segment budget). Same knob for both the
+    # chain-ladder tests (24h, so a slow system stops for review instead of
+    # silently re-queueing for days) and the eventual full-model production run
+    # (e.g. 336.0 for a 2-week cap) -- just set it per-run in solver_params.json,
+    # including on a run already in progress (see config_signature below).
+    max_total_hours = posterior_config.get("max_total_hours", 24.0)
+    max_total_hours = float(max_total_hours) if max_total_hours is not None else None
+    # Sampling-phase-only compute ceiling (see SamplerSpec.max_sampling_hours).
+    max_sampling_hours = posterior_config.get("max_sampling_hours", None)
+    max_sampling_hours = float(max_sampling_hours) if max_sampling_hours is not None else None
 
     # Fast no-op if a prior job already finished this run (SLURM chains overshoot).
     results_file = savedir_path / imported.posterior_samples_file
@@ -525,9 +555,20 @@ def run_bayesian_inference(
 
     bundle = _build_model_bundle(imported)
 
+    # max_total_hours is a compute budget, not part of the chain's state, so it
+    # is left out of the resume check: raising a run's cap mid-run must not make
+    # its checkpoint "incompatible" and force a restart. Dropped only when
+    # present, so every config that doesn't set it hashes exactly as it did.
+    # Stopping-rule knobs are excluded from the resume signature: they decide when to stop,
+    # never where the chains go, so changing one must not invalidate a live checkpoint.
+    signature_sampling = {k: v for k, v in posterior_config.items()
+                          if k not in ("max_total_hours", "max_sampling_hours",
+                                       "min_chains_for_convergence", "ess_per_split_chain")}
+    # ess_threshold itself stays IN the signature: it is present in every existing config,
+    # so dropping it now would change their hashes and refuse to resume live checkpoints.
     config_signature = json.dumps(
         {
-            "posterior_sampling": posterior_config,
+            "posterior_sampling": signature_sampling,
             "free_params": bundle.free_params,
             "reactions_source": str(imported.reactions_source),
         },
@@ -551,10 +592,17 @@ def run_bayesian_inference(
             f", plus a rank-ECDF mixing check at prob={rank_ecdf_prob}"
             if rank_ecdf_prob is not None else ""
         )
-        _print_kv("early-stop", f"r_hat<{rhat_threshold} and ess_bulk>=400, checked every {rhat_check_every} draws{burn_in_note}{extra_note}{rank_note}")
+        ess_clause = f"and ess_bulk>={ess_threshold:g} " if ess_threshold is not None else "(ess ignored) "
+        if ess_per_split is not None:
+            _print_kv("ess threshold", f"{ess_threshold:g} = 2 x {n_chains} chains x {ess_per_split} per split chain")
+        _print_kv("min chains for convergence", f"{min_chains_conv} (of {n_chains}; stranded chains excluded)")
+        _print_kv("early-stop", f"r_hat<{rhat_threshold} {ess_clause}checked every {rhat_check_every} draws{burn_in_note}{extra_note}{rank_note}")
     if posterior_burn_in:
         _print_kv("posterior_burn_in_draws", f"{posterior_burn_in} (extra, beyond tune={n_tune}; final posterior = sampling[{posterior_burn_in}:])")
     _print_kv("max_hours (this segment)", max_hours if max_hours else "unbounded")
+    _print_kv("max_total_hours (whole run)", max_total_hours if max_total_hours else "unbounded")
+    if max_sampling_hours is not None:
+        _print_kv("max_sampling_hours (sampling phase)", max_sampling_hours)
     if extra_draws:
         _print_kv("extra_draws requested", extra_draws)
 
@@ -571,12 +619,16 @@ def run_bayesian_inference(
         checkpoint_every=checkpoint_every,
         random_seed=seed,
         rhat_threshold=rhat_threshold,
+        ess_threshold=ess_threshold,
         rhat_check_every=rhat_check_every,
+        min_chains_for_convergence=min_chains_conv,
         posterior_burn_in_draws=posterior_burn_in,
         post_convergence_checks=post_convergence_checks,
         rank_ecdf_prob=rank_ecdf_prob,
         rank_ecdf_simulations=rank_ecdf_simulations,
         convergence_consecutive_checks=convergence_consecutive_checks,
+        max_total_hours=max_total_hours,
+        max_sampling_hours=max_sampling_hours,
     )
     sampler = rs.ResumableSampler(
         bridge.logdensity_fn,
@@ -626,11 +678,12 @@ def run_bayesian_inference(
         stats=sampling_stats,
         segment_seconds=segment_seconds,
         warmup_draws=warmup_draws,
+        stranded_chains=status.stranded_chains,
     )
 
 
 def _finalize_resumable_run(
-    imported, bundle, draws, stats, segment_seconds, warmup_draws=None
+    imported, bundle, draws, stats, segment_seconds, warmup_draws=None, stranded_chains=None
 ) -> InferenceRunResult:
     """Convert selected draws into the standard netcdf outputs + metrics.
 
@@ -639,7 +692,29 @@ def _finalize_resumable_run(
     the sampling phase, or a retroactively windowed slice). ``warmup_draws``, if
     given, is added as a ``warmup_posterior`` group so trace plots can show the
     tuning phase (inference_plotting reads it for include_tuning).
+
+    ``stranded_chains``, if given, drops those chain indices from ``draws``,
+    ``stats``, and ``warmup_draws`` before anything else runs. The live
+    convergence check (resumable_sampler._stranded_chains) already excludes a
+    stranded chain from its OWN r-hat/ESS decision -- deliberately without
+    touching the checkpointed draws, so nothing is silently lost mid-run and a
+    different exclusion threshold can be revisited later. But until this fix,
+    finalize still built log-likelihood/posterior-predictive/summary metrics
+    from all chains regardless, so a "converged" run's saved artifacts still
+    quietly included the excluded chain -- confirmed visually on C10-narrowest
+    (2026-09-09): the blended posterior-predictive band was measurably biased
+    and widened relative to the kept-chains-only version. This is the fix
+    point for both callers (the live auto-finalize path above, and
+    finalize_window.py's offline re-finalize).
     """
+    if stranded_chains:
+        keep = [c for c in range(next(iter(draws.values())).shape[0]) if c not in set(stranded_chains)]
+        print(f"Excluding {len(stranded_chains)} stranded chain(s) from finalized artifacts: "
+              f"{stranded_chains} (keeping {keep})")
+        draws = {name: arr[keep] for name, arr in draws.items()}
+        stats = {name: arr[keep] for name, arr in stats.items()}
+        if warmup_draws:
+            warmup_draws = {name: arr[keep] for name, arr in warmup_draws.items()}
     from arviz_base import from_dict
     from pymc.backends.arviz import coords_and_dims_for_inferencedata
     from pymc.sampling.jax import get_jaxified_graph, _postprocess_samples
