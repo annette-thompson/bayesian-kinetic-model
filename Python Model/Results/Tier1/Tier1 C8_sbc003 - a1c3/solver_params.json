@@ -1,0 +1,231 @@
+{
+  "free_kinetic_params": [
+    {
+      "rxn_name": null,
+      "param_name": "a1",
+      "prior_dist_params": {
+        "distribution": "LogNormal",
+        "lower": 0.1,
+        "upper": 10.0,
+        "mass": 0.95,
+        "fixed_stat": [
+          "median",
+          1.0
+        ]
+      }
+    },
+    {
+      "rxn_name": null,
+      "param_name": "c3",
+      "prior_dist_params": {
+        "distribution": "LogNormal",
+        "lower": 0.1,
+        "upper": 10.0,
+        "mass": 0.95,
+        "fixed_stat": [
+          "median",
+          1.0
+        ]
+      }
+    }
+  ],
+  "prior_sampling": {
+    "draws": 2000,
+    "random_seed": 0
+  },
+  "posterior_sampling": {
+    "sampler": "blackjax",
+    "draws": 5000,
+    "tune": 300,
+    "chains": 4,
+    "target_accept": 0.8,
+    "random_seed": 42,
+    "is_mass_matrix_diagonal": true,
+    "rhat_threshold": 1.01,
+    "ess_per_split_chain": 50,
+    "min_chains_for_convergence": 3,
+    "rhat_check_every": 100,
+    "convergence_consecutive_checks": 2,
+    "post_convergence_checks": 1,
+    "checkpoint_every_steps": 5,
+    "max_total_hours": 24.0
+  },
+  "ODE_solver": {
+    "solver_name": "Kvaerno5",
+    "max_steps": 20000,
+    "dt0": 1e-06,
+    "stepsize_controller": "PIDController"
+  },
+  "ODE_stepsize_controller": {
+    "rtol": 0.001,
+    "atol": 1e-07,
+    "pcoeff": 0.4,
+    "icoeff": 0.3,
+    "dcoeff": 0.0
+  },
+  "calculation_module": "Calculation Files/Full_FAS/FA_conc.py",
+  "datasets": [
+    {
+      "name": "timeseries_Chain_C8_sbc003",
+      "dataset_type": "timeseries",
+      "data_file": "Data/Tier1_rates/Chain_C8_sbc003/time_vs_conc.csv",
+      "observables": {
+        "C16 Equivalents (uM)": "C16 Equivalents (uM)"
+      },
+      "noise_model": "column",
+      "noise_params": {
+        "column_mapping": {
+          "C16 Equivalents (uM)": "C16 Equivalents (uM)_sigma"
+        }
+      },
+      "enabled": true,
+      "time_column": "Time (s)",
+      "init_cond_overrides": {
+        "C3_MalCoA": 500.0,
+        "C2_AcCoA": 500.0,
+        "ACP": 10.0,
+        "NADPH": 1000.0,
+        "NADH": 1000.0,
+        "FabD": 1.0,
+        "FabH": 1.0,
+        "FabG": 1.0,
+        "FabZ": 1.0,
+        "FabI": 1.0,
+        "FabF": 1.0,
+        "FabA": 1.0,
+        "FabB": 1.0,
+        "TesA": 10.0
+      }
+    },
+    {
+      "name": "profile_Chain_C8_sbc003",
+      "dataset_type": "endpoint",
+      "data_file": "Data/Tier1_rates/Chain_C8_sbc003/init_vs_final_conc.csv",
+      "observables": {
+        "C4_FA (uM)": "C4_FA (uM)",
+        "C6_FA (uM)": "C6_FA (uM)",
+        "C8_FA (uM)": "C8_FA (uM)"
+      },
+      "noise_model": "column",
+      "noise_params": {
+        "column_mapping": {
+          "C4_FA (uM)": "C4_FA (uM)_sigma",
+          "C6_FA (uM)": "C6_FA (uM)_sigma",
+          "C8_FA (uM)": "C8_FA (uM)_sigma"
+        }
+      },
+      "enabled": true,
+      "time_values": [
+        720
+      ],
+      "init_cond_columns": {
+        "C3_MalCoA": "C3_MalCoA (uM)",
+        "C2_AcCoA": "C2_AcCoA (uM)",
+        "ACP": "ACP (uM)",
+        "NADPH": "NADPH (uM)",
+        "NADH": "NADH (uM)",
+        "FabD": "FabD (uM)",
+        "FabH": "FabH (uM)",
+        "FabG": "FabG (uM)",
+        "FabZ": "FabZ (uM)",
+        "FabI": "FabI (uM)",
+        "FabF": "FabF (uM)",
+        "FabA": "FabA (uM)",
+        "FabB": "FabB (uM)",
+        "TesA": "TesA (uM)"
+      },
+      "init_cond_overrides": {}
+    },
+    {
+      "name": "rates_Chain_C8_sbc003",
+      "dataset_type": "endpoint",
+      "data_file": "Data/Tier1_rates/Chain_C8_sbc003/init_vs_rate.csv",
+      "observables": {
+        "Initial Rate (uM C16 Equivalents/min)": "Initial Rate (uM C16 Equivalents/min)"
+      },
+      "noise_model": "column",
+      "noise_params": {
+        "column_mapping": {
+          "Initial Rate (uM C16 Equivalents/min)": "Initial Rate (uM C16 Equivalents/min)_sigma"
+        }
+      },
+      "enabled": true,
+      "time_values": [
+        150
+      ],
+      "init_cond_columns": {
+        "C3_MalCoA": "C3_MalCoA (uM)",
+        "C2_AcCoA": "C2_AcCoA (uM)",
+        "ACP": "ACP (uM)",
+        "NADPH": "NADPH (uM)",
+        "NADH": "NADH (uM)",
+        "FabD": "FabD (uM)",
+        "FabH": "FabH (uM)",
+        "FabG": "FabG (uM)",
+        "FabZ": "FabZ (uM)",
+        "FabI": "FabI (uM)",
+        "FabF": "FabF (uM)",
+        "FabA": "FabA (uM)",
+        "FabB": "FabB (uM)",
+        "TesA": "TesA (uM)"
+      },
+      "init_cond_overrides": {}
+    }
+  ],
+  "path_base": "../../..",
+  "output_paths": {
+    "reactions_source": [
+      "Reactions/EC_FAS_ME1/C8/FabD.yaml",
+      "Reactions/EC_FAS_ME1/C8/FabH.yaml",
+      "Reactions/EC_FAS_ME1/C8/FabG.yaml",
+      "Reactions/EC_FAS_ME1/C8/FabZ.yaml",
+      "Reactions/EC_FAS_ME1/C8/FabI.yaml",
+      "Reactions/EC_FAS_ME1/C8/TesA.yaml",
+      "Reactions/EC_FAS_ME1/C8/FabF.yaml",
+      "Reactions/EC_FAS_ME1/C8/FabA.yaml",
+      "Reactions/EC_FAS_ME1/C8/FabB.yaml"
+    ],
+    "results_save_dir": "Results/Tier1/Tier1 C8_sbc003 - a1c3",
+    "prior_samples_file": "prior_samples_pm.nc",
+    "posterior_samples_file": "posterior_samples_pm.nc",
+    "trace_plot_file": "trace_plot.png"
+  },
+  "scaling_groups": {
+    "a1": 1.0,
+    "a2": 1.0,
+    "a3": 1.0,
+    "b1": 1.0,
+    "b2": 1.0,
+    "b3": 1.0,
+    "c1": 1.0,
+    "c2": 1.0,
+    "c3": 1.0,
+    "c4": 1.0,
+    "d1": 0.0,
+    "d2": 0.0,
+    "e": 1.0,
+    "x1": 1.0,
+    "x2": 1.0,
+    "x3": 1.0,
+    "x4": 1.0
+  },
+  "tier1_truth": {
+    "a1": 1.1961785815049129,
+    "a2": 1.0,
+    "a3": 1.0,
+    "b1": 1.0,
+    "b2": 1.0,
+    "b3": 1.0,
+    "c1": 1.0,
+    "c2": 1.0,
+    "c3": 0.3341911043978007,
+    "c4": 1.0,
+    "d1": 0.0,
+    "d2": 0.0,
+    "e": 1.0,
+    "x1": 1.0,
+    "x2": 1.0,
+    "x3": 1.0,
+    "x4": 1.0
+  }
+}

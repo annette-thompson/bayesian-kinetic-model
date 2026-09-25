@@ -1,0 +1,111 @@
+{
+ "replicates": {
+  "0": {
+   "truth": {
+    "a1": 1.6680374309267743,
+    "c3": 1.825538883467743
+   },
+   "data_name": "Chain_C8_sbc000",
+   "run": "Tier1 C8_sbc000 - a1c3",
+   "data_seed": 0,
+   "status": "ready"
+  },
+  "1": {
+   "truth": {
+    "a1": 0.8529972027225494,
+    "c3": 6.02643216721341
+   },
+   "data_name": "Chain_C8_sbc001",
+   "run": "Tier1 C8_sbc001 - a1c3",
+   "data_seed": 1,
+   "status": "ready"
+  },
+  "2": {
+   "truth": {
+    "a1": 1.3433574699947628,
+    "c3": 9.855115804426946
+   },
+   "data_name": "Chain_C8_sbc002",
+   "run": "Tier1 C8_sbc002 - a1c3",
+   "data_seed": 2,
+   "status": "ready"
+  },
+  "3": {
+   "truth": {
+    "a1": 1.1961785815049129,
+    "c3": 0.3341911043978007
+   },
+   "data_name": "Chain_C8_sbc003",
+   "run": "Tier1 C8_sbc003 - a1c3",
+   "data_seed": 3,
+   "status": "ready"
+  },
+  "4": {
+   "truth": {
+    "a1": 8.049313577059511,
+    "c3": 1.4548234513533447
+   },
+   "data_name": "Chain_C8_sbc004",
+   "run": "Tier1 C8_sbc004 - a1c3",
+   "data_seed": 4,
+   "status": "ready"
+  },
+  "5": {
+   "truth": {
+    "a1": 8.688220974354357,
+    "c3": 3.332444455819822
+   },
+   "data_name": "Chain_C8_sbc005",
+   "run": "Tier1 C8_sbc005 - a1c3",
+   "data_seed": 5,
+   "status": "ready"
+  },
+  "6": {
+   "truth": {
+    "a1": 5.298480545959419,
+    "c3": 0.8320708305585569
+   },
+   "data_name": "Chain_C8_sbc006",
+   "run": "Tier1 C8_sbc006 - a1c3",
+   "data_seed": 6,
+   "status": "ready"
+  },
+  "7": {
+   "truth": {
+    "a1": 0.9497439662923809,
+    "c3": 0.38929230407045373
+   },
+   "data_name": "Chain_C8_sbc007",
+   "run": "Tier1 C8_sbc007 - a1c3",
+   "data_seed": 7,
+   "status": "ready"
+  },
+  "8": {
+   "truth": {
+    "a1": 3.983646829449861,
+    "c3": 0.268607409441528
+   },
+   "data_name": "Chain_C8_sbc008",
+   "run": "Tier1 C8_sbc008 - a1c3",
+   "data_seed": 8,
+   "status": "ready"
+  },
+  "9": {
+   "truth": {
+    "a1": 0.350953433833484,
+    "c3": 2.2875199036830263
+   },
+   "data_name": "Chain_C8_sbc009",
+   "run": "Tier1 C8_sbc009 - a1c3",
+   "data_seed": 9,
+   "status": "ready"
+  }
+ },
+ "system": "C8",
+ "params": [
+  "a1",
+  "c3"
+ ],
+ "prior_sigma_log": 1.174809900159668,
+ "base_seed": 20260925
+}
