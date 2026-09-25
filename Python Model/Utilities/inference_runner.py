@@ -39,6 +39,7 @@ import xarray as xr
 from pymc.logprob.transforms import Transform
 from pytensor.graph import Apply, Op
 from pytensor.link.jax.dispatch import jax_funcify
+from scipy import optimize, special
 
 from experiment_framework import (
     compute_observation_prediction,
@@ -984,6 +985,65 @@ class _ScaleTransform(Transform):
         return pt.zeros_like(value) - np.log(self.factor)
 
 
+# Largest |achieved - requested| prior mass accepted from a fit.
+_PRIOR_MASS_TOL = 1e-3
+
+
+def _fit_prior(param_name, prior_params):
+    """PreliZ distribution for one `prior_dist_params` spec, checked against its mass.
+
+    A LogNormal with a fixed median is solved exactly rather than by maxent. Once
+    mu = log(median) is fixed, sigma is set by the mass constraint alone -- there
+    is no entropy left to maximise -- and maxent's optimiser can miss it: it seeds
+    from the arithmetic midpoint of [lower, upper], a poor start for a wide
+    LogNormal far from 1. With the Tier-1 prior-offset specs (median shifted
+    +2/+3/+4 prior sd, window moved with it) preliz 0.23 returned sigma 0.16,
+    0.52 and 1.11 instead of 1.17, with only a UserWarning (2026-09-25). The exact
+    solve agrees with log(10)/z_0.975 to 12 digits; maxent gets within ~5e-6.
+
+    Every result is then checked against the requested mass, so a bad fit of any
+    other spec raises instead of silently changing the prior.
+    """
+    dist_name = prior_params["distribution"]
+    lower = float(prior_params["lower"])
+    upper = float(prior_params["upper"])
+    mass = float(prior_params.get("mass", 0.95))
+    fixed_stat = prior_params.get("fixed_stat", None)
+
+    if dist_name == "LogNormal" and fixed_stat and fixed_stat[0] == "median":
+        mu = float(np.log(fixed_stat[1]))
+        above, below = np.log(upper) - mu, mu - np.log(lower)
+        if not (above > 0 and below > 0):
+            raise ValueError(
+                f"{param_name}: LogNormal median {fixed_stat[1]} is outside "
+                f"[{lower}, {upper}]"
+            )
+        # Mass in [lower, upper] falls monotonically from 1 to 0 as sigma grows.
+        sigma = optimize.brentq(
+            lambda s: special.ndtr(above / s) - special.ndtr(-below / s) - mass,
+            1e-8, 1e8, xtol=1e-14,
+        )
+        result = pz.LogNormal(mu=mu, sigma=sigma)
+    else:
+        result = pz.maxent(
+            distribution=getattr(pz, dist_name)(),
+            lower=lower,
+            upper=upper,
+            mass=mass,
+            fixed_stat=fixed_stat,
+            plot=False
+        )
+
+    achieved = float(result.cdf(upper) - result.cdf(lower))
+    if abs(achieved - mass) > _PRIOR_MASS_TOL:
+        fitted = [round(float(v), 4) for v in result.params]
+        raise ValueError(
+            f"{param_name}: fitted {result.__class__.__name__} prior (params {fitted}) "
+            f"puts mass {achieved:.4f} in [{lower}, {upper}], not the requested {mass}"
+        )
+    return result
+
+
 def _build_pymc_model(
     solver_params,
     sol_op,
@@ -1022,16 +1082,7 @@ def _build_pymc_model(
             param_name = param_spec["param_name"]
             prior_params = param_spec["prior_dist_params"]
 
-            dist_name = prior_params["distribution"]
-            dist = getattr(pz, dist_name)()
-            result = pz.maxent(
-                distribution=dist,
-                lower=prior_params["lower"],
-                upper=prior_params["upper"],
-                mass=prior_params.get("mass", 0.95),
-                fixed_stat=prior_params.get("fixed_stat", None),
-                plot=False
-            )
+            result = _fit_prior(param_name, prior_params)
             pm_dist_cls = getattr(pm, result.__class__.__name__)
             dist_kwargs = {}
             sample_scale = prior_params.get("sample_scale")
