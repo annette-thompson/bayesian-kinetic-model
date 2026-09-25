@@ -1,22 +1,3 @@
-# Conda environment for the Bayesian kinetic model.
-#
-#   conda env create -f environment.yml        # or: mamba env create -f ...
-#   conda activate Bayesian
-#
-# On nate this is built for you by Sync/setup_nate_env.sh, which streams
-# Sync/provision_nate_env.sh over ssh. Keep the two package lists in step.
-#
-# Channel is conda-forge, NOT defaults: defaults does not carry pymc/diffrax/
-# blackjax at usable versions, and conda-forge is what both working environments
-# (Alpine and nate) were actually built from.
-#
-# GPU JAX: conda-forge's pymc/numpyro/blackjax now pull in a CUDA-capable jax
-# (jax-cuda12-pjrt / jax-cuda12-plugin) on linux-64, so no pip step is needed.
-# Do NOT try to `pip install jax[cuda12]==<ver>` over the top -- pip cannot
-# uninstall the conda-installed plugin (no RECORD file) and the install aborts
-# midway, which is how nate's first provisioning run failed. If you must pin a
-# different jax, install jax, jaxlib, jax-cuda12-plugin and jax-cuda12-pjrt at
-# MATCHING versions or the plugin fails to import.
 name: Bayesian
 channels:
   - conda-forge
@@ -24,9 +5,9 @@ dependencies:
   - python=3.12
 
   # --- sampling / probabilistic stack ---
-  - pymc
+  - pymc>=6
   - pytensor
-  - blackjax          # the resumable sampler this project uses
+  - blackjax
   - numpyro
   - nutpie
   - arviz
@@ -34,34 +15,23 @@ dependencies:
   - preliz
 
   # --- ODE solving and JAX ---
-  - jax
+  - jax==0.7.2
   - jaxlib
-  - diffrax           # Kvaerno5 + PIDController; its adjoint is the gradient path
+  - diffrax>=0.7.2
   - equinox
   - jaxtyping
 
   # --- numerics / IO ---
-  # netcdf4 is REQUIRED, not optional: inference_runner writes its posterior with
-  # idata.to_netcdf(format="NETCDF4"), which raises
-  #   "cannot write NetCDF files ... none of the suitable backend libraries
-  #    (netCDF4, h5netcdf) are installed"
-  # if no backend is present. Sampling completes first, so the failure lands at the
-  # very END of a multi-hour run -- an env without this silently cannot produce a
-  # single completed inference. Omitting it is what made every nate run fail.
   - netcdf4
   - numpy
   - scipy
-  - zarr>=3           # checkpoint store format for the resumable sampler
-  - numba=0.65.1      # pinned: 0.66+ needs a newer llvmlite than pytensor accepts
+  - zarr
+  - numba
   - llvmlite
-  - libsqlite>=3.53
-  - sqlite>=3.53
+  - libsqlite
+  - sqlite
 
   # --- imported directly by Utilities/ and Calculation Files/ ---
-  # sympy and seaborn are NOT pulled in transitively by anything above. Omitting
-  # them is what made nate's first real run die on `import sympy` several seconds
-  # into a GPU job, so list every direct import explicitly rather than relying on
-  # another package to drag it in.
   - sympy
   - seaborn
   - matplotlib
