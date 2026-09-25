@@ -36,6 +36,7 @@ import preliz as pz
 import pytensor.tensor as pt
 import xarray as xr
 
+from pymc.logprob.transforms import Transform
 from pytensor.graph import Apply, Op
 from pytensor.link.jax.dispatch import jax_funcify
 
@@ -950,6 +951,39 @@ def _build_simulator(ode_system, species_names, solver_params, experiment):
     return simulator
 
 
+class _ScaleTransform(Transform):
+    """Sample x through u = factor * x -- the same mechanism that gives a
+    LogNormal parameter its "_log__" coordinate, but affine.
+
+    Why it exists: NUTS moves in the unconstrained coordinate. A LogNormal group
+    (a1, c3, ...) is sampled as log(x), whose prior sd is ~1.17. d1 enters TesA
+    as exp(12*d1), so its Normal prior needs sd 0.098 to span the same 100-fold
+    rate window -- and sampled raw, that is a 12x scale mismatch the diagonal
+    mass matrix starts out blind to. Two things broke (2026-09-14, 3-param
+    pilot): warmup step size collapsed to fit d1 (up to 339x smaller than the
+    matching a2 run), and PyMC's +/-1 initial-point jitter put d1 at up to 0.85,
+    i.e. TesA at up to 25,800x. Sampling u = 12*d1 gives d1 an unconstrained
+    sd of 1.17 and a jitter footprint of TesA 0.37-2.7x, both matching a1's.
+
+    The prior itself is unchanged -- only the coordinate NUTS walks in. The
+    variable is still named after the parameter; its value var becomes
+    "<param>_x<factor>__", which export_posterior_series.py undoes.
+    """
+
+    def __init__(self, factor: float):
+        self.factor = float(factor)
+        self.name = f"x{self.factor:g}"
+
+    def forward(self, value, *inputs):
+        return value * self.factor
+
+    def backward(self, value, *inputs):
+        return value / self.factor
+
+    def log_jac_det(self, value, *inputs):
+        return pt.zeros_like(value) - np.log(self.factor)
+
+
 def _build_pymc_model(
     solver_params,
     sol_op,
@@ -999,9 +1033,23 @@ def _build_pymc_model(
                 plot=False
             )
             pm_dist_cls = getattr(pm, result.__class__.__name__)
+            dist_kwargs = {}
+            sample_scale = prior_params.get("sample_scale")
+            if sample_scale is not None and float(sample_scale) != 1.0:
+                # A transform REPLACES a distribution's default one, so on a
+                # bounded prior (LogNormal) this would silently drop the log
+                # transform that keeps it positive. Only an unbounded prior can
+                # take it safely.
+                if result.__class__.__name__ != "Normal":
+                    raise ValueError(
+                        f"{param_name}: sample_scale is only valid on a Normal prior, "
+                        f"got {result.__class__.__name__}"
+                    )
+                dist_kwargs["default_transform"] = _ScaleTransform(float(sample_scale))
             priors[param_name] = pm_dist_cls(
                 param_name,
                 *[float(value) for value in result.params],
+                **dist_kwargs,
             )
 
         # Build full parameter tuple in reaction-defined order. Free parameters are
