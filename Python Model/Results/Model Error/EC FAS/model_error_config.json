@@ -1,6 +1,6 @@
 {
     "path_base": "../../..",
-    "reactions_path": "Reactions/EC_FAS_ME1",
+    "reactions_path": "Reactions/EC_FAS_ME1/C20+unsat",
     "folder_name": "EC FAS",
     "output_folder": "Results/Model Error/EC FAS",
     "y0": {
@@ -43,7 +43,7 @@
         0.0,
         720.0
     ],
-    "max_steps": 10000,
+    "max_steps": 20000,
     "perturb": {
         "species": [
             "C2_AcCoA",
@@ -71,7 +71,10 @@
     },
     "tolerance": {
         "rtol": 1e-05,
-        "atol": 1e-08
+        "atol": 1e-07,
+        "pcoeff": 0.4,
+        "icoeff": 0.3,
+        "dcoeff": 0.0
     },
     "fa_profile": {
         "save": true
