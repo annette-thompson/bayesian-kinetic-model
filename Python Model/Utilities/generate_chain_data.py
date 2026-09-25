@@ -231,6 +231,41 @@ def export_timeseries(sys_: ChainSystem, targets: list[str], out_dir: Path,
     return df
 
 
+# One-at-a-time titration factors, in the order candidates are listed: nearest to
+# baseline first, alternating down/up. Step-count ties in export_sweep_ranked's
+# cheapest-first ranking break in this order, so milder perturbations win ties.
+# 0.25-4x (0.75, 1.33, 0.5, 2, 0.25, 4) gave only 8 usable conditions on C8 and C12:
+# most single-species changes that small move no fatty acid by the 0.2 decades the
+# diversity rule needs.
+TITRATION_FACTORS = (0.5, 2.0, 0.2, 5.0, 0.1, 10.0)
+
+
+def make_titration_sweep(sys_: ChainSystem, names: list[str],
+                         factors=TITRATION_FACTORS) -> tuple[dict[str, list[float]], list[str]]:
+    """Candidate rows that change ONE species at a time, everything else at baseline.
+
+    Unlike make_sweep, whose rows move every species by one shared factor (so its 60
+    rows are effectively points on a single axis), each row here probes a different
+    direction. Rows are ordered factor-first (all species at 0.75x, then all at 1.33x,
+    ...). Values are kept to 3 significant figures -- make_sweep's 1 significant figure
+    would round 1.33x of 1 uM back to exactly the baseline.
+
+    Returns (sweep, labels): sweep maps species -> one value per row, as make_sweep;
+    labels[i] names row i, e.g. "TesA x0.75".
+    """
+    names = [n for n in names if n in sys_.index_of]
+    y0 = sys_.y0()
+    base = {n: float(y0[sys_.index_of[n]]) for n in names}
+    sweep = {n: [] for n in names}
+    labels = []
+    for factor in factors:
+        for target in names:
+            for n in names:
+                sweep[n].append(round_sigfigs(base[n] * factor, 3) if n == target else base[n])
+            labels.append(f"{target} x{factor:g}")
+    return sweep, labels
+
+
 def make_sweep(sys_: ChainSystem, names: list[str],
                offsets=(-0.08, -0.04, 0.0, 0.04, 0.08)) -> dict[str, list[float]]:
     """Candidate initial-condition rows: a shared base factor per row, plus a small
@@ -477,7 +512,11 @@ def export_sweep_ranked(sys_: ChainSystem, targets: list[str], out_dir: Path, ma
                         strict_rtol: float = 1e-10, strict_atol: float = 1e-12,
                         strict_probe_max_steps: int = 200_000,
                         strict_cap_override: int | None = None,
-                        n_keep: int | None = None):
+                        n_keep: int | None = None,
+                        total_weights=None,
+                        min_total_frac_of_baseline: float | None = None,
+                        seed_diversity_with_baseline: bool = True,
+                        candidates: tuple[dict[str, list[float]], list[str]] | None = None):
     """Three-phase sweep search, replacing export_sweep's interleaved loose+strict+
     diversity checking with a simpler, order-independent design: (1) exhaustively find
     every sweep candidate that converges at the candidate's OWN (loose) tolerance --
@@ -504,10 +543,37 @@ def export_sweep_ranked(sys_: ChainSystem, targets: list[str], out_dir: Path, ma
     directly. The probe is nondeterministic on heterogeneous GPU pools (see the note
     at step 2), so a cap measured for the same system in an earlier successful run is
     a valid substitute. Doing so leaves the baseline's own ``err_pct`` as None.
+
+    ``seed_diversity_with_baseline`` puts the baseline's own output in the diversity
+    filter before any candidate. Every caller prepends the baseline as row 0, and
+    without the seed the filter never compared candidates against it: the first sweep
+    factors (1.05x, 0.95x, small offsets) round back to exactly the baseline at one
+    significant figure, so that candidate always passed and, being as expensive as the
+    baseline, landed last -- a duplicate of row 0 in C14, C16+unsat, C20 and C20+unsat.
+
+    ``min_total_frac_of_baseline`` with ``total_weights`` (one weight per target)
+    rejects a candidate whose weighted total output, sum(w * out), is below that
+    fraction of the baseline's -- e.g. C16 Equivalents >= 10% of baseline, so no
+    condition asks the fit to match concentrations far below the measured range.
+
+    ``candidates`` replaces the default make_sweep rows with a precomputed
+    (sweep, labels) pair, e.g. make_titration_sweep's. Its values are used as given;
+    make_sweep's are rounded to one significant figure as before. Kept rows carry
+    their label.
     """
-    sweep = make_sweep(sys_, SWEEP_SPECIES)
+    if candidates is None:
+        sweep = make_sweep(sys_, SWEEP_SPECIES)
+        labels = [None] * len(next(iter(sweep.values())))
+        _round = round_sigfigs
+    else:
+        sweep, labels = candidates
+        _round = float
     idx = [sys_.index_of[n] for n in targets]
     y0_base = sys_.y0()
+    if min_total_frac_of_baseline is not None:
+        if total_weights is None or len(total_weights) != len(targets):
+            raise ValueError("min_total_frac_of_baseline needs total_weights, one per target")
+        total_weights = np.asarray(total_weights, dtype=np.float64)
 
     def _solve_full(y0, rtol, atol, cap):
         sol = dfrx.diffeqsolve(
@@ -549,6 +615,7 @@ def export_sweep_ranked(sys_: ChainSystem, targets: list[str], out_dir: Path, ma
     if strict_cap_override is not None:
         strict_cap = max(1, int(strict_cap_override))
         base_strict_final = None
+        base_strict_steps = None
         print(f"      strict baseline probe SKIPPED -- strict cap set to {strict_cap} "
               f"from strict_cap_override (baseline err_pct will be unavailable)")
     else:
@@ -560,8 +627,12 @@ def export_sweep_ranked(sys_: ChainSystem, targets: list[str], out_dir: Path, ma
         strict_cap = max(1, int(np.ceil(max_steps_relative_to_baseline * base_strict_steps)))
         print(f"      baseline solved in {base_strict_steps} steps at strict tolerance (self-referential, "
               f"same PID) -> per-candidate strict cap set to {strict_cap} ({max_steps_relative_to_baseline}x baseline)")
+    base_out = [float(base_loose_final[i]) for i in idx]
+    base_total = None if min_total_frac_of_baseline is None else float(total_weights @ np.asarray(base_out))
     baseline_row = dict(
-        condition="baseline", steps=base_loose_steps, rejected=base_loose_rejected,
+        condition="baseline", steps=base_loose_steps, rejected=base_loose_rejected, out=base_out,
+        strict_steps=base_strict_steps, loose_cap=loose_cap, strict_cap=strict_cap,
+        weighted_total=base_total,
         err_pct=(None if base_strict_final is None
                  else relative_error(base_loose_final, base_strict_final) * 100))
 
@@ -572,17 +643,30 @@ def export_sweep_ranked(sys_: ChainSystem, targets: list[str], out_dir: Path, ma
     # instead of whichever happened to come first in sweep-factor order.
     survivors = []
     n_bad = 0
-    for combo in zip(*sweep.values()):
+    n_low_total = 0
+    # One entry per candidate: why it was dropped, or "kept"/"usable beyond n_keep". Candidates
+    # that passed the step caps, weighted-total floor and strict check also carry their
+    # endpoint outputs ("out") and strict-tolerance step count, so diversity can be re-tested
+    # against any other set of conditions afterwards.
+    candidate_log = []
+    for label, combo in zip(labels, zip(*sweep.values())):
         y0 = y0_base.copy()
         for name, conc in zip(sweep, combo):
-            y0[sys_.index_of[name]] = round_sigfigs(conc)
+            y0[sys_.index_of[name]] = _round(conc)
         final, steps, rejected, ok = _solve_full(y0, sys_.rtol, sys_.atol, loose_cap)
         if not ok:
             n_bad += 1
+            candidate_log.append(dict(label=label, result="over loose step cap / non-converged", steps=steps))
             continue
         out = [float(final[i]) for i in idx]
-        survivors.append(dict(y0=y0, combo=[round_sigfigs(c) for c in combo], loose_final=final,
-                              out=out, steps=steps, rejected=rejected))
+        total_frac = None if base_total is None else float(total_weights @ np.asarray(out)) / base_total
+        if total_frac is not None and total_frac < min_total_frac_of_baseline:
+            n_low_total += 1
+            candidate_log.append(dict(label=label, result="below weighted-total floor", steps=steps,
+                                      total_frac_of_baseline=total_frac))
+            continue
+        survivors.append(dict(y0=y0, combo=[_round(c) for c in combo], loose_final=final,
+                              out=out, steps=steps, rejected=rejected, label=label, total_frac=total_frac))
 
     # Step 4: strict-tolerance filter over ALL loose-tolerance survivors (no diversity
     # filtering has happened yet, so every loose-converged candidate gets this check).
@@ -593,27 +677,38 @@ def export_sweep_ranked(sys_: ChainSystem, targets: list[str], out_dir: Path, ma
             s["y0"], strict_rtol, strict_atol, strict_cap)
         if not strict_ok:
             n_stiff += 1
+            candidate_log.append(dict(label=s["label"], result="stiff at strict tolerance", steps=s["steps"],
+                                      strict_steps=strict_steps, total_frac_of_baseline=s["total_frac"]))
             continue
         err_pct = relative_error(s["loose_final"], strict_final) * 100
         passing.append(dict(combo=s["combo"], out=s["out"], steps=s["steps"], rejected=s["rejected"],
-                            err_pct=err_pct))
+                            err_pct=err_pct, label=s["label"], total_frac=s["total_frac"],
+                            strict_steps=strict_steps))
 
     # Step 5: rank by steps ascending, THEN resolve diversity in that order -- the
     # cheapest member of any too-similar cluster is processed first and claims that
     # output region, so any pricier candidate too close to it gets dropped instead.
     passing.sort(key=lambda r: r["steps"])
     diverse = []
-    kept_outputs = []
+    kept_outputs = [base_out] if seed_diversity_with_baseline else []
     n_similar = 0
     for r in passing:
         if kept_outputs and min(log_distance(r["out"], p) for p in kept_outputs) < min_log_diff:
             n_similar += 1
+            candidate_log.append(dict(label=r["label"], result="too similar", steps=r["steps"],
+                                      strict_steps=r["strict_steps"], out=r["out"],
+                                      total_frac_of_baseline=r["total_frac"],
+                                      nearest_log_distance=min(log_distance(r["out"], p) for p in kept_outputs)))
             continue
         kept_outputs.append(r["out"])
         diverse.append(r)
 
     n_found = len(diverse)
     kept = diverse if n_keep is None else diverse[:n_keep]
+    for rank, r in enumerate(diverse):
+        candidate_log.append(dict(label=r["label"], result="kept" if rank < len(kept) else "usable beyond n_keep",
+                                  steps=r["steps"], strict_steps=r["strict_steps"], out=r["out"],
+                                  total_frac_of_baseline=r["total_frac"]))
 
     rows = [r["combo"] + r["out"] for r in kept]
     df = pd.DataFrame(rows, columns=[f"{n} (uM)" for n in sweep] + [f"{n} (uM)" for n in targets])
@@ -632,14 +727,15 @@ def export_sweep_ranked(sys_: ChainSystem, targets: list[str], out_dir: Path, ma
                    max_err_pct=float(err_arr.max()), avg_err_pct=float(err_arr.mean()))
 
     summary = _summary(kept)
-    print(f"      found {n_found} usable condition(s) ({n_bad} non-converged, {n_similar} too similar, "
+    low_msg = "" if base_total is None else f", {n_low_total} below {min_total_frac_of_baseline:g}x baseline total"
+    print(f"      found {n_found} usable condition(s) ({n_bad} non-converged{low_msg}, {n_similar} too similar, "
           f"{n_stiff} stiff at strict tolerance); kept {len(kept)}")
     print(f"      kept-set summary: max_steps={summary['max_steps']} avg_steps={summary['avg_steps']} "
           f"max_rejected={summary['max_rejected']} avg_rejected={summary['avg_rejected']} "
           f"max_err_pct={summary['max_err_pct']} avg_err_pct={summary['avg_err_pct']}")
 
     return dict(kept=kept, baseline=baseline_row, n_found=n_found, n_bad=n_bad, n_similar=n_similar,
-               n_stiff=n_stiff, summary=summary)
+               n_stiff=n_stiff, n_low_total=n_low_total, summary=summary, candidate_log=candidate_log)
 
 
 def main() -> int:
@@ -672,7 +768,7 @@ def main() -> int:
         rx_dir = root / "Reactions" / "EC_FAS_ME1" / name
         out_dir = root / "Data" / data_dir_name(cap, unsat)
         try:
-            _, _, _, _, _scaling_groups = build_ode_system_from_reactions(rx_dir)
+            _scaling_groups = discover_scaling_groups(rx_dir)
             sys_ = ChainSystem(rx_dir, a.rtol, a.atol,
                               scaling_group_overrides=nominal_scaling_group_overrides(_scaling_groups))
             targets = sys_.targets(UNSAT_PATTERN if unsat else SAT_PATTERN)

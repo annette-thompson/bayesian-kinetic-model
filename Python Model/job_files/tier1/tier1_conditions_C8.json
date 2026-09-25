@@ -1,0 +1,174 @@
+{
+  "system": "C8",
+  "rtol": 0.001,
+  "min_c16_frac": 0.1,
+  "usable_conditions_including_baseline": 7,
+  "needed": 7,
+  "enough": true,
+  "min_log_diff": 0.0,
+  "n_non_converged": 0,
+  "n_below_c16_floor": 0,
+  "n_too_similar": 0,
+  "n_stiff_at_strict": 0,
+  "baseline_steps": 92,
+  "baseline_strict_steps": 1452,
+  "loose_cap": 138,
+  "strict_cap": 2178,
+  "baseline_out": [
+    0.17868729631634264,
+    0.2644169444056139,
+    56.70324353941999
+  ],
+  "targets": [
+    "C4_FA",
+    "C6_FA",
+    "C8_FA"
+  ],
+  "baseline_c16_equivalents": 28.495449947941186,
+  "kept_steps": [
+    86,
+    89,
+    89,
+    90,
+    90,
+    93
+  ],
+  "kept_c16_frac_of_baseline": [
+    0.43250385375037065,
+    0.22372491258021127,
+    0.24266813181436245,
+    0.9705360555615802,
+    0.33114647724023655,
+    0.9996206098646833
+  ],
+  "kept_max_err_pct": 0.04374996489552731,
+  "kept_labels": [
+    "FabH x0.1",
+    "ACP x0.1",
+    "C3_MalCoA x0.1",
+    "FabB x0.1",
+    "TesA x0.1",
+    "FabF x0.1"
+  ],
+  "all_usable_labels": [
+    "FabH x0.1",
+    "ACP x0.1",
+    "C3_MalCoA x0.1",
+    "FabB x0.1",
+    "TesA x0.1",
+    "FabF x0.1"
+  ],
+  "all_usable_c16_frac_of_baseline": [
+    0.43250385375037065,
+    0.22372491258021127,
+    0.24266813181436245,
+    0.9705360555615802,
+    0.33114647724023655,
+    0.9996206098646833
+  ],
+  "end_time_s": 720.0,
+  "requested_conditions": "FabH x0.1,ACP x0.1,C3_MalCoA x0.1,FabF x0.1,FabB x0.1,TesA x0.1",
+  "strict_reference": [
+    1e-09,
+    1e-11
+  ],
+  "candidate_sweep": "titration",
+  "titration_factors": [
+    0.5,
+    2.0,
+    0.2,
+    5.0,
+    0.1,
+    10.0
+  ],
+  "candidate_log": [
+    {
+      "label": "FabH x0.1",
+      "result": "kept",
+      "steps": 86,
+      "strict_steps": 1159,
+      "out": [
+        0.04605427199025713,
+        0.06831828697421498,
+        24.574517982444934
+      ],
+      "total_frac_of_baseline": 0.43250385375037065
+    },
+    {
+      "label": "ACP x0.1",
+      "result": "kept",
+      "steps": 89,
+      "strict_steps": 1125,
+      "out": [
+        0.012415308186917124,
+        0.0184825649209495,
+        12.730214519289685
+      ],
+      "total_frac_of_baseline": 0.22372491258021127
+    },
+    {
+      "label": "C3_MalCoA x0.1",
+      "result": "kept",
+      "steps": 89,
+      "strict_steps": 1357,
+      "out": [
+        0.5932104299727062,
+        0.7154873048948313,
+        12.996654514495642
+      ],
+      "total_frac_of_baseline": 0.24266813181436245
+    },
+    {
+      "label": "FabB x0.1",
+      "result": "kept",
+      "steps": 90,
+      "strict_steps": 1415,
+      "out": [
+        0.1694593493607428,
+        0.25063034365909154,
+        55.03902075542986
+      ],
+      "total_frac_of_baseline": 0.9705360555615802
+    },
+    {
+      "label": "TesA x0.1",
+      "result": "kept",
+      "steps": 90,
+      "strict_steps": 1293,
+      "out": [
+        0.002506672923408427,
+        0.0037549557556212877,
+        18.86826618199399
+      ],
+      "total_frac_of_baseline": 0.33114647724023655
+    },
+    {
+      "label": "FabF x0.1",
+      "result": "kept",
+      "steps": 93,
+      "strict_steps": 1508,
+      "out": [
+        1.3319327402544037,
+        1.9069448659913608,
+        54.873103091038324
+      ],
+      "total_frac_of_baseline": 0.9996206098646833
+    }
+  ],
+  "timeseries_times_s": [
+    3.8135406697743672,
+    8.7836903006625,
+    16.193765114011835,
+    25.023705502239988,
+    38.36005605605354,
+    60.75808409823385,
+    104.20020045875894,
+    257.0809015530035,
+    486.0693619520507,
+    720.0
+  ],
+  "noise_seed": 848279207,
+  "noise_mode": "pointwise",
+  "noise_floor": 0.01,
+  "seconds": 77.8
+}
