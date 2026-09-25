@@ -1,0 +1,20 @@
+{
+  "config": "Chain C4_NoFB - a2",
+  "max_steps": 20000,
+  "solver": "Kvaerno5",
+  "rtol": 0.001,
+  "atol": 1e-07,
+  "n_param_sets": 11,
+  "n_conditions": 10,
+  "total_solves": 110,
+  "n_hit_max_steps": 0,
+  "successful_num_steps": {
+    "min": 74,
+    "median": 80,
+    "p95": 85,
+    "p99": 88,
+    "max": 88
+  },
+  "max_rejected_steps": 0,
+  "recommended_max_steps": 1000
+}
