@@ -1,0 +1,142 @@
+{
+  "free_kinetic_params": [
+    {
+      "rxn_name": null,
+      "param_name": "a1",
+      "prior_dist_params": {
+        "distribution": "LogNormal",
+        "lower": 0.05,
+        "upper": 20.0,
+        "mass": 0.95,
+        "fixed_stat": [
+          "median",
+          1.0
+        ]
+      }
+    }
+  ],
+  "prior_sampling": {
+    "draws": 10000,
+    "random_seed": 0
+  },
+  "posterior_sampling": {
+    "draws": 5000,
+    "tune": 1000,
+    "chains": 8,
+    "target_accept": 0.8,
+    "random_seed": 42,
+    "rhat_threshold": 1.01,
+    "rhat_check_every": 100,
+    "convergence_consecutive_checks": 2,
+    "post_convergence_checks": 1,
+    "rank_ecdf_prob": 0.95,
+    "checkpoint_every_steps": 5
+  },
+  "ODE_solver": {
+    "solver_name": "Kvaerno5",
+    "max_steps": 20000,
+    "dt0": 1e-06,
+    "stepsize_controller": "PIDController"
+  },
+  "ODE_stepsize_controller": {
+    "rtol": 0.001,
+    "atol": 1e-07,
+    "pcoeff": 0.4,
+    "icoeff": 0.3,
+    "dcoeff": 0.0
+  },
+  "calculation_module": "Calculation Files/Full_FAS/FA_conc.py",
+  "datasets": [
+    {
+      "name": "time_vs_conc_Chain_C4_NoFB",
+      "dataset_type": "timeseries",
+      "data_file": "Data/Chain_C4_NoFB/time_vs_conc.csv",
+      "observables": {
+        "C4_FA (uM)": "C4_FA (uM)"
+      },
+      "noise_model": "relative_mean",
+      "noise_params": {
+        "frac": 0.1
+      },
+      "enabled": true,
+      "time_column": "Time (s)",
+      "init_cond_overrides": {
+        "C3_MalCoA": 500.0,
+        "C2_AcCoA": 500.0,
+        "ACP": 10.0,
+        "NADPH": 1000.0,
+        "NADH": 1000.0,
+        "FabD": 1.0,
+        "FabH": 1.0,
+        "FabG": 1.0,
+        "FabZ": 1.0,
+        "FabI": 1.0,
+        "FabA": 1.0,
+        "TesA": 10.0
+      }
+    },
+    {
+      "name": "sweep_conc_Chain_C4_NoFB",
+      "dataset_type": "endpoint",
+      "data_file": "Data/Chain_C4_NoFB/init_vs_final_conc.csv",
+      "observables": {
+        "C4_FA (uM)": "C4_FA (uM)"
+      },
+      "noise_model": "relative_mean",
+      "noise_params": {
+        "frac": 0.1
+      },
+      "enabled": true,
+      "time_values": [
+        150
+      ],
+      "init_cond_columns": {
+        "C3_MalCoA": "C3_MalCoA (uM)",
+        "C2_AcCoA": "C2_AcCoA (uM)",
+        "ACP": "ACP (uM)",
+        "FabD": "FabD (uM)",
+        "FabH": "FabH (uM)",
+        "FabG": "FabG (uM)",
+        "FabZ": "FabZ (uM)",
+        "FabI": "FabI (uM)",
+        "FabA": "FabA (uM)",
+        "TesA": "TesA (uM)"
+      },
+      "init_cond_overrides": {
+        "NADPH": 1000.0,
+        "NADH": 1000.0
+      }
+    }
+  ],
+  "path_base": "../../..",
+  "output_paths": {
+    "reactions_source": [
+      "Reactions/EC_FAS_ME1/C4/FabD.yaml",
+      "Reactions/EC_FAS_ME1/C4/FabH.yaml",
+      "Reactions/EC_FAS_ME1/C4/FabG.yaml",
+      "Reactions/EC_FAS_ME1/C4/FabZ.yaml",
+      "Reactions/EC_FAS_ME1/C4/FabI.yaml",
+      "Reactions/EC_FAS_ME1/C4/TesA.yaml",
+      "Reactions/EC_FAS_ME1/C4/FabA.yaml"
+    ],
+    "results_save_dir": "Results/Chain Scaling Tests/Chain C4_NoFB - a1_0.05-20_floor",
+    "prior_samples_file": "prior_samples_pm.nc",
+    "posterior_samples_file": "posterior_samples_pm.nc",
+    "trace_plot_file": "trace_plot.png"
+  },
+  "scaling_groups": {
+    "a1": 1.0,
+    "a2": 1.0,
+    "a3": 1.0,
+    "b1": 1.0,
+    "b2": 1.0,
+    "b3": 1.0,
+    "c1": 1.0,
+    "c2": 1.0,
+    "c3": 1.0,
+    "c4": 1.0,
+    "d1": 0.0,
+    "d2": 0.0,
+    "e": 1.0
+  }
+}
