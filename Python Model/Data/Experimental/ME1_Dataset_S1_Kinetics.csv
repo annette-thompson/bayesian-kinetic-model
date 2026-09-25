@@ -1,0 +1,19 @@
+﻿Figure,Experiment,System,[FabA],[FabB],[FabD],[FabF],[FabG],[FabH],[FabI],[FabZ],[TesA],[Holo-ACP],[NADPH],[Malonyl CoA],[Acetyl CoA],Average Initial Rate,Standard error,Replicates (n)
+,(type),, (µM), (µM), (µM), (µM), (µM), (µM), (µM), (µM), (µM), (µM), (µM), (µM), (µM), (µM C16/min), (µM C16/min),(#)
+S1A,Kinetics,Reference,1,1,1,1,1,1,1,1,10,10,1300,500,100,4.655129552,0.195953656,3
+S1A,Kinetics,No FabH,1,1,1,1,1,0,1,1,10,10,1300,500,100,2.41772584,0.329796844,3
+S1A,Kinetics,"No FabH, No FabF",1,1,1,0,1,0,1,1,10,10,1300,500,100,1.796165966,0.153881698,3
+S1A,Kinetics,"No FabH, No FabB",1,0,1,1,1,0,1,1,10,10,1300,500,100,2.976304272,0.145801109,3
+S1A,Kinetics,"No FabH, No AcCoA",1,1,1,1,1,0,1,1,10,10,1300,500,0,2.91667542,0.175030609,3
+S1A,Kinetics,"No FabH, No FabF, No AcCoA",1,1,1,0,1,0,1,1,10,10,1300,500,0,0.893110994,0.188789642,3
+S1A,Kinetics,"No FabH, No FabB, No AcCoA",1,0,1,1,1,0,1,1,10,10,1300,500,0,2.428676471,0.106000831,3
+S1A,Kinetics,No ACP (Ctl),1,1,1,1,1,1,1,1,10,0,1300,500,100,-0.336677171,0.124846843,3
+S16A,Kinetics,"No FabF, 1 μM FabB, 1 μM FabH",1,1,1,0,1,1,1,1,10,10,1300,500,100,3.272438672,0.676380263,3
+S16A,Kinetics,"No FabF, 1 μM FabB, 5 μM FabH",1,1,1,0,1,5,1,1,10,10,1300,500,100,-0.036219336,0.272989588,3
+S16A,Kinetics,"No FabF, 1 μM FabB, 10 μM FabH",1,1,1,0,1,10,1,1,10,10,1300,500,100,0,0,3
+S16A,Kinetics,"No FabF, 4 μM FabB, 1 μM FabH",1,4,1,0,1,1,1,1,10,10,1300,500,100,7.781818182,0.337239996,3
+S16A,Kinetics,"No FabF, 4 μM FabB, 5 μM FabH",1,4,1,0,1,5,1,1,10,10,1300,500,100,5.476479076,0.125825072,3
+S16A,Kinetics,"No FabF, 4 μM FabB, 10 μM FabH",1,4,1,0,1,10,1,1,10,10,1300,500,100,0.748773449,0.737351192,3
+S16A,Kinetics,"No FabF, 10 μM FabB, 1 μM FabH",1,10,1,0,1,1,1,1,10,10,1300,500,100,6.022077922,0.284293688,3
+S16A,Kinetics,"No FabF, 10 μM FabB, 5 μM FabH",1,10,1,0,1,5,1,1,10,10,1300,500,100,6.011616162,0.145907855,3
+S16A,Kinetics,"No FabF, 10 μM FabB, 10 μM FabH",1,10,1,0,1,10,1,1,10,10,1300,500,100,2.178138528,0.49864272,3
