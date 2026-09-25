@@ -10,7 +10,7 @@
 # script on Blanca (any full A100/V100/H100) and Alpine (full A100) at once; the
 # first twin to start runs it and cancels the other (claim below). A bare sbatch
 # gets no GPU and stops at the GPU check.
-#SBATCH --output=/projects/anth4580/Bayesian/job_files/masking_check/%x.%j.out
+#SBATCH --output=/projects/anth4580/Bayesian/job_files/chain_scaling_tests/%x.%j.out
 #SBATCH --mail-type=ALL
 #SBATCH --export=NONE
 
@@ -75,7 +75,7 @@ export EQX_ON_ERROR=nan
 # unfinished: resubmit_if_needed.sh checks the checkpoint phase and the
 # per-chain acceptance first. The TERM trap covers preemption -- on this QOS a
 # job can be requeued out from under us, and SIGTERM is the only warning.
-RESUB="/projects/anth4580/Bayesian/job_files/masking_check/resubmit_if_needed.sh"
+RESUB="/projects/anth4580/Bayesian/job_files/chain_scaling_tests/resubmit_if_needed.sh"
 # Not "$(basename "${BASH_SOURCE[0]}")": under SLURM the batch script runs
 # from a spool copy named "slurm_script", so resubmit_if_needed.sh built
 # ".../masking_check/slurm_script" and EVERY automatic resubmission failed
@@ -94,6 +94,6 @@ echo "==> System: $SYSTEM  Prior width: $WIDTH"
 echo "==> Host: $(hostname)"
 echo "==> GPU model: $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null || echo unknown)"
 
-time python -u /projects/anth4580/Bayesian/job_files/masking_check/truncated_warmup_test.py
+time python -u /projects/anth4580/Bayesian/job_files/chain_scaling_tests/truncated_warmup_test.py
 
 _do_resubmit normal

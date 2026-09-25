@@ -12,9 +12,9 @@
 
 # Runs one Tier-1 prep script on CPU. These are single, unbatched ODE solves, which a
 # GPU does not speed up, so no GPU is requested.
-# The script path is relative to job_files/ (multiparam_tests is job_files/bench on the cluster):
+# The script path is relative to job_files/:
 #   sbatch --job-name=t1data_C12 cpu_python.sbatch tier1/make_tier1_data.py C12
-#   sbatch --job-name=info_C12   cpu_python.sbatch bench/info_vs_conditions.py --system C12
+#   sbatch --job-name=info_C12   cpu_python.sbatch multiparam_tests/info_vs_conditions.py --system C12
 
 _die() { echo "Error: $*" >&2; exit 1; }
 [[ $# -ge 1 ]] || _die "usage: sbatch cpu_python.sbatch <script relative to job_files/> [args]"

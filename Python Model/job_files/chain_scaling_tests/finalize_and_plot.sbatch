@@ -4,7 +4,7 @@
 #SBATCH --qos=preemptable
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --output=/projects/anth4580/Bayesian/job_files/masking_check/%x.%j.out
+#SBATCH --output=/projects/anth4580/Bayesian/job_files/chain_scaling_tests/%x.%j.out
 #SBATCH --export=NONE
 
 # Finalize a converged run (netcdf) and/or draw its six standard figures.
@@ -63,7 +63,7 @@ case "$MODE" in
     if [[ "$MODE" == finalize+plots ]]; then
       jid=$(module unload slurm >/dev/null 2>&1; module load slurm/blanca >/dev/null 2>&1
             sbatch --parsable --partition=blanca --qos=preemptable --time=01:00:00 \
-                   --cpus-per-task=4 --mem=8G /projects/anth4580/Bayesian/job_files/masking_check/finalize_and_plot.sbatch "$RUN" plots 2>&1)
+                   --cpus-per-task=4 --mem=8G /projects/anth4580/Bayesian/job_files/chain_scaling_tests/finalize_and_plot.sbatch "$RUN" plots 2>&1)
       echo "==> figures job (Blanca CPU): $jid"
     fi
     ;;

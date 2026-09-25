@@ -244,7 +244,7 @@ def latest_convergence_check(jids):
     import glob
     best = None
     for j in jids:
-        matches = glob.glob(f"{JOBDIR}/masking_check/*.{j.rpartition(':')[2]}.out")
+        matches = glob.glob(f"{JOBDIR}/chain_scaling_tests/*.{j.rpartition(':')[2]}.out")
         for path in matches:
             try:
                 with open(path, "r", errors="replace") as fh:

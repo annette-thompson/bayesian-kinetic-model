@@ -38,7 +38,7 @@
 set -uo pipefail
 SCRIPT="${1:?script}"; SYSTEM="${2:?system}"; WIDTH="${3:?width}"
 MAXH="${4:?maxh}";     WHY="${5:-normal}"
-MC="/projects/anth4580/Bayesian/job_files/masking_check"
+MC="/projects/anth4580/Bayesian/job_files/chain_scaling_tests"
 BASE="/projects/anth4580/Bayesian/Results/Chain Scaling Tests"
 WALL="${RESUB_WALL:-12:15:00}"
 MAX_SEGMENTS="${RESUB_MAX_SEGMENTS:-12}"

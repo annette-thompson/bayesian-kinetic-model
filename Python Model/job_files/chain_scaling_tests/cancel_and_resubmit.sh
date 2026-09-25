@@ -15,7 +15,7 @@
 set -uo pipefail
 JOBID="${1:?jobid}"; SCRIPT="${2:?sbatch_script}"; SYSTEM="${3:?system}"
 WIDTH="${4:?width}"; MAXH="${5:?maxh}"
-MC="/projects/anth4580/Bayesian/job_files/masking_check"
+MC="/projects/anth4580/Bayesian/job_files/chain_scaling_tests"
 
 scancel "$JOBID"
 bash "$MC/resubmit_if_needed.sh" "$SCRIPT" "$SYSTEM" "$WIDTH" "$MAXH" watcher_cancel
