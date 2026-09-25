@@ -46,7 +46,7 @@
     "post_convergence_checks": 1,
     "checkpoint_every_steps": 5,
     "max_total_hours": 12.0,
-    "max_sampling_hours": 2.0
+    "max_sampling_hours": 4.0
   },
   "ODE_solver": {
     "solver_name": "Kvaerno5",
