@@ -17,7 +17,12 @@ import argparse
 
 import arviz as az
 
-from inference_plotting import plot_convergence_diagnostics, plot_energy_diagnostics, plot_loo_diagnostics
+from inference_plotting import (
+    ess_threshold_for,
+    plot_convergence_diagnostics,
+    plot_energy_diagnostics,
+    plot_loo_diagnostics,
+)
 from inference_runner import import_solver_params
 
 
@@ -45,10 +50,18 @@ def main() -> None:
     print(f"Run: {imported.results_save_dir}")
     print(f"Free params: {free_params}")
 
+    # The ESS bar scales with chain count (see ess_threshold_for). Take the chain count
+    # from the draws themselves rather than the config, so a run resumed with a different
+    # chain count is still plotted against the bar it actually has to clear.
+    n_chains = int(inf_data.posterior.sizes["chain"])
+    ess_threshold, ess_source = ess_threshold_for(posterior_config, n_chains)
+    print(f"ESS threshold: {ess_threshold:g}  ({ess_source})")
+
     result = plot_convergence_diagnostics(
         inf_data=inf_data,
         free_params=free_params,
         rhat_threshold=rhat_threshold,
+        ess_threshold=ess_threshold,
         step=args.step,
         save_file=str(imported.results_save_dir / "convergence_diagnostics.png"),
         system_name=system_name,
@@ -57,9 +70,9 @@ def main() -> None:
     n_draws = result["draw_counts"][-1]
     print(f"Sampling draws available: {n_draws}")
     if result["criteria_met_at"] is not None:
-        print(f"Criteria (r_hat<{rhat_threshold}, ess>=400) first met at draw {result['criteria_met_at']}")
+        print(f"Criteria (r_hat<{rhat_threshold}, ess>={ess_threshold:g}) first met at draw {result['criteria_met_at']}")
     else:
-        print(f"Criteria (r_hat<{rhat_threshold}, ess>=400) not yet met within {n_draws} draws.")
+        print(f"Criteria (r_hat<{rhat_threshold}, ess>={ess_threshold:g}) not yet met within {n_draws} draws.")
     print(f"Total divergences: {result['total_divergences']}")
     print(f"Saved: {result['plot_file']}")
 

@@ -370,14 +370,14 @@ class ReactionNetwork(eqx.Module):
             return jnp.zeros_like(y)
 
         theta = jnp.asarray(args)
-        # Clamp concentrations to be non-negative before computing rates.
-        # Concentrations are physically >= 0, but the adaptive solver can
-        # produce tiny negative overshoots. Raised to a stoichiometric power
-        # (possibly non-integer) those negatives yield NaN, and large negative
-        # excursions during NUTS warmup make mass-action terms blow up to inf
-        # (which then crashes the implicit linear solver). Flooring at 0 keeps
-        # the rate law well-defined without changing the physical dynamics.
-        reactant_conc = jnp.maximum(y[self.reactant_idx_arr], 0.0)
+        # No negative-concentration floor. A jnp.maximum(y, 0.0) clamp sat here
+        # until 2026-09-14, when the project settled on no floor everywhere:
+        # tested across the whole chain ladder, the clamp did not prevent the
+        # solver crash it was added for, froze every chain (0% acceptance) above
+        # C8-C10, and was up to ~9x slower where it did run. A solve that goes
+        # bad returns NaN instead (EQX_ON_ERROR=nan, set by inference_runner),
+        # which the sampler rejects. Scripts no longer need a no-floor patch.
+        reactant_conc = y[self.reactant_idx_arr]
         reactant_powers = jnp.where(
             self.reactant_mask_arr,
             reactant_conc ** self.reactant_stoich_arr,
@@ -412,6 +412,24 @@ def discover_scaling_groups(
                 if n not in names:
                     names.append(n)
     return names
+
+
+def nominal_scaling_group_values(scaling_groups: "Sequence[str]") -> dict[str, float]:
+    """The no-op value for each group: 1.0 multiplicative, 0.0 for 'd'-prefixed.
+
+    'd' groups are additive inside exp() (TesA's 1/exp(12*d1+d2)), so their no-op
+    value is 0, not 1. Giving them 1 does not fail loudly -- it silently rescales
+    TesA by ~4.4e5x at C12 and ~4e12x at C20. That is the bug
+    build_ode_system_from_reactions' explicit-value requirement exists to catch,
+    which is why the rule lives here next to it rather than being retyped at each
+    call site.
+
+    Only for callers that genuinely need a no-op build (structural queries, or
+    builds whose values are overridden afterwards from a config or posterior).
+    Anything that solves with these values should pass the authoritative
+    'scaling_groups' block from its solver params instead.
+    """
+    return {g: (0.0 if g.startswith("d") else 1.0) for g in scaling_groups}
 
 
 def _resolve_scaling_value(name: str, scaling_group) -> float:

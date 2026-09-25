@@ -36,8 +36,10 @@ import preliz as pz
 import pytensor.tensor as pt
 import xarray as xr
 
+from pymc.logprob.transforms import Transform
 from pytensor.graph import Apply, Op
 from pytensor.link.jax.dispatch import jax_funcify
+from scipy import optimize, special
 
 from experiment_framework import (
     compute_observation_prediction,
@@ -497,7 +499,26 @@ def run_bayesian_inference(
     initial_step = float(posterior_config.get("initial_step_size", 1.0))
     rhat_threshold = posterior_config.get("rhat_threshold", None)
     rhat_threshold = float(rhat_threshold) if rhat_threshold is not None else None
+    # Historically a hardcoded >=400 literal inside _check_converged; now a
+    # config knob so a run can drop the ESS requirement (null) and converge on
+    # r-hat alone -- see SamplerSpec.ess_threshold.
+    ess_threshold = posterior_config.get("ess_threshold", 400.0)
+    ess_threshold = float(ess_threshold) if ess_threshold is not None else None
+    # Vehtari et al. 2021 state the ESS requirement per split chain, not as one number:
+    # "we only recommend relying on the R-hat estimate ... if each of the split chains has
+    # an average ESS estimate of at least 50. In our minimum recommended setup of four
+    # parallel chains, the total ESS should be at least 400". Each chain is split in two, so
+    # the threshold scales as 2 x chains x ess_per_split_chain -- 400 at 4 chains, 800 at 8,
+    # and so on. Setting this overrides a flat ess_threshold.
+    ess_per_split = posterior_config.get("ess_per_split_chain")
+    if ess_per_split is not None:
+        ess_threshold = 2.0 * n_chains * float(ess_per_split)
     rhat_check_every = int(posterior_config.get("rhat_check_every", 100))
+    # How many chains must survive the stranded-chain exclusion before convergence may be
+    # declared (SamplerSpec.min_chains_for_convergence). At 4 chains with the default floor
+    # of 4, a single stranded chain blocks convergence for the whole run; lowering it trades
+    # r-hat's power to see chains disagree for the ability to finish such a run.
+    min_chains_conv = int(posterior_config.get("min_chains_for_convergence", 4))
     posterior_burn_in = int(posterior_config.get("posterior_burn_in_draws", 0))
     post_convergence_checks = int(posterior_config.get("post_convergence_checks", 0))
     # Optional third convergence criterion (rank-normalized ECDF mixing check).
@@ -508,6 +529,17 @@ def run_bayesian_inference(
     rank_ecdf_prob = float(rank_ecdf_prob) if rank_ecdf_prob is not None else None
     rank_ecdf_simulations = int(posterior_config.get("rank_ecdf_simulations", 300))
     convergence_consecutive_checks = int(posterior_config.get("convergence_consecutive_checks", 1))
+    # Total COMPUTE ceiling summed across every segment, independent of this
+    # invocation's own max_hours (segment budget). Same knob for both the
+    # chain-ladder tests (24h, so a slow system stops for review instead of
+    # silently re-queueing for days) and the eventual full-model production run
+    # (e.g. 336.0 for a 2-week cap) -- just set it per-run in solver_params.json,
+    # including on a run already in progress (see config_signature below).
+    max_total_hours = posterior_config.get("max_total_hours", 24.0)
+    max_total_hours = float(max_total_hours) if max_total_hours is not None else None
+    # Sampling-phase-only compute ceiling (see SamplerSpec.max_sampling_hours).
+    max_sampling_hours = posterior_config.get("max_sampling_hours", None)
+    max_sampling_hours = float(max_sampling_hours) if max_sampling_hours is not None else None
 
     # Fast no-op if a prior job already finished this run (SLURM chains overshoot).
     results_file = savedir_path / imported.posterior_samples_file
@@ -525,9 +557,20 @@ def run_bayesian_inference(
 
     bundle = _build_model_bundle(imported)
 
+    # max_total_hours is a compute budget, not part of the chain's state, so it
+    # is left out of the resume check: raising a run's cap mid-run must not make
+    # its checkpoint "incompatible" and force a restart. Dropped only when
+    # present, so every config that doesn't set it hashes exactly as it did.
+    # Stopping-rule knobs are excluded from the resume signature: they decide when to stop,
+    # never where the chains go, so changing one must not invalidate a live checkpoint.
+    signature_sampling = {k: v for k, v in posterior_config.items()
+                          if k not in ("max_total_hours", "max_sampling_hours",
+                                       "min_chains_for_convergence", "ess_per_split_chain")}
+    # ess_threshold itself stays IN the signature: it is present in every existing config,
+    # so dropping it now would change their hashes and refuse to resume live checkpoints.
     config_signature = json.dumps(
         {
-            "posterior_sampling": posterior_config,
+            "posterior_sampling": signature_sampling,
             "free_params": bundle.free_params,
             "reactions_source": str(imported.reactions_source),
         },
@@ -551,10 +594,17 @@ def run_bayesian_inference(
             f", plus a rank-ECDF mixing check at prob={rank_ecdf_prob}"
             if rank_ecdf_prob is not None else ""
         )
-        _print_kv("early-stop", f"r_hat<{rhat_threshold} and ess_bulk>=400, checked every {rhat_check_every} draws{burn_in_note}{extra_note}{rank_note}")
+        ess_clause = f"and ess_bulk>={ess_threshold:g} " if ess_threshold is not None else "(ess ignored) "
+        if ess_per_split is not None:
+            _print_kv("ess threshold", f"{ess_threshold:g} = 2 x {n_chains} chains x {ess_per_split} per split chain")
+        _print_kv("min chains for convergence", f"{min_chains_conv} (of {n_chains}; stranded chains excluded)")
+        _print_kv("early-stop", f"r_hat<{rhat_threshold} {ess_clause}checked every {rhat_check_every} draws{burn_in_note}{extra_note}{rank_note}")
     if posterior_burn_in:
         _print_kv("posterior_burn_in_draws", f"{posterior_burn_in} (extra, beyond tune={n_tune}; final posterior = sampling[{posterior_burn_in}:])")
     _print_kv("max_hours (this segment)", max_hours if max_hours else "unbounded")
+    _print_kv("max_total_hours (whole run)", max_total_hours if max_total_hours else "unbounded")
+    if max_sampling_hours is not None:
+        _print_kv("max_sampling_hours (sampling phase)", max_sampling_hours)
     if extra_draws:
         _print_kv("extra_draws requested", extra_draws)
 
@@ -571,12 +621,16 @@ def run_bayesian_inference(
         checkpoint_every=checkpoint_every,
         random_seed=seed,
         rhat_threshold=rhat_threshold,
+        ess_threshold=ess_threshold,
         rhat_check_every=rhat_check_every,
+        min_chains_for_convergence=min_chains_conv,
         posterior_burn_in_draws=posterior_burn_in,
         post_convergence_checks=post_convergence_checks,
         rank_ecdf_prob=rank_ecdf_prob,
         rank_ecdf_simulations=rank_ecdf_simulations,
         convergence_consecutive_checks=convergence_consecutive_checks,
+        max_total_hours=max_total_hours,
+        max_sampling_hours=max_sampling_hours,
     )
     sampler = rs.ResumableSampler(
         bridge.logdensity_fn,
@@ -626,11 +680,12 @@ def run_bayesian_inference(
         stats=sampling_stats,
         segment_seconds=segment_seconds,
         warmup_draws=warmup_draws,
+        stranded_chains=status.stranded_chains,
     )
 
 
 def _finalize_resumable_run(
-    imported, bundle, draws, stats, segment_seconds, warmup_draws=None
+    imported, bundle, draws, stats, segment_seconds, warmup_draws=None, stranded_chains=None
 ) -> InferenceRunResult:
     """Convert selected draws into the standard netcdf outputs + metrics.
 
@@ -639,7 +694,29 @@ def _finalize_resumable_run(
     the sampling phase, or a retroactively windowed slice). ``warmup_draws``, if
     given, is added as a ``warmup_posterior`` group so trace plots can show the
     tuning phase (inference_plotting reads it for include_tuning).
+
+    ``stranded_chains``, if given, drops those chain indices from ``draws``,
+    ``stats``, and ``warmup_draws`` before anything else runs. The live
+    convergence check (resumable_sampler._stranded_chains) already excludes a
+    stranded chain from its OWN r-hat/ESS decision -- deliberately without
+    touching the checkpointed draws, so nothing is silently lost mid-run and a
+    different exclusion threshold can be revisited later. But until this fix,
+    finalize still built log-likelihood/posterior-predictive/summary metrics
+    from all chains regardless, so a "converged" run's saved artifacts still
+    quietly included the excluded chain -- confirmed visually on C10-narrowest
+    (2026-09-09): the blended posterior-predictive band was measurably biased
+    and widened relative to the kept-chains-only version. This is the fix
+    point for both callers (the live auto-finalize path above, and
+    finalize_window.py's offline re-finalize).
     """
+    if stranded_chains:
+        keep = [c for c in range(next(iter(draws.values())).shape[0]) if c not in set(stranded_chains)]
+        print(f"Excluding {len(stranded_chains)} stranded chain(s) from finalized artifacts: "
+              f"{stranded_chains} (keeping {keep})")
+        draws = {name: arr[keep] for name, arr in draws.items()}
+        stats = {name: arr[keep] for name, arr in stats.items()}
+        if warmup_draws:
+            warmup_draws = {name: arr[keep] for name, arr in warmup_draws.items()}
     from arviz_base import from_dict
     from pymc.backends.arviz import coords_and_dims_for_inferencedata
     from pymc.sampling.jax import get_jaxified_graph, _postprocess_samples
@@ -695,16 +772,35 @@ def _finalize_resumable_run(
     # reproduces on Linux/Alpine. If a finalize step aborts with that error,
     # that's this tradeoff -- rerun, or drop backend="jax" here.
     print("Computing log-likelihood, prior, and posterior predictive...")
-    with pm_model:
-        pm.compute_log_likelihood(idata, progressbar=False, backend="jax")
+    prior_file = savedir_path / imported.prior_samples_file
+    results_file = savedir_path / imported.posterior_samples_file
+    # Both heavy steps here cost one ODE solve per posterior draw (3,200 on the
+    # larger ladder systems -- hours of GPU time each). Until 2026-09-11 nothing
+    # reached disk until AFTER the posterior predictive returned, so a job that
+    # hit its time limit anywhere in between discarded every stage that had
+    # already succeeded and its successor restarted from zero -- C18+unsat spent
+    # three attempts re-running a log-likelihood pass that had finished each
+    # time. Each stage is now flushed as it completes, and reloaded rather than
+    # recomputed when the cache belongs to the draws actually in hand.
+    stage_file = savedir_path / "finalize_stage.nc"
+    cached_log_likelihood = _cached_log_likelihood(stage_file, idata)
+    if cached_log_likelihood is None:
+        with pm_model:
+            pm.compute_log_likelihood(idata, progressbar=False, backend="jax")
+        _safe_write_idata(idata.copy(), stage_file)
+        print(f"  log-likelihood computed, staged -> {stage_file.name}")
+    else:
+        idata.update({"log_likelihood": cached_log_likelihood})
+        print(f"  log-likelihood reused from {stage_file.name} (same draws), recompute skipped")
+
     prior_pred = _sample_prior(pm_model=pm_model, solver_params=solver_params, free_params=free_params)
+    _safe_write_idata(prior_pred, prior_file)
+    print(f"  prior samples written -> {prior_file.name}")
+
     with pm_model:
         post_pred = pm.sample_posterior_predictive(idata, progressbar=False, backend="jax")
 
     _print_section("Artifacts")
-    prior_file = savedir_path / imported.prior_samples_file
-    results_file = savedir_path / imported.posterior_samples_file
-    _safe_write_idata(prior_pred, prior_file)
     combined = idata.copy()
     combined.update(prior_pred)
     combined.update(post_pred)
@@ -717,6 +813,8 @@ def _finalize_resumable_run(
         ).posterior
         combined["warmup_posterior"] = warmup_posterior
     _safe_write_idata(combined, results_file)
+    # Only now is the staged copy redundant: results_file holds everything it did.
+    stage_file.unlink(missing_ok=True)
     _print_kv("Prior file", prior_file.name)
     _print_kv("Posterior file", results_file.name)
 
@@ -779,7 +877,7 @@ def _build_solver(solver_params):
 def _build_simulator(ode_system, species_names, solver_params, experiment):
     ode_solver_config = solver_params.get("ODE_solver", {})
     dt0 = ode_solver_config.get("dt0", None)
-    max_steps = int(ode_solver_config.get("max_steps", 10_000))
+    max_steps = int(ode_solver_config.get("max_steps", 20_000))
 
     ode_controller_config = solver_params.get("ODE_stepsize_controller", {})
 
@@ -854,6 +952,98 @@ def _build_simulator(ode_system, species_names, solver_params, experiment):
     return simulator
 
 
+class _ScaleTransform(Transform):
+    """Sample x through u = factor * x -- the same mechanism that gives a
+    LogNormal parameter its "_log__" coordinate, but affine.
+
+    Why it exists: NUTS moves in the unconstrained coordinate. A LogNormal group
+    (a1, c3, ...) is sampled as log(x), whose prior sd is ~1.17. d1 enters TesA
+    as exp(12*d1), so its Normal prior needs sd 0.098 to span the same 100-fold
+    rate window -- and sampled raw, that is a 12x scale mismatch the diagonal
+    mass matrix starts out blind to. Two things broke (2026-09-14, 3-param
+    pilot): warmup step size collapsed to fit d1 (up to 339x smaller than the
+    matching a2 run), and PyMC's +/-1 initial-point jitter put d1 at up to 0.85,
+    i.e. TesA at up to 25,800x. Sampling u = 12*d1 gives d1 an unconstrained
+    sd of 1.17 and a jitter footprint of TesA 0.37-2.7x, both matching a1's.
+
+    The prior itself is unchanged -- only the coordinate NUTS walks in. The
+    variable is still named after the parameter; its value var becomes
+    "<param>_x<factor>__", which export_posterior_series.py undoes.
+    """
+
+    def __init__(self, factor: float):
+        self.factor = float(factor)
+        self.name = f"x{self.factor:g}"
+
+    def forward(self, value, *inputs):
+        return value * self.factor
+
+    def backward(self, value, *inputs):
+        return value / self.factor
+
+    def log_jac_det(self, value, *inputs):
+        return pt.zeros_like(value) - np.log(self.factor)
+
+
+# Largest |achieved - requested| prior mass accepted from a fit.
+_PRIOR_MASS_TOL = 1e-3
+
+
+def _fit_prior(param_name, prior_params):
+    """PreliZ distribution for one `prior_dist_params` spec, checked against its mass.
+
+    A LogNormal with a fixed median is solved exactly rather than by maxent. Once
+    mu = log(median) is fixed, sigma is set by the mass constraint alone -- there
+    is no entropy left to maximise -- and maxent's optimiser can miss it: it seeds
+    from the arithmetic midpoint of [lower, upper], a poor start for a wide
+    LogNormal far from 1. With the Tier-1 prior-offset specs (median shifted
+    +2/+3/+4 prior sd, window moved with it) preliz 0.23 returned sigma 0.16,
+    0.52 and 1.11 instead of 1.17, with only a UserWarning (2026-09-25). The exact
+    solve agrees with log(10)/z_0.975 to 12 digits; maxent gets within ~5e-6.
+
+    Every result is then checked against the requested mass, so a bad fit of any
+    other spec raises instead of silently changing the prior.
+    """
+    dist_name = prior_params["distribution"]
+    lower = float(prior_params["lower"])
+    upper = float(prior_params["upper"])
+    mass = float(prior_params.get("mass", 0.95))
+    fixed_stat = prior_params.get("fixed_stat", None)
+
+    if dist_name == "LogNormal" and fixed_stat and fixed_stat[0] == "median":
+        mu = float(np.log(fixed_stat[1]))
+        above, below = np.log(upper) - mu, mu - np.log(lower)
+        if not (above > 0 and below > 0):
+            raise ValueError(
+                f"{param_name}: LogNormal median {fixed_stat[1]} is outside "
+                f"[{lower}, {upper}]"
+            )
+        # Mass in [lower, upper] falls monotonically from 1 to 0 as sigma grows.
+        sigma = optimize.brentq(
+            lambda s: special.ndtr(above / s) - special.ndtr(-below / s) - mass,
+            1e-8, 1e8, xtol=1e-14,
+        )
+        result = pz.LogNormal(mu=mu, sigma=sigma)
+    else:
+        result = pz.maxent(
+            distribution=getattr(pz, dist_name)(),
+            lower=lower,
+            upper=upper,
+            mass=mass,
+            fixed_stat=fixed_stat,
+            plot=False
+        )
+
+    achieved = float(result.cdf(upper) - result.cdf(lower))
+    if abs(achieved - mass) > _PRIOR_MASS_TOL:
+        fitted = [round(float(v), 4) for v in result.params]
+        raise ValueError(
+            f"{param_name}: fitted {result.__class__.__name__} prior (params {fitted}) "
+            f"puts mass {achieved:.4f} in [{lower}, {upper}], not the requested {mass}"
+        )
+    return result
+
+
 def _build_pymc_model(
     solver_params,
     sol_op,
@@ -892,20 +1082,25 @@ def _build_pymc_model(
             param_name = param_spec["param_name"]
             prior_params = param_spec["prior_dist_params"]
 
-            dist_name = prior_params["distribution"]
-            dist = getattr(pz, dist_name)()
-            result = pz.maxent(
-                distribution=dist,
-                lower=prior_params["lower"],
-                upper=prior_params["upper"],
-                mass=prior_params.get("mass", 0.95),
-                fixed_stat=prior_params.get("fixed_stat", None),
-                plot=False
-            )
+            result = _fit_prior(param_name, prior_params)
             pm_dist_cls = getattr(pm, result.__class__.__name__)
+            dist_kwargs = {}
+            sample_scale = prior_params.get("sample_scale")
+            if sample_scale is not None and float(sample_scale) != 1.0:
+                # A transform REPLACES a distribution's default one, so on a
+                # bounded prior (LogNormal) this would silently drop the log
+                # transform that keeps it positive. Only an unbounded prior can
+                # take it safely.
+                if result.__class__.__name__ != "Normal":
+                    raise ValueError(
+                        f"{param_name}: sample_scale is only valid on a Normal prior, "
+                        f"got {result.__class__.__name__}"
+                    )
+                dist_kwargs["default_transform"] = _ScaleTransform(float(sample_scale))
             priors[param_name] = pm_dist_cls(
                 param_name,
                 *[float(value) for value in result.params],
+                **dist_kwargs,
             )
 
         # Build full parameter tuple in reaction-defined order. Free parameters are
@@ -956,6 +1151,35 @@ def _sample_prior(pm_model, solver_params, free_params):
             var_names=var_names,
             backend="jax",
         )
+
+
+def _cached_log_likelihood(stage_file: Path, idata):
+    """An interrupted finalize's log_likelihood for exactly these draws, or None.
+
+    Guarded on the posterior values themselves rather than on their shape: a
+    cache left behind by a different window (finalize_window.py's --burn_in /
+    --thin) or by an earlier run of the same system has the same shape and
+    would otherwise be reused against draws it was never computed for, which
+    fails silently as wrong likelihoods rather than as an error.
+    """
+    if not stage_file.exists():
+        return None
+    try:
+        cached = az.from_netcdf(stage_file)
+        groups = {group.lstrip("/") for group in cached.groups}
+        if not {"posterior", "log_likelihood"} <= groups:
+            return None
+        have, want = cached["posterior"].dataset, idata["posterior"].dataset
+        if set(have.data_vars) != set(want.data_vars):
+            return None
+        for name in want.data_vars:
+            if not np.array_equal(np.asarray(have[name]), np.asarray(want[name])):
+                return None
+        return cached["log_likelihood"]
+    except Exception as exc:  # noqa: BLE001 - a truncated cache must never fail the run
+        print(f"Ignoring unusable finalize cache {stage_file.name} "
+              f"({type(exc).__name__}: {exc}); recomputing")
+        return None
 
 
 def _safe_write_idata(inf_data: xr.DataTree, output_file: Path):

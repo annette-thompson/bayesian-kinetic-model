@@ -533,6 +533,25 @@ def _rhat_ess_trajectory(
     return draw_counts, rhats, esses, n_tune
 
 
+def ess_threshold_for(posterior_config: dict, n_chains: int) -> tuple[float, str]:
+    """The ESS bar a run has to clear, and a short phrase saying where it came from.
+
+    Vehtari et al. 2021 state the requirement per split chain -- an average ESS of at
+    least 50 in each half of each chain -- which is 100 x chains once every chain is
+    split in two. That is 400 at four chains, the figure these plots used to hardcode,
+    and 800 at eight, so a flat 400 held every multi-chain run to half the standard it
+    should have met. The precedence matches inference_runner.py so a plot and the
+    sampler that produced it never disagree about the bar.
+    """
+    per_split = posterior_config.get("ess_per_split_chain")
+    if per_split is not None:
+        return 2.0 * n_chains * float(per_split), f"{per_split} per split chain x 2 x {n_chains} chains"
+    explicit = posterior_config.get("ess_threshold")
+    if explicit is not None:
+        return float(explicit), "ess_threshold from the config"
+    return 100.0 * n_chains, f"100 x {n_chains} chains (config sets no ESS bar)"
+
+
 def compute_convergence_criteria_met_at(
     inf_data: az.InferenceData,
     free_params: list[str],

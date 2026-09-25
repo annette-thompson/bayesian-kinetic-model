@@ -50,6 +50,8 @@ try:
     # directory on sys.path, so its sibling module is importable by its bare name.
     from reaction_model_builder import (
         build_ode_system_from_reactions,
+        discover_scaling_groups,
+        nominal_scaling_group_values,
         set_scaling_group_values,
     )
 except ModuleNotFoundError:
@@ -58,6 +60,8 @@ except ModuleNotFoundError:
     # itself, so the sibling module has to be found via the package instead.
     from Utilities.reaction_model_builder import (
         build_ode_system_from_reactions,
+        discover_scaling_groups,
+        nominal_scaling_group_values,
         set_scaling_group_values,
     )
 
@@ -98,14 +102,24 @@ def sample_perturbed_y0(
     return y0_batch
 
 
+# Fallbacks for configs that leave these out: the solver settings validated on the chain
+# ladder (outline 2.2). rtol is chosen per system there (1e-5 is its strictest), so a
+# config should state its own.
+DEFAULT_MAX_STEPS = 20_000
+DEFAULT_RTOL = 1e-5
+DEFAULT_ATOL = 1e-7
+DEFAULT_PID = (0.4, 0.3, 0.0)  # pcoeff, icoeff, dcoeff
+
+
 def run_ensemble(
     network: Any,
     theta: jnp.ndarray,
     y0_batch: np.ndarray,
     time_range: Sequence[float],
-    max_steps: int = 10_000,
-    rtol: float = 1e-5,
-    atol: float = 1e-8,
+    max_steps: int = DEFAULT_MAX_STEPS,
+    rtol: float = DEFAULT_RTOL,
+    atol: float = DEFAULT_ATOL,
+    pid: Sequence[float] = DEFAULT_PID,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Solve the ODE system for every row of ``y0_batch`` in one batched vmap call.
 
@@ -127,7 +141,7 @@ def run_ensemble(
             y0=y0,
             args=theta,
             stepsize_controller=dfrx.PIDController(
-                rtol=rtol, atol=atol, pcoeff=0.2, icoeff=0.4, dcoeff=0,
+                rtol=rtol, atol=atol, pcoeff=pid[0], icoeff=pid[1], dcoeff=pid[2],
             ),
             max_steps=max_steps,
             throw=False,
@@ -148,9 +162,10 @@ def run_ensemble_chunked(
     y0_batch: np.ndarray,
     time_range: Sequence[float],
     batch_size: int | None = None,
-    max_steps: int = 10_000,
-    rtol: float = 1e-5,
-    atol: float = 1e-8,
+    max_steps: int = DEFAULT_MAX_STEPS,
+    rtol: float = DEFAULT_RTOL,
+    atol: float = DEFAULT_ATOL,
+    pid: Sequence[float] = DEFAULT_PID,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Run ``run_ensemble`` in sequential chunks of ``batch_size`` draws to bound peak memory."""
     n_samples = y0_batch.shape[0]
@@ -161,7 +176,7 @@ def run_ensemble_chunked(
     for start in range(0, n_samples, chunk):
         y0_chunk = y0_batch[start:start + chunk]
         C_chunk, ok_chunk = run_ensemble(
-            network, theta, y0_chunk, time_range, max_steps=max_steps, rtol=rtol, atol=atol,
+            network, theta, y0_chunk, time_range, max_steps=max_steps, rtol=rtol, atol=atol, pid=pid,
         )
         C_chunks.append(C_chunk)
         ok_chunks.append(ok_chunk)
@@ -180,15 +195,21 @@ def _init_worker(
     max_steps: int,
     rtol: float,
     atol: float,
+    pid: Sequence[float],
 ) -> None:
     """Build one worker's own copy of the network (cheap: YAML parsing, no heavy compute)."""
-    network, *_ = build_ode_system_from_reactions(reactions_path)
+    # theta (carrying the real scaling values) is passed to the solver separately,
+    # so the build itself only needs to be a no-op.
+    network, *_ = build_ode_system_from_reactions(
+        reactions_path,
+        scaling_group=nominal_scaling_group_values(discover_scaling_groups(reactions_path)))
     _worker_state["network"] = network
     _worker_state["theta"] = jnp.array(theta_list, dtype=jnp.float64)
     _worker_state["time_range"] = time_range
     _worker_state["max_steps"] = max_steps
     _worker_state["rtol"] = rtol
     _worker_state["atol"] = atol
+    _worker_state["pid"] = tuple(pid)
 
 
 def _solve_one_draw(item: tuple[int, np.ndarray]) -> tuple[int, np.ndarray, bool]:
@@ -199,6 +220,7 @@ def _solve_one_draw(item: tuple[int, np.ndarray]) -> tuple[int, np.ndarray, bool
     max_steps = _worker_state["max_steps"]
     rtol = _worker_state["rtol"]
     atol = _worker_state["atol"]
+    pid = _worker_state["pid"]
 
     sol = dfrx.diffeqsolve(
         dfrx.ODETerm(network),
@@ -207,7 +229,7 @@ def _solve_one_draw(item: tuple[int, np.ndarray]) -> tuple[int, np.ndarray, bool
         y0=jnp.asarray(y0_row, dtype=jnp.float64),
         args=theta,
         stepsize_controller=dfrx.PIDController(
-            rtol=rtol, atol=atol, pcoeff=0.2, icoeff=0.4, dcoeff=0,
+            rtol=rtol, atol=atol, pcoeff=pid[0], icoeff=pid[1], dcoeff=pid[2],
         ),
         max_steps=max_steps,
         throw=False,
@@ -222,9 +244,10 @@ def run_ensemble_multiprocess(
     y0_batch: np.ndarray,
     time_range: Sequence[float],
     n_workers: int | None = None,
-    max_steps: int = 10_000,
-    rtol: float = 1e-5,
-    atol: float = 1e-8,
+    max_steps: int = DEFAULT_MAX_STEPS,
+    rtol: float = DEFAULT_RTOL,
+    atol: float = DEFAULT_ATOL,
+    pid: Sequence[float] = DEFAULT_PID,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Solve each draw as an independent ``diffeqsolve`` call, load-balanced across worker processes.
 
@@ -255,7 +278,7 @@ def run_ensemble_multiprocess(
     with ctx.Pool(
         processes=n_workers,
         initializer=_init_worker,
-        initargs=(str(reactions_path), theta_list, tuple(time_range), max_steps, rtol, atol),
+        initargs=(str(reactions_path), theta_list, tuple(time_range), max_steps, rtol, atol, tuple(pid)),
     ) as pool:
         report_every = max(1, n_samples // 20)
         for n_done, (idx, y_i, ok_i) in enumerate(
@@ -401,7 +424,9 @@ def run_from_config(config_path: str | Path) -> tuple[pd.DataFrame, dict[str, An
     reactions_path = _resolve_path(path_base, config["reactions_path"])
 
     print(f"==> Loading reactions from {reactions_path}")
-    network, species, params, param_values, scaling_groups = build_ode_system_from_reactions(reactions_path)
+    network, species, params, param_values, scaling_groups = build_ode_system_from_reactions(
+        reactions_path,
+        scaling_group=nominal_scaling_group_values(discover_scaling_groups(reactions_path)))
     species_idx = {name: i for i, name in enumerate(species)}
 
     theta = jnp.array([param_values[p] for p in params], dtype=jnp.float64)
@@ -425,15 +450,16 @@ def run_from_config(config_path: str | Path) -> tuple[pd.DataFrame, dict[str, An
 
     time_range = config.get("time_range", [0.0, 720.0])
 
-    max_steps = int(config.get("max_steps", 10_000))
+    max_steps = int(config.get("max_steps", DEFAULT_MAX_STEPS))
     tolerance_cfg = config.get("tolerance", {})
-    rtol = float(tolerance_cfg.get("rtol", 1e-5))
-    atol = float(tolerance_cfg.get("atol", 1e-8))
+    rtol = float(tolerance_cfg.get("rtol", DEFAULT_RTOL))
+    atol = float(tolerance_cfg.get("atol", DEFAULT_ATOL))
+    pid = tuple(float(tolerance_cfg.get(k, d)) for k, d in zip(("pcoeff", "icoeff", "dcoeff"), DEFAULT_PID))
     parallel_cfg = config.get("parallel", {})
     parallel_mode = parallel_cfg.get("mode", "vmap")
 
     print(f"==> Solving ODE ensemble over t in {time_range}, "
-          f"rtol={rtol:g}, atol={atol:g}, max_steps={max_steps}...")
+          f"rtol={rtol:g}, atol={atol:g}, PID={pid}, max_steps={max_steps}...")
     if parallel_mode == "process":
         n_workers = parallel_cfg.get("n_workers") or int(
             os.environ.get("SLURM_CPUS_PER_TASK", os.cpu_count() or 1)
@@ -441,12 +467,12 @@ def run_from_config(config_path: str | Path) -> tuple[pd.DataFrame, dict[str, An
         print(f"==> Process-parallel mode: {n_workers} worker processes, one draw at a time each.")
         C_batch, ok = run_ensemble_multiprocess(
             reactions_path, theta, y0_batch, time_range,
-            n_workers=n_workers, max_steps=max_steps, rtol=rtol, atol=atol,
+            n_workers=n_workers, max_steps=max_steps, rtol=rtol, atol=atol, pid=pid,
         )
     else:
         C_batch, ok = run_ensemble_chunked(
             network, theta, y0_batch, time_range, batch_size=batch_size,
-            max_steps=max_steps, rtol=rtol, atol=atol,
+            max_steps=max_steps, rtol=rtol, atol=atol, pid=pid,
         )
 
     n_failed = int((~ok).sum())

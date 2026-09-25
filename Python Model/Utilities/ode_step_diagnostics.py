@@ -55,7 +55,7 @@ def profile_ode_steps(solver_params_file: str, n_samples: int = 20, seed: int = 
     imported = import_solver_params(solver_params_file)
     sp = imported.solver_params
     ode_system, species_names, param_names, param_values, _scaling = build_ode_system_from_reactions(
-        imported.reactions_source
+        imported.reactions_source, scaling_group=sp.get("scaling_groups")
     )
     validate_experiment_config(
         solver_params=sp, solver_params_file=str(imported.solver_params_file), species_names=species_names
@@ -69,7 +69,7 @@ def profile_ode_steps(solver_params_file: str, n_samples: int = 20, seed: int = 
     ode_cfg = sp.get("ODE_solver", {})
     controller_cfg = sp.get("ODE_stepsize_controller", {})
     dt0 = ode_cfg.get("dt0", None)
-    max_steps = int(ode_cfg.get("max_steps", 10_000))
+    max_steps = int(ode_cfg.get("max_steps", 20_000))
     solver = _build_solver(sp)
     controller = dfrx.PIDController(**controller_cfg)
     t0, t1 = 0.0, float(experiment.simulation_times_np[-1])

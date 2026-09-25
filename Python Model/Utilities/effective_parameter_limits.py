@@ -13,7 +13,9 @@ from reaction_model_builder import (
     _eval_scale_expr,
     _extract_scale_param_names,
     build_ode_system_from_reactions,
+    discover_scaling_groups,
     load_elementary_reactions,
+    nominal_scaling_group_values,
 )
 
 
@@ -46,8 +48,11 @@ def evaluate_effective_parameter_limits(
         raise ValueError("At least one effective parameter limit rule is required.")
 
     rxns = load_elementary_reactions(reactions_source)
+    # No solver params here by design; the build-time scaling values are
+    # replaced by posterior draws below, so a no-op build is what is wanted.
     _, _, param_names, param_values, scaling_params = build_ode_system_from_reactions(
-        reactions_source
+        reactions_source,
+        scaling_group=nominal_scaling_group_values(discover_scaling_groups(reactions_source)),
     )
 
     selected_free_params = [name for name in free_params if name in inf_data.posterior.data_vars]
