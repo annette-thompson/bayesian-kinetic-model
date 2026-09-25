@@ -1,0 +1,476 @@
+[
+ {
+  "run": "Chain C10 - a1_0.05-20_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C10 - a1_0.05-20_no_floor",
+  "chains": 4,
+  "ess_old": 400.0,
+  "ess_new": 400.0,
+  "ess_source": "100 x 4 chains (config sets no ESS bar)",
+  "criteria_at_old": 220,
+  "criteria_at_new": 220,
+  "production_draw_old": 400,
+  "production_draw_new": 400,
+  "sampling_draws": 500,
+  "moved": false,
+  "figures": []
+ },
+ {
+  "run": "Chain C10 - a1_0.1-10_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C10 - a1_0.1-10_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 170,
+  "criteria_at_new": 310,
+  "production_draw_old": 400,
+  "production_draw_new": 500,
+  "sampling_draws": 500,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C10 - a1c2_no_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C10 - a1c3_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 320,
+  "criteria_at_new": 320,
+  "production_draw_old": 500,
+  "production_draw_new": 500,
+  "sampling_draws": 600,
+  "moved": false,
+  "figures": []
+ },
+ {
+  "run": "Chain C10 - a1c3a2_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 330,
+  "criteria_at_new": 460,
+  "production_draw_old": 500,
+  "production_draw_new": 600,
+  "sampling_draws": 600,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C10 - a1c3d1_no_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C12 - a1_0.1-10_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C12 - a1_0.1-10_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 130,
+  "criteria_at_new": 260,
+  "production_draw_old": 300,
+  "production_draw_new": 400,
+  "sampling_draws": 400,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C12+unsat - a1_0.1-10_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C12+unsat - a1_0.1-10_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 220,
+  "criteria_at_new": 270,
+  "production_draw_old": 400,
+  "production_draw_new": 400,
+  "sampling_draws": 500,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C14 - a1_0.05-20_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 240,
+  "criteria_at_new": 270,
+  "production_draw_old": 400,
+  "production_draw_new": 400,
+  "sampling_draws": 500,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C14 - a1_0.1-10_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C14 - a1_0.1-10_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 190,
+  "criteria_at_new": 260,
+  "production_draw_old": 300,
+  "production_draw_new": 400,
+  "sampling_draws": 400,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C14 - a1c2_no_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C14 - a1c3_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 90,
+  "criteria_at_new": 190,
+  "production_draw_old": 200,
+  "production_draw_new": 300,
+  "sampling_draws": 300,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C14 - a1c3a2_no_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C14 - a1c3d1_no_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C14+unsat - a1_0.1-10_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C14+unsat - a1_0.1-10_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 150,
+  "criteria_at_new": 260,
+  "production_draw_old": 300,
+  "production_draw_new": 400,
+  "sampling_draws": 400,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C16 - a1_0.1-10_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C16 - a1_0.1-10_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 190,
+  "criteria_at_new": 290,
+  "production_draw_old": 300,
+  "production_draw_new": 400,
+  "sampling_draws": 400,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C16+unsat - a1_0.1-10_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C16+unsat - a1_0.1-10_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 190,
+  "criteria_at_new": 250,
+  "production_draw_old": 300,
+  "production_draw_new": 400,
+  "sampling_draws": 400,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C18 - a1_0.1-10_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C18 - a1_0.1-10_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 170,
+  "criteria_at_new": 260,
+  "production_draw_old": 300,
+  "production_draw_new": 400,
+  "sampling_draws": 400,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C18+unsat - a1_0.1-10_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C18+unsat - a1_0.1-10_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 160,
+  "criteria_at_new": 270,
+  "production_draw_old": 300,
+  "production_draw_new": 400,
+  "sampling_draws": 400,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C20 - a1_0.1-10_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C20 - a1_0.1-10_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 170,
+  "criteria_at_new": 280,
+  "production_draw_old": 300,
+  "production_draw_new": 400,
+  "sampling_draws": 400,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C20+unsat - a1_0.1-10_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C20+unsat - a1_0.1-10_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 180,
+  "criteria_at_new": 290,
+  "production_draw_old": 300,
+  "production_draw_new": 400,
+  "sampling_draws": 400,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C4_NoFB - a1_0.05-20_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 300,
+  "criteria_at_new": 420,
+  "production_draw_old": 400,
+  "production_draw_new": 600,
+  "sampling_draws": 605,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C4_NoFB - a1_0.05-20_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 310,
+  "criteria_at_new": 460,
+  "production_draw_old": 500,
+  "production_draw_new": 600,
+  "sampling_draws": 700,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C4_NoFB - a1_0.1-10_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 610,
+  "criteria_at_new": 610,
+  "production_draw_old": 800,
+  "production_draw_new": 800,
+  "sampling_draws": 800,
+  "moved": false,
+  "figures": []
+ },
+ {
+  "run": "Chain C4_NoFB - a1_0.1-10_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 370,
+  "criteria_at_new": 500,
+  "production_draw_old": 500,
+  "production_draw_new": 600,
+  "sampling_draws": 700,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C6 - a1 narrowest nofloor-eqxnan",
+  "chains": 6,
+  "ess_old": 400.0,
+  "ess_new": 600.0,
+  "ess_source": "100 x 6 chains (config sets no ESS bar)",
+  "criteria_at_old": 150,
+  "criteria_at_new": 240,
+  "production_draw_old": 300,
+  "production_draw_new": 400,
+  "sampling_draws": 400,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C6 - a1_0.1-10_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 170,
+  "criteria_at_new": 230,
+  "production_draw_old": 300,
+  "production_draw_new": 400,
+  "sampling_draws": 400,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C6 - a1_0.1-10_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 150,
+  "criteria_at_new": 240,
+  "production_draw_old": 300,
+  "production_draw_new": 400,
+  "sampling_draws": 400,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C6 - a1c2_no_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C6 - a1c3_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 210,
+  "criteria_at_new": 230,
+  "production_draw_old": 400,
+  "production_draw_new": 400,
+  "sampling_draws": 500,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C6 - a1c3a2_no_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 330,
+  "criteria_at_new": 570,
+  "production_draw_old": 500,
+  "production_draw_new": null,
+  "sampling_draws": 600,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C6 - a1c3d1_no_floor",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C8 - a1_0.1-10_floor",
+  "chains": 8,
+  "ess_old": 400.0,
+  "ess_new": 800.0,
+  "ess_source": "100 x 8 chains (config sets no ESS bar)",
+  "criteria_at_old": 170,
+  "criteria_at_new": 240,
+  "production_draw_old": 300,
+  "production_draw_new": 400,
+  "sampling_draws": 400,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C8 - a1_0.1-10_no_floor",
+  "chains": 7,
+  "ess_old": 400.0,
+  "ess_new": 700.0,
+  "ess_source": "100 x 7 chains (config sets no ESS bar)",
+  "criteria_at_old": 170,
+  "criteria_at_new": 250,
+  "production_draw_old": 300,
+  "production_draw_new": 400,
+  "sampling_draws": 400,
+  "moved": true,
+  "figures": []
+ },
+ {
+  "run": "Chain C12 - a1c3_16chains",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C12 - a1c3_32chains",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C12 - a1c3_4chains",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C12 - a1c3_64chains",
+  "skipped": "no posterior netcdf"
+ },
+ {
+  "run": "Chain C12 - a1c3_8chains",
+  "skipped": "no posterior netcdf"
+ }
+]
