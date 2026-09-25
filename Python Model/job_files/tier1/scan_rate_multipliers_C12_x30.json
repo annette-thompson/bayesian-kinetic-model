@@ -1,0 +1,42 @@
+{
+ "system": "C12",
+ "rtol": 0.001,
+ "atol": 1e-07,
+ "reference": {
+  "c16_150s": 16.503943640402905,
+  "steps_loose": 73,
+  "steps_strict": 1176
+ },
+ "rows": [
+  {
+   "enzyme": "FabF",
+   "multiplier": 30.0,
+   "c16_150s": 10.370309127513385,
+   "frac_of_ref": 0.6283534016758323,
+   "sep_decades": 0.20179602946502126,
+   "steps_loose_ratio": 0.9452054794520548,
+   "steps_strict_ratio": 0.891156462585034,
+   "converged": true
+  },
+  {
+   "enzyme": "TesA",
+   "multiplier": 30.0,
+   "c16_150s": 9.449830614050544,
+   "frac_of_ref": 0.5725801553827803,
+   "sep_decades": 0.24216370793352895,
+   "steps_loose_ratio": 0.9452054794520548,
+   "steps_strict_ratio": 0.8877551020408163,
+   "converged": true
+  },
+  {
+   "enzyme": "FabH",
+   "multiplier": 30.0,
+   "c16_150s": 3.439565361622335,
+   "frac_of_ref": 0.20840869531340486,
+   "sep_decades": 0.6810841651812928,
+   "steps_loose_ratio": 0.958904109589041,
+   "steps_strict_ratio": 1.0161564625850341,
+   "converged": true
+  }
+ ]
+}
