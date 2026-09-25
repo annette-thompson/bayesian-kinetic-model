@@ -118,7 +118,7 @@ class ChainSystem:
     """
 
     def __init__(self, reactions_dir: Path, rtol: float, atol: float,
-                pcoeff: float = 0.2, icoeff: float = 0.4, dcoeff: float = 0.0,
+                pcoeff: float = 0.4, icoeff: float = 0.3, dcoeff: float = 0.0,
                 scaling_group_overrides: dict[str, float] | None = None):
         # Names are discovered first so the overrides can be validated BEFORE the
         # build; build_ode_system_from_reactions now refuses to invent a value for

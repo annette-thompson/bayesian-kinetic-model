@@ -877,7 +877,7 @@ def _build_solver(solver_params):
 def _build_simulator(ode_system, species_names, solver_params, experiment):
     ode_solver_config = solver_params.get("ODE_solver", {})
     dt0 = ode_solver_config.get("dt0", None)
-    max_steps = int(ode_solver_config.get("max_steps", 10_000))
+    max_steps = int(ode_solver_config.get("max_steps", 20_000))
 
     ode_controller_config = solver_params.get("ODE_stepsize_controller", {})
 
