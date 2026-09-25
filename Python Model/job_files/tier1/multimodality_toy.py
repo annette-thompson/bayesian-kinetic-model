@@ -23,10 +23,16 @@ a real mode, which is the failure the SI item has to rule out.
 
 No ODE: runs on a laptop CPU in a few minutes (~20 s per replicate).
 
-Usage: python multimodality_toy.py [--replicates 10] [--out multimodality_toy.json]
+Each replicate runs in its own process by default. On the laptop, jaxlib 0.7.0's XLA:CPU JIT
+aborts intermittently ("recursive_mutex lock failed") when a second model is compiled in one
+process, which a single-process loop does once per replicate. A replicate is deterministic in
+its seed, so one that aborts is simply rerun (--tries). --in_process restores the old loop.
+
+Usage: python multimodality_toy.py [--replicates 10] [--out multimodality_toy.json] [--in_process]
 """
 import argparse
 import json
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -101,6 +107,19 @@ def replicate(seed, n_tune, n_draws, lp_nats):
     }
 
 
+def replicate_in_subprocess(seed, a):
+    """One replicate in a fresh interpreter, rerun if the process aborts."""
+    cmd = [sys.executable, "-u", str(Path(__file__).resolve()), "--replicate", str(seed),
+           "--tune", str(a.tune), "--draws", str(a.draws), "--lp_nats", str(a.lp_nats)]
+    for attempt in range(1, a.tries + 1):
+        p = subprocess.run(cmd, capture_output=True, text=True)
+        row = next((line[4:] for line in p.stdout.splitlines() if line.startswith("ROW ")), None)
+        if p.returncode == 0 and row:
+            return json.loads(row)
+        print(f"seed {seed}: attempt {attempt} exited {p.returncode}; rerunning", flush=True)
+    raise SystemExit(f"seed {seed} failed {a.tries} times:\n{p.stderr[-2000:]}")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -109,10 +128,18 @@ def main():
     ap.add_argument("--draws", type=int, default=1000)
     ap.add_argument("--lp_nats", type=float, default=20.0, help="production stranded-chain threshold")
     ap.add_argument("--out", default=str(HERE / "multimodality_toy.json"))
+    ap.add_argument("--tries", type=int, default=4, help="attempts per replicate process")
+    ap.add_argument("--in_process", action="store_true",
+                    help="run every replicate in this process, with no rerun on abort")
+    ap.add_argument("--replicate", type=int, default=None, help=argparse.SUPPRESS)  # one child run
     a = ap.parse_args()
+    if a.replicate is not None:
+        print("ROW " + json.dumps(replicate(a.replicate, a.tune, a.draws, a.lp_nats)))
+        return
     rows = []
     for seed in range(a.replicates):
-        r = replicate(seed, a.tune, a.draws, a.lp_nats)
+        r = (replicate(seed, a.tune, a.draws, a.lp_nats) if a.in_process
+             else replicate_in_subprocess(seed, a))
         rows.append(r)
         split = min(r["chains_per_mode"].values()) > 0
         print(f"seed {seed}: modes {r['chains_per_mode']}  split={split}  r-hat {r['rhat_k1']:.3f}  "
