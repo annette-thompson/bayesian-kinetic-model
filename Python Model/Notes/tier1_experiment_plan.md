@@ -215,9 +215,38 @@ in appendix D):
    unchanged. The +2/+3/+4 sd pre-flights were re-run with finite logp and gradient. At +4 sd
    the sampler starts where the data barely respond: `c3`'s gradient there is the prior's
    alone (−0.5).
+8. Fig 9's information grid, computed at the truth on R2's model (`expected_information_grid.py`,
+   `expected_information_grid.json` and `.png`), under the five Tier-1 conditions and the
+   Tier-1 noise model. Per data point, total fatty acid at 150 s is the most informative cell
+   (1.09 nats per point). Individual species buy most of the attainable shrinkage (0.95-0.97
+   mean, log scale). The ACP intermediates (ketoacyl-, hydroxyacyl-, enoyl- and acyl-ACP) add
+   little beyond that at their concentrations under the 0.01 µM floor (0.03-0.06 nats per
+   point). The Tier-1 design scores 0.39 nats per point over 23 points (shrinkage 0.96 / 0.90
+   / 0.93 for `a1` / `c3` / `a2`). So R7's "best cell per data point" is total fatty acid at
+   150 s, and "cheapest data type" is the endpoint profile.
+9. R4's pilot built (`sbc.py generate`): 10 replicates on C8, each truth drawn from the fit's
+   own prior, with its data in `Data/Tier1_rates/Chain_C8_sbc<i>/` and its config in
+   `Results/Tier1/Tier1 C8_sbc<i> - a1c3/`, all recorded in `sbc_manifest.json`. The truths
+   span a1 0.35-8.7 and c3 0.27-9.9, and every replicate's data generated. `sbc.py selftest`
+   confirms the rank code: ranks come out uniform on an exact posterior (chi-square p 0.67 and
+   0.78), and an over-confident one is caught (p < 10⁻³, 57% coverage at 90%). All 10 pilot
+   configs pass the pre-flight. Their clean-data error reaches 8×10⁻⁵ on the extreme truths,
+   still far below the noise. Expect replicates 4 and 5 (a1 ≈ 8) to cost more than a typical C8
+   run. The sampler starts near the prior's centre, where their log posterior is about −4×10⁴
+   with gradients of about 10⁵, so warmup has a long way to travel.
+10. jax 0.7.2 does not cure the laptop's JIT abort. A throwaway clone of the env with jax
+    0.7.2 (`Bayesian_jax072_test`) aborted the same way in the in-process toy loop. Sampler
+    numerics also shift between jax versions (toy seed 0: r-hat 1.74 on 0.7.0, 1.61 on
+    0.7.2), so results will not reproduce bit for bit across the pending pin change.
 
 Still to do before R0:
-- Sync the new files to the cluster, including `Utilities/inference_runner.py`.
+- On the cluster, before pushing `job_files/`, rename `job_files/masking_check` to
+  `chain_scaling_tests` and `job_files/bench` to `multiparam_tests`. The scripts' paths now
+  use the local names, and nothing is running on the cluster.
+- Sync the new files to the cluster, including `Utilities/inference_runner.py`,
+  `Utilities/model_error_runner.py`, `Calculation Files/`, `Data/Tier1_rates/` and
+  `Results/Tier1/`.
+- Pin `environment.yml` and `requirements.txt` to Alpine's stack once Alpine is back.
 
 **Stage 1: R0 (~2.5 A100-h).** Checks plumbing: resume, stopping on r-hat + ESS, finalize,
 figures, `recovery_report.py`. It also decides the replicate system. Nothing else is queued
@@ -235,8 +264,9 @@ R4 pilot.
 - R6 (b), then (c) once (b)'s cost is known.
 - R7, and the remaining R4 replicates.
 
-**Stage 4: post-processing (forward solves).** Figs 6/6b from R2 and R3; Figs 7 and 8 once
-their modules exist; Fig 9's information grid.
+**Stage 4: post-processing (forward solves).** Figs 6/6b from R2 and R3. Figs 7 and 8 from
+R2's posterior (`posterior_morris.py`, `posterior_ratio_response.py`). Fig 9's grid is done
+at the truth (item 8), and R7 checks it against sampled shrinkage.
 
 **Stage 5: draft every figure, then choose what goes to Tier 2** (section 5).
 
@@ -255,15 +285,20 @@ their modules exist; Fig 9's information grid.
 - `tier1.sbatch`, `convergence_and_warmup.py`
 - initial-rate, C16-equivalent and mole-fraction observables in
   `Calculation Files/Full_FAS/FA_conc.py`
+- `Calculation Files/Full_FAS/FA_acylACP_conc.py`: everything in `FA_conc.py`, plus ketoacyl-,
+  hydroxyacyl-, enoyl- and acyl-ACP per chain length and saturation. Each sums the free form
+  and the enzyme complexes a quench would release. The exposed set is the `MEASURED_FORMS`
+  table at the top.
+- `forward_model.py`: the batched forward solver shared by Figs 7-9. It is compiled once, so
+  it takes any scaling values and initial conditions, and it loads posterior draws.
+- `expected_information_grid.py` (Fig 9), `posterior_morris.py` (Fig 7),
+  `posterior_ratio_response.py` (Fig 8), and `plot_tier1_drafts.py` for their drafts
+- `sbc.py` (Fig 3): `generate` draws truths from the prior and builds each replicate's data and
+  config. `ranks` scores finished runs (rank histograms, a uniformity test, coverage and a draft
+  figure). `selftest` checks the rank code on a known answer.
 
-**To build, in the order they block figures:**
-1. Posterior-integrated sensitivity: Morris over the nine enzyme concentrations, repeated
-   across posterior draws (Fig 7). `morris_screen.py` does Morris at a single point.
-2. Optimisation across posterior draws (Fig 8).
-3. Expected-information grid over data types (Fig 9).
-4. Acyl-ACP intermediate observables (Fig 9's intermediates cells): a copy of `FA_conc.py`
-   with a different species list.
-5. SBC harness: draw a truth from the prior → generate data → fit → record the rank (Fig 3).
+Nothing in the plan's to-build list remains. Figs 7 and 8 wait on R2's posterior, and Fig 3
+on the R4 fits.
 
 ---
 
