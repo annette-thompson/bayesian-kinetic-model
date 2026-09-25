@@ -370,14 +370,14 @@ class ReactionNetwork(eqx.Module):
             return jnp.zeros_like(y)
 
         theta = jnp.asarray(args)
-        # Clamp concentrations to be non-negative before computing rates.
-        # Concentrations are physically >= 0, but the adaptive solver can
-        # produce tiny negative overshoots. Raised to a stoichiometric power
-        # (possibly non-integer) those negatives yield NaN, and large negative
-        # excursions during NUTS warmup make mass-action terms blow up to inf
-        # (which then crashes the implicit linear solver). Flooring at 0 keeps
-        # the rate law well-defined without changing the physical dynamics.
-        reactant_conc = jnp.maximum(y[self.reactant_idx_arr], 0.0)
+        # No negative-concentration floor. A jnp.maximum(y, 0.0) clamp sat here
+        # until 2026-09-14, when the project settled on no floor everywhere:
+        # tested across the whole chain ladder, the clamp did not prevent the
+        # solver crash it was added for, froze every chain (0% acceptance) above
+        # C8-C10, and was up to ~9x slower where it did run. A solve that goes
+        # bad returns NaN instead (EQX_ON_ERROR=nan, set by inference_runner),
+        # which the sampler rejects. Scripts no longer need a no-floor patch.
+        reactant_conc = y[self.reactant_idx_arr]
         reactant_powers = jnp.where(
             self.reactant_mask_arr,
             reactant_conc ** self.reactant_stoich_arr,
