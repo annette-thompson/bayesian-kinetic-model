@@ -1,6 +1,8 @@
 # Bayesian Inference — Quick Start
 
-A generic framework for fitting Bayesian kinetic parameters to enzyme reaction networks using PyMC, JAX-accelerated ODE solving, and MCMC sampling. Any reaction network defined as YAML files can be used — *E. coli* type II FAS is the worked example included here, solving for binding parameters of **FabD**.
+A framework for Bayesian inference of kinetic parameters in enzyme reaction networks: a PyMC model over a JAX/diffrax ODE solve, sampled with BlackJAX NUTS in resumable, checkpointed segments. Any network defined as YAML reaction files can be used. The worked example is *E. coli* type II fatty-acid synthesis (the ME1 model), fitted through its 18 scaling parameters on truncated chain-length systems (C4_NoFB through C20+unsat) against synthetic data with a known answer.
+
+What the paper argues and which runs produce each figure: `Notes/paper_outline.md` and `Notes/tier1_experiment_plan.md`.
 
 ---
 
@@ -13,35 +15,32 @@ conda activate Bayesian
 ```
 
 ### 2. Run the model
-Open and run **`ODE Runner/run_model.ipynb`**.
+Open and run **`ODE Runner/run_model.ipynb`**. It loads one reaction set (`Reactions/EC_FAS_ME1/C8/` by default), checks it with `reaction_sanity_check.py`, shows the reaction class's `query` helper, then solves and plots the network.
 
-This notebook lets you run the model with the given reactions in `Reactions/EC_FAS_ME1/`. Includes demonstration of `reaction_sanity_check.py` to help identify any mistakes in reactions and `query` property of the reaction class.
+Every build of the model states all scaling values explicitly: `build_ode_system_from_reactions(path, scaling_group={...})`. Multiplicative groups are 1 at nominal; `d`-prefixed groups enter inside an exponential and are **0** at nominal. Setting a `d` group to 1 does not fail, but it silently rescales TesA by ~4×10⁵ at C12. For a no-op build, `nominal_scaling_group_values(discover_scaling_groups(path))` gives the right values.
 
-The bottom of this notebook also has some example functions to generate the data used for Bayesian inference.
+### 3. Make synthetic data
+```bash
+cd job_files/tier1
+python -u make_tier1_rate_data.py C8
+```
+This writes `Data/Tier1_rates/Chain_C8/`: the noisy files the fit sees, a noise-free `clean/` copy, and `ground_truth.json`. Options cover noise level (`--noise_frac`), variant reaction sets (`--reactions`), off-nominal truths (`--set GROUP=VALUE`) and the output name (`--out_name`).
 
-### 3. Configure the model for Bayesian inference
-Open and run **`Bayesian Inference/guided_solver_config_builder.ipynb`**.
+### 4. Build run configs
+```bash
+python build_tier1_configs.py --plan                      # every planned Tier-1 run
+python build_tier1_configs.py --system C8 --params a1,c3  # one run
+```
+Each run gets `Results/Tier1/<run>/solver_params.json`, the one file the inference runner reads. Its `path_base` points back to the `Python Model` folder, and every path inside is relative to that folder, so a config can move with its results folder. It records the data's truth as `tier1_truth`.
 
-This notebook walks through every setting step by step and writes `solver_params.json` — the configuration file read by the inference runner. Set both:
-
-| Variable | Example | Purpose |
-|---|---|---|
-| `name` | `"FabD"` | Model label used in the solver params filename, e.g. `solver_params.json` |
-| `folder_name` | `"FabD Inference"` | Folder used to organize reactions, data, calculation files, solver params, posterior samples, and plots |
-
-The generated solver params JSON stores `path_base`, which points back to the Python Model home directory. All model paths inside the JSON are relative to that home directory, so the JSON can move with its results folder without requiring absolute paths.
-
-### 4. Run inference and plot results
-Open and run **`Bayesian Inference/guided_bayesian_inference.ipynb`**.
-
-| Variable | Value | Effect |
-|---|---|---|
-| `use_existing_results` | `False` | Run full MCMC inference (~10 min with current (really low) sampling values) |
-| `use_existing_results` | `True` | Load a saved posterior and go straight to plotting |
-| `name` | `"FabD"` | Must match the `name` set in the config builder |
-| `folder_name` | `"FabD Inference"` | Must match the `folder_name` set in the config builder |
-
-Results (posterior samples and plots) are saved to `Results/<folder_name>/`.
+### 5. Pre-flight, then run
+```bash
+python -u check_model_vs_data.py "Tier1 C8 - a1c3" --grad   # model reproduces its clean data; logp and gradient finite
+```
+Then run inference (see [Running Inference](#running-inference)), and score the result against the recorded truth:
+```bash
+python recovery_report.py --only "Tier1 C8 - a1c3"   # z, shrinkage, 50/90/95% coverage
+```
 
 ---
 
@@ -49,142 +48,113 @@ Results (posterior samples and plots) are saved to `Results/<folder_name>/`.
 
 | Path | Purpose |
 |---|---|
-| `Bayesian Inference/` | Config builder + main inference notebook — configure parameters, run MCMC, visualize results |
-| `ODE Runner/` | Standalone deterministic ODE runner — simulate the full FAS network without Bayesian inference |
-| `Reactions/EC_FAS_ME1/` | YAML files with reaction mechanisms and kinetic parameters |
-| `Reactions/<folder_name>/` | Reaction YAML/JSON files for a Bayesian inference run, e.g. `Reactions/FabD Inference/` |
-| `Data/<folder_name>/` | Experimental CSV files for a Bayesian inference run, e.g. `Data/FabD Inference/` |
-| `Calculation Files/<folder_name>/` | Observable extraction functions for a Bayesian inference run, e.g. `Calculation Files/FabD Inference/` |
-| `Results/<folder_name>/` | Solver params JSON, posterior/prior samples, and plots for a Bayesian inference run |
-| `Utilities/` | Core library: ODE builder, reaction sanity checker, inference engine, plotting, experiment framework |
-
-For the current FabD inference example, use `folder_name = "FabD Inference"`. The matching files live in:
-
-| Path | Contents |
-|---|---|
-| `Reactions/FabD Inference/FabD.yaml` | FabD reaction mechanism |
-| `Data/FabD Inference/` | FabD endpoint and time-series CSV files |
-| `Calculation Files/FabD Inference/FabD_calculations.py` | FabD observable calculations |
-| `Results/FabD Inference/solver_params.json` | Generated solver configuration |
+| `Utilities/` | Core library: reaction-network builder, sanity checker, inference runner, resumable sampler, plotting, experiment framework, data generation |
+| `Calculation Files/Full_FAS/FA_conc.py` | Observables: fatty-acid concentrations, C16 equivalents, initial rate (µM C16/min), mole fractions |
+| `Reactions/EC_FAS_ME1/<system>/` | Reaction YAMLs per truncated system (C4 … C20+unsat), plus variants: `C14+unsat+c3split` (TesA's `c3` split in two) and `C20+unsat+FBinit` (matches the ME1 MATLAB model reaction for reaction) |
+| `Reactions/Camelina_FAS_simple/` | A simplified Camelina FAS network, used by the model-error runs |
+| `Data/Chain_<system>/` | Data for the single-parameter chain-ladder fits |
+| `Data/Tier1_rates/` | Tier-1 data for the current runs: time series, chain-length profile and initial rates |
+| `Data/Tier1/` | The earlier endpoint-condition Tier-1 design, which the chain-count test was fit to |
+| `Data/Experimental/` | The ME1 Dataset S1 measurements and reference time course |
+| `Results/` | One folder per run (see [Output Files](#output-files)): `Chain Scaling Tests/` (the ladder), `Chain Count Test/`, `Tier1/`, `Experimental Comparison/`, `Model Error/` |
+| `job_files/` | Cluster job scripts and per-study tools: `gpu_submit.sh`, `tier1/`, `chain_scaling_tests/`, `multiparam_tests/`, `chain_system_sensitivity_analysis/` |
+| `ODE Runner/` | Notebooks for deterministic solves, ODE-solver tuning and model-error configs |
+| `Bayesian Inference/` | Interactive notebooks and the Alpine segment-chain scripts |
+| `ME1_Refit/` | A Python port of the original ME1 scaling-parameter fit |
+| `Notes/` | Paper outline, Tier-1 run plan, audit and decision records |
+| `Sync/` | rsync to and from the clusters |
+| `_staging_new_schema/` | Mock-up of a more general, less FAS-specific reaction schema (future work) |
+| `*/Archive/` | Retired material, including the earlier one-enzyme-at-a-time stage (`Test_FabD*`) |
 
 ---
 
 ## Output Files
 
-After running inference, `Results/<folder_name>/` will contain:
+A finished run's folder, `Results/<...>/<run>/`, contains:
 
 | File | Contents |
 |---|---|
-| `solver_params.json` | Solver, dataset, path, prior, and sampler configuration |
-| `prior_samples_pm.nc` | Prior samples (NetCDF / ArviZ format) |
-| `posterior_samples_pm.nc` | Posterior samples (NetCDF / ArviZ format) |
-| `checkpoint/` | Resumable state + all draws: `draws.zarr`, `checkpoint.pkl`, `status.json` |
-| `throughput_probe.json` | *(if benchmarked)* measured throughput + estimated segments needed |
-| `trace_plot.png` | Prior-vs-posterior, zoomed posterior, and per-chain trace, one column per free parameter |
-| `predictive_plots_<system>.png` | *(if run)* one row per chain-length observable (plus a combined "Total FA" row) — time-course panel next to the final-concentration/initial-conditions table — see `Utilities/plot_predictive_check.py` below |
-| `convergence_diagnostics.png` | *(if run)* r-hat/ESS trajectory (including warm-up) and cumulative divergences — see `Utilities/plot_convergence_trajectory.py` below |
-| `energy_plot.png` | *(if run)* per-chain BFMI + marginal/transition energy distributions |
-| `rank_plot.png` | *(if run)* per-chain rank-ECDF mixing check |
-| `loo_diagnostics.png` | *(if run)* Pareto-k + LOO summary — needs enough sampling draws for the Pareto tail fit to converge (a few hundred is not always enough) |
+| `solver_params.json` | Solver, dataset, path, prior and sampler configuration |
+| `prior_samples_pm.nc` | Prior samples (NetCDF / ArviZ) |
+| `posterior_samples_pm.nc` | Posterior samples, log-likelihood and posterior predictive (NetCDF / ArviZ) |
+| `timing.json` | Posterior-sampling time in seconds |
+| `checkpoint/` | Resumable state and every draw: `draws.zarr`, `checkpoint.pkl`, `checkpoint_meta.json`, `progress_log.jsonl`, `status.json`. Not tracked by git. |
+| `trace_plot.png` | Prior vs. posterior, zoomed posterior and per-chain trace, one column per free parameter |
+| `convergence_diagnostics.png` | r-hat/ESS against cumulative draws (warm-up included) and cumulative divergences |
+| `energy_plot.png` | Per-chain BFMI and marginal/transition energy |
+| `rank_plot.png` | Per-chain rank-ECDF mixing check |
+| `loo_diagnostics.png` | Pareto-k and LOO summary. It needs enough sampling draws for the Pareto tail fit; a few hundred is not always enough. |
+| `predictive_plots_<system>.png` | Posterior-predictive check, one row per observable |
 
----
-
-## View Existing Data and Config Files
-
-Already-generated files are in:
-
-- `Results/<folder_name>/solver_params.json` (config used for that run)
-- `Results/<folder_name>/` (saved plots + `prior_samples_pm.nc` + `posterior_samples_pm.nc`)
-- `Data/<folder_name>/` (CSV data files)
-
-To replot existing results without rerunning MCMC, open `Bayesian Inference/guided_bayesian_inference.ipynb`, set `folder_name` to the run folder, set `use_existing_results = True`, and run the Configure and Run cell.
+While a run finalizes it keeps `finalize_stage.nc`, so a job killed partway through doesn't redo the finished stages. The file is removed once the posterior file is written.
 
 ---
 
 ## Running Inference
 
-Posterior sampling always uses **BlackJAX**, and every draw (warm-up *and* sampling) is **checkpointed** under `Results/<folder_name>/checkpoint/`. That's what makes runs resumable across Alpine's 24 h job cap — and it costs nothing for a short local run, which just completes in a single call.
+Posterior sampling uses **BlackJAX**, and every draw, warm-up *and* sampling, is **checkpointed** under the run's `checkpoint/`. Runs are therefore resumable across cluster time limits, and a short local run just completes in one call.
 
 ### Locally (CPU)
 
-Run inference directly — no wall-clock limit, so it runs to completion in this process:
-
 ```bash
-python "Utilities/inference_runner.py" --solver_params_file "Results/<folder_name>/solver_params.json"
+python "Utilities/inference_runner.py" --solver_params_file "Results/Tier1/Tier1 C8 - a1c3/solver_params.json"
 ```
 
-Or from `guided_bayesian_inference.ipynb` with `use_existing_results = False` (see Step 4 above).
+`--max_hours H` checkpoints and exits after H hours; running the same command again resumes. `--extra_draws N` raises the draw target, and `--no_resume` discards the checkpoint and starts over.
 
-### On Alpine (CPU or GPU) — for runs that may exceed 24 h
-
-After syncing the `Python Model` folder to Alpine and creating the `Bayesian` conda environment:
-
-**1. Size the chain** (recommended) — a short probe measures throughput and estimates how many 24 h segments you need:
+### On the cluster (GPU)
 
 ```bash
-python "Utilities/benchmark_throughput.py" --solver_params_file "Results/<folder_name>/solver_params.json" --minutes 10
+job_files/gpu_submit.sh --time 12:15:00 --name tier1_C8_a1c3 -- tier1/tier1.sbatch "Tier1 C8 - a1c3"
 ```
 
-**2. Submit the chain** — N dependent jobs (chained with `--dependency=afterany`, so a segment that hits the time limit still triggers the next, which resumes from the checkpoint). CPU by default; add `--gpu` for a single-GPU (aa100) worker instead:
+`gpu_submit.sh` queues the job on both Blanca and Alpine; whichever starts first runs it (`gpu_twin_claim.sh`) and cancels the other. The run samples until it converges, then finalizes and writes its figures. If it hits the time limit first it checkpoints, and resubmitting the same command resumes. Sync the `Python Model` folder first (`Sync/sync_to_cluster.sh`).
+
+`Bayesian Inference/submit_inference_chain.sh` is the older route: a chain of dependent Alpine jobs (CPU, or `--gpu`) that resume one run segment by segment. It has `--segments N`, `--max-hours`, `--time` and `--extra-draws`.
+
+### When a run stops
+
+Convergence is checked every `rhat_check_every` draws (from `posterior_sampling` in `solver_params.json`):
+
+- **Converged:** r-hat ≤ `rhat_threshold` and bulk ESS at or above the bar, on `convergence_consecutive_checks` consecutive checks. The ESS bar is `ess_per_split_chain × 2 × chains` (Vehtari et al. 2021: 400 at four chains, 800 at eight), or a flat `ess_threshold`.
+- **Stranded chains:** a chain whose mean log-posterior sits more than `lp_exclusion_nats` (default 20) below the best chain is excluded from that decision and recorded in `checkpoint/status.json` as `stranded_chains`. At least `min_chains_for_convergence` chains must remain. The saved draws keep every chain, but the finalized netcdf, whether written live or by `finalize_window.py`, leaves the stranded ones out unless `--include_stranded` is passed.
+- **Compute cap:** `max_total_hours` (default 24) caps the run's **total A100-equivalent compute** across all segments: wall time on each card × its measured speed relative to an A100 (`GPU_SPEED_VS_A100` in `resumable_sampler.py`). Time spent queued or idle doesn't count. Once the cap is crossed the run checkpoints and stops, as `total_time_budget`, and it does not resubmit. Raise it, or set it to `null`, before starting a run meant to go further. `max_sampling_hours` caps the sampling phase alone.
+- **Dead runs:** if every chain accepts nothing for two consecutive checkpoints, the run stops as `not_sampling` and is never finalized.
+
+### Re-picking the posterior window
+
+All warm-up and sampling draws are kept, so the posterior window can be moved afterwards without resampling. `posterior_burn_in_draws` in `solver_params.json` adds burn-in beyond `tune`, both live and in the auto-written posterior. `finalize_window.py` re-derives the posterior netcdf from any window:
 
 ```bash
-"Bayesian Inference/submit_inference_chain.sh" --solver-params "Results/<folder_name>/solver_params.json" --segments 5
-"Bayesian Inference/submit_inference_chain.sh" --solver-params "Results/<folder_name>/solver_params.json" --segments 5 --gpu
+python "Utilities/finalize_window.py" --solver_params_file ".../solver_params.json" --burn_in 800 --end_draw 1400
 ```
 
-Each segment samples within `--max-hours` (default 23.5), checkpoints, and exits; the run finalizes (writes the netcdf outputs) once the draw target is met, and any remaining queued segments become a fast no-op.
+`--burn_in` and `--end_draw` are indexes into the full per-chain timeline (warm-up then sampling). With neither given, it reproduces what the run already wrote.
 
-> **This 5-segment chain can silently stop early.** `resumable_sampler.py`'s `SamplerSpec.max_total_hours` is a *separate*, total-wall-clock-since-first-checkpoint ceiling (default **24.0 h**), independent of each segment's own `--max-hours`. It exists so an unattended run can't quietly re-queue itself for days, but a 5×23.5h chain — built for exactly the case of needing *more* than 24h — will hit that default around segment 2 and stop there, saving its checkpoint but not converging, with no error. Set `posterior_sampling.max_total_hours` explicitly in `solver_params.json` (a larger number, or `null` to disable it) before submitting a chain meant to run past 24h total.
+### Plotting diagnostics
 
-**3. Run longer** — if that wasn't enough, submit more segments (add `--extra-draws N` on the new batch to raise the target):
+Three standalone scripts redraw the figures from the saved posterior netcdf, so no notebook or cluster run is needed:
 
 ```bash
-"Bayesian Inference/submit_inference_chain.sh" --solver-params ".../solver_params.json" --segments 3 --extra-draws 1000
+python "Utilities/plot_convergence_trajectory.py" --solver_params_file ".../solver_params.json"  # r-hat/ESS, divergences, energy, rank-ECDF, LOO
+python "Utilities/plot_trace_diagnostics.py"      --solver_params_file ".../solver_params.json"  # prior vs. posterior and traces
+python "Utilities/plot_predictive_check.py"       --solver_params_file ".../solver_params.json"  # posterior-predictive checks
 ```
 
-**4. Re-pick the tuning/posterior boundary** (optional) — because all warm-up and sampling draws are retained, you can move the burn-in boundary after the fact, no resampling. `solver_params.json`'s `posterior_sampling.posterior_burn_in_draws` sets an automatic extra burn-in (beyond `tune`) applied live during the run and to its auto-written posterior; `finalize_window.py --burn_in` re-derives the posterior netcdf from any chosen boundary after the fact, defaulting to `tune + posterior_burn_in_draws` (i.e. reproducing what the run already did) when `--burn_in` isn't given:
-
-```bash
-python "Utilities/finalize_window.py" --solver_params_file "Results/<folder_name>/solver_params.json" --burn_in 800
-```
-
-If a chain got stuck in a much-lower-posterior basin than its siblings (`lp_exclusion_nats` in `resumable_sampler.py`; recorded per run in `checkpoint/status.json` as `stranded_chains`), both the live auto-finalize path and `finalize_window.py` exclude it from the written netcdf by default — the same chain the live r-hat/ESS check already excluded from its convergence decision, so a "converged" run's saved posterior/posterior-predictive/LOO no longer silently blend in a chain that never contributed useful mass. Pass `--include_stranded` to deliberately get the unfiltered, all-chains artifact instead.
-
-**5. Plot diagnostics** (optional) — three standalone scripts, all recomputed from the saved posterior netcdf, none of them need the notebook or a re-run on Alpine/Blanca:
-
-```bash
-# r-hat/ESS vs. cumulative draws (warm-up included by default), cumulative divergences,
-# per-chain BFMI + energy, and a rank-ECDF mixing check, plus LOO if enough draws exist
-python "Utilities/plot_convergence_trajectory.py" --solver_params_file "Results/<folder_name>/solver_params.json"
-
-# Prior-vs-posterior, zoomed posterior, and per-chain trace, one column per free parameter
-python "Utilities/plot_trace_diagnostics.py" --solver_params_file "Results/<folder_name>/solver_params.json"
-
-# Posterior-predictive checks: one combined figure, one row per chain-length observable
-# (time course next to final-concentration-vs-initial-conditions), plus a "Total FA" row
-python "Utilities/plot_predictive_check.py" --solver_params_file "Results/<folder_name>/solver_params.json"
-```
-
-Cheap enough (plain numpy/arviz/matplotlib over a handful of draws/chains) to run locally after transferring just the `posterior_samples_pm.nc` file down from the cluster.
-
-The cluster scripts only run sampling and write `prior_samples_pm.nc` and `posterior_samples_pm.nc`. To make or remake the main plots after a job finishes, open `Bayesian Inference/guided_bayesian_inference.ipynb`, set the same `folder_name`, set `use_existing_results = True`, and rerun the plotting cell.
+They are cheap enough to run locally after copying just `posterior_samples_pm.nc` down from the cluster. `Bayesian Inference/guided_bayesian_inference.ipynb` does the same interactively: set `folder_name` and `use_existing_results = True`.
 
 ---
 
 ## Dependencies
 
-All required packages are in `environment.yml`. Key ones:
+`environment.yml` (conda-forge) is the reference environment; `requirements.txt` is the pip equivalent. Key packages:
 
 | Package | Role |
 |---|---|
 | `pymc` | Model definition (priors, transforms, likelihood) and netcdf/arviz plumbing |
-| `jax` + `diffrax` | Stiff ODE solving with automatic differentiation |
-| `blackjax` | The NUTS sampler — checkpointed/resumable, CPU or GPU |
+| `jax` + `diffrax` | Stiff ODE solving (Kvaerno5, PID step control) with automatic differentiation |
+| `blackjax` | The NUTS sampler, checkpointed and resumable, CPU or GPU |
 | `equinox` | JAX-compatible ODE system module |
-| `preliz` | Prior specification via maximum entropy |
-| `arviz` | Inference diagnostics (trace plots, r-hat/ESS, LOO — WAIC is not available in this arviz version) |
-| `zarr` | On-disk streaming store for checkpointed draws |
-
----
-
-
+| `preliz` | Priors from bounds and mass. A LogNormal with a fixed median is solved exactly, and every fitted prior is checked against its requested mass. |
+| `arviz` | Diagnostics: trace plots, r-hat/ESS, LOO. WAIC is not available in this arviz version. |
+| `zarr` | On-disk store for checkpointed draws |
