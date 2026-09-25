@@ -1,0 +1,76 @@
+{
+ "system": "C14+unsat",
+ "rtol": 0.001,
+ "atol": 1e-07,
+ "candidates": [
+  {
+   "label": "reference",
+   "steps_loose": 71,
+   "steps_strict": 1171,
+   "c16_150s": 13.259073414625382,
+   "converged": true
+  },
+  {
+   "label": "FabH x10",
+   "steps_loose": 73,
+   "steps_strict": 1384,
+   "c16_150s": 13.09238983735657,
+   "converged": true
+  },
+  {
+   "label": "FabH x0.1",
+   "steps_loose": 65,
+   "steps_strict": 843,
+   "c16_150s": 6.538238887667527,
+   "converged": true
+  },
+  {
+   "label": "FabF x10",
+   "steps_loose": 69,
+   "steps_strict": 1089,
+   "c16_150s": 11.651645594608329,
+   "converged": true
+  },
+  {
+   "label": "FabF x0.1",
+   "steps_loose": 69,
+   "steps_strict": 1111,
+   "c16_150s": 10.934837777123384,
+   "converged": true
+  },
+  {
+   "label": "FabB x10",
+   "steps_loose": 70,
+   "steps_strict": 1173,
+   "c16_150s": 13.497611618906554,
+   "converged": true
+  },
+  {
+   "label": "FabB x0.1",
+   "steps_loose": 69,
+   "steps_strict": 1109,
+   "c16_150s": 12.51329609231596,
+   "converged": true
+  },
+  {
+   "label": "TesA x0.1",
+   "steps_loose": 72,
+   "steps_strict": 1214,
+   "c16_150s": 11.210746226407986,
+   "converged": true
+  },
+  {
+   "label": "TesA x3",
+   "steps_loose": 70,
+   "steps_strict": 1134,
+   "c16_150s": 13.189476268477577,
+   "converged": true
+  }
+ ],
+ "reference_720s": {
+  "steps_loose": 78,
+  "steps_strict": 1360,
+  "c16": 34.04871623861213,
+  "converged": true
+ }
+}

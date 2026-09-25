@@ -1,0 +1,42 @@
+{
+ "system": "C14+unsat",
+ "rtol": 0.001,
+ "atol": 1e-07,
+ "reference": {
+  "c16_150s": 13.259073414625382,
+  "steps_loose": 71,
+  "steps_strict": 1171
+ },
+ "rows": [
+  {
+   "enzyme": "FabF",
+   "multiplier": 30.0,
+   "c16_150s": 9.240611119308863,
+   "frac_of_ref": 0.6969273666677216,
+   "sep_decades": 0.15681248144161022,
+   "steps_loose_ratio": 0.9436619718309859,
+   "steps_strict_ratio": 0.8642186165670367,
+   "converged": true
+  },
+  {
+   "enzyme": "TesA",
+   "multiplier": 30.0,
+   "c16_150s": 9.772706149902376,
+   "frac_of_ref": 0.737058001287075,
+   "sep_decades": 0.13249833487124682,
+   "steps_loose_ratio": 0.9577464788732394,
+   "steps_strict_ratio": 0.874466268146883,
+   "converged": true
+  },
+  {
+   "enzyme": "FabH",
+   "multiplier": 30.0,
+   "c16_150s": 3.36738573771933,
+   "frac_of_ref": 0.2539684058167251,
+   "sep_decades": 0.5952203071316067,
+   "steps_loose_ratio": 0.9577464788732394,
+   "steps_strict_ratio": 0.9649871904355252,
+   "converged": true
+  }
+ ]
+}

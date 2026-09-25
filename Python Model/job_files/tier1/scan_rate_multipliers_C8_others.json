@@ -1,0 +1,812 @@
+{
+ "system": "C8",
+ "rtol": 0.001,
+ "atol": 1e-07,
+ "reference": {
+  "c16_150s": 9.586217798653015,
+  "steps_loose": 70,
+  "steps_strict": 1104
+ },
+ "rows": [
+  {
+   "enzyme": "FabD",
+   "multiplier": 0.0,
+   "c16_150s": 7.035827865229258e-19,
+   "frac_of_ref": 7.339524318149626e-20,
+   "sep_decades": 19.134332086227953,
+   "steps_loose_ratio": 0.7428571428571429,
+   "steps_strict_ratio": 0.5543478260869565,
+   "converged": true
+  },
+  {
+   "enzyme": "FabD",
+   "multiplier": 0.1,
+   "c16_150s": 8.930147197416364,
+   "frac_of_ref": 0.9315610582800614,
+   "sep_decades": 0.0307886744176994,
+   "steps_loose_ratio": 0.9714285714285714,
+   "steps_strict_ratio": 0.9791666666666666,
+   "converged": true
+  },
+  {
+   "enzyme": "FabD",
+   "multiplier": 0.2,
+   "c16_150s": 9.299321602715745,
+   "frac_of_ref": 0.9700720135966885,
+   "sep_decades": 0.013196024551511403,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 1.0153985507246377,
+   "converged": true
+  },
+  {
+   "enzyme": "FabD",
+   "multiplier": 0.5,
+   "c16_150s": 9.52396164150883,
+   "frac_of_ref": 0.9935056600578246,
+   "sep_decades": 0.0028296543469406776,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 1.016304347826087,
+   "converged": true
+  },
+  {
+   "enzyme": "FabD",
+   "multiplier": 2.0,
+   "c16_150s": 9.58913228148859,
+   "frac_of_ref": 1.0003040284392437,
+   "sep_decades": 0.00013201780593820369,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.980072463768116,
+   "converged": true
+  },
+  {
+   "enzyme": "FabD",
+   "multiplier": 3.0,
+   "c16_150s": 9.564274962057006,
+   "frac_of_ref": 0.9977110016633366,
+   "sep_decades": 0.000995238831759205,
+   "steps_loose_ratio": 0.9714285714285714,
+   "steps_strict_ratio": 0.9646739130434783,
+   "converged": true
+  },
+  {
+   "enzyme": "FabD",
+   "multiplier": 5.0,
+   "c16_150s": 9.497517841597094,
+   "frac_of_ref": 0.9907471373049354,
+   "sep_decades": 0.004037173855711776,
+   "steps_loose_ratio": 0.9571428571428572,
+   "steps_strict_ratio": 0.9384057971014492,
+   "converged": true
+  },
+  {
+   "enzyme": "FabD",
+   "multiplier": 10.0,
+   "c16_150s": 9.31065955727643,
+   "frac_of_ref": 0.971254748518722,
+   "sep_decades": 0.012666844895856183,
+   "steps_loose_ratio": 0.9285714285714286,
+   "steps_strict_ratio": 0.8623188405797102,
+   "converged": true
+  },
+  {
+   "enzyme": "FabD",
+   "multiplier": 20.0,
+   "c16_150s": 8.9248403489667,
+   "frac_of_ref": 0.9310074668051829,
+   "sep_decades": 0.031046835904495702,
+   "steps_loose_ratio": 0.8857142857142857,
+   "steps_strict_ratio": 0.7780797101449275,
+   "converged": true
+  },
+  {
+   "enzyme": "FabD",
+   "multiplier": 30.0,
+   "c16_150s": 8.53781578062306,
+   "frac_of_ref": 0.8906344462382996,
+   "sep_decades": 0.05030051207710806,
+   "steps_loose_ratio": 0.8714285714285714,
+   "steps_strict_ratio": 0.7355072463768116,
+   "converged": true
+  },
+  {
+   "enzyme": "FabG",
+   "multiplier": 0.0,
+   "c16_150s": 3.4490536058195624e-23,
+   "frac_of_ref": 3.597929525765832e-24,
+   "sep_decades": 23.44394734762492,
+   "steps_loose_ratio": 0.9142857142857143,
+   "steps_strict_ratio": 0.7735507246376812,
+   "converged": true
+  },
+  {
+   "enzyme": "FabG",
+   "multiplier": 0.1,
+   "c16_150s": 7.96397249691798,
+   "frac_of_ref": 0.8307731645776939,
+   "sep_decades": 0.08051754037966238,
+   "steps_loose_ratio": 1.0285714285714285,
+   "steps_strict_ratio": 1.0778985507246377,
+   "converged": true
+  },
+  {
+   "enzyme": "FabG",
+   "multiplier": 0.2,
+   "c16_150s": 8.855392535273204,
+   "frac_of_ref": 0.9237629189394694,
+   "sep_decades": 0.03443947489222933,
+   "steps_loose_ratio": 1.0142857142857142,
+   "steps_strict_ratio": 1.0480072463768115,
+   "converged": true
+  },
+  {
+   "enzyme": "FabG",
+   "multiplier": 0.5,
+   "c16_150s": 9.404473016472476,
+   "frac_of_ref": 0.9810410334922626,
+   "sep_decades": 0.008312827231090452,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 1.0181159420289856,
+   "converged": true
+  },
+  {
+   "enzyme": "FabG",
+   "multiplier": 2.0,
+   "c16_150s": 9.676255699795268,
+   "frac_of_ref": 1.009392432243184,
+   "sep_decades": 0.00406004435710231,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 0.9945652173913043,
+   "converged": true
+  },
+  {
+   "enzyme": "FabG",
+   "multiplier": 3.0,
+   "c16_150s": 9.706054711896412,
+   "frac_of_ref": 1.0125009587472793,
+   "sep_decades": 0.005395443124687204,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9945652173913043,
+   "converged": true
+  },
+  {
+   "enzyme": "FabG",
+   "multiplier": 5.0,
+   "c16_150s": 9.729714644977978,
+   "frac_of_ref": 1.014969078456065,
+   "sep_decades": 0.006452811450746696,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9981884057971014,
+   "converged": true
+  },
+  {
+   "enzyme": "FabG",
+   "multiplier": 10.0,
+   "c16_150s": 9.74706922818247,
+   "frac_of_ref": 1.016779446587585,
+   "sep_decades": 0.007226758706638259,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 1.006340579710145,
+   "converged": true
+  },
+  {
+   "enzyme": "FabG",
+   "multiplier": 20.0,
+   "c16_150s": 9.754961139458441,
+   "frac_of_ref": 1.017602702582987,
+   "sep_decades": 0.007578251719550473,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 1.013586956521739,
+   "converged": true
+  },
+  {
+   "enzyme": "FabG",
+   "multiplier": 30.0,
+   "c16_150s": 9.756884671540975,
+   "frac_of_ref": 1.017803358579224,
+   "sep_decades": 0.0076638796380986895,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 1.016304347826087,
+   "converged": true
+  },
+  {
+   "enzyme": "FabZ",
+   "multiplier": 0.0,
+   "c16_150s": 4.695882119520288,
+   "frac_of_ref": 0.4898576496123548,
+   "sep_decades": 0.30993010562367873,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 1.0235507246376812,
+   "converged": true
+  },
+  {
+   "enzyme": "FabZ",
+   "multiplier": 0.1,
+   "c16_150s": 6.733520927110254,
+   "frac_of_ref": 0.7024168518324713,
+   "sep_decades": 0.15340507772544504,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 1.0289855072463767,
+   "converged": true
+  },
+  {
+   "enzyme": "FabZ",
+   "multiplier": 0.2,
+   "c16_150s": 7.699819694774493,
+   "frac_of_ref": 0.8032176877784286,
+   "sep_decades": 0.09516673642915043,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 1.0253623188405796,
+   "converged": true
+  },
+  {
+   "enzyme": "FabZ",
+   "multiplier": 0.5,
+   "c16_150s": 8.90492739979998,
+   "frac_of_ref": 0.9289302190746422,
+   "sep_decades": 0.032016908836352706,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 1.0190217391304348,
+   "converged": true
+  },
+  {
+   "enzyme": "FabZ",
+   "multiplier": 2.0,
+   "c16_150s": 10.048087095033416,
+   "frac_of_ref": 1.0481805552597918,
+   "sep_decades": 0.020436098868098173,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9891304347826086,
+   "converged": true
+  },
+  {
+   "enzyme": "FabZ",
+   "multiplier": 3.0,
+   "c16_150s": 10.228430399508728,
+   "frac_of_ref": 1.0669933246192207,
+   "sep_decades": 0.028161702376573238,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9846014492753623,
+   "converged": true
+  },
+  {
+   "enzyme": "FabZ",
+   "multiplier": 5.0,
+   "c16_150s": 10.374390501662727,
+   "frac_of_ref": 1.0822193611249329,
+   "sep_decades": 0.034315299282856676,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9809782608695652,
+   "converged": true
+  },
+  {
+   "enzyme": "FabZ",
+   "multiplier": 10.0,
+   "c16_150s": 10.4451993435933,
+   "frac_of_ref": 1.0896058865949179,
+   "sep_decades": 0.03726944085063379,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9773550724637681,
+   "converged": true
+  },
+  {
+   "enzyme": "FabZ",
+   "multiplier": 20.0,
+   "c16_150s": 10.374856930651442,
+   "frac_of_ref": 1.0822680173310104,
+   "sep_decades": 0.03433482457279248,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9755434782608695,
+   "converged": true
+  },
+  {
+   "enzyme": "FabZ",
+   "multiplier": 30.0,
+   "c16_150s": 10.259328272186599,
+   "frac_of_ref": 1.0702164803336895,
+   "sep_decades": 0.029471634418905962,
+   "steps_loose_ratio": 0.9714285714285714,
+   "steps_strict_ratio": 0.9764492753623188,
+   "converged": true
+  },
+  {
+   "enzyme": "FabI",
+   "multiplier": 0.0,
+   "c16_150s": 2.3055842564068234e-21,
+   "frac_of_ref": 2.4051031437349435e-22,
+   "sep_decades": 21.618866294011813,
+   "steps_loose_ratio": 0.9285714285714286,
+   "steps_strict_ratio": 0.7853260869565217,
+   "converged": true
+  },
+  {
+   "enzyme": "FabI",
+   "multiplier": 0.1,
+   "c16_150s": 6.775708740541537,
+   "frac_of_ref": 0.706817733840098,
+   "sep_decades": 0.1506925627132645,
+   "steps_loose_ratio": 1.0142857142857142,
+   "steps_strict_ratio": 1.0588768115942029,
+   "converged": true
+  },
+  {
+   "enzyme": "FabI",
+   "multiplier": 0.2,
+   "c16_150s": 8.198157646951543,
+   "frac_of_ref": 0.8552025229495086,
+   "sep_decades": 0.06793102657683513,
+   "steps_loose_ratio": 1.0142857142857142,
+   "steps_strict_ratio": 1.0353260869565217,
+   "converged": true
+  },
+  {
+   "enzyme": "FabI",
+   "multiplier": 0.5,
+   "c16_150s": 9.21768827935725,
+   "frac_of_ref": 0.961556316887819,
+   "sep_decades": 0.01702527471477171,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 1.0117753623188406,
+   "converged": true
+  },
+  {
+   "enzyme": "FabI",
+   "multiplier": 2.0,
+   "c16_150s": 9.77557436119407,
+   "frac_of_ref": 1.0197530002466315,
+   "sep_decades": 0.008494991742149727,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9927536231884058,
+   "converged": true
+  },
+  {
+   "enzyme": "FabI",
+   "multiplier": 3.0,
+   "c16_150s": 9.839307070599732,
+   "frac_of_ref": 1.0264013688466664,
+   "sep_decades": 0.011317222558373837,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9909420289855072,
+   "converged": true
+  },
+  {
+   "enzyme": "FabI",
+   "multiplier": 5.0,
+   "c16_150s": 9.89030610294233,
+   "frac_of_ref": 1.0317214057385637,
+   "sep_decades": 0.013562441201460457,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9882246376811594,
+   "converged": true
+  },
+  {
+   "enzyme": "FabI",
+   "multiplier": 10.0,
+   "c16_150s": 9.927965388419052,
+   "frac_of_ref": 1.0356498878852989,
+   "sep_decades": 0.015212962496184887,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9864130434782609,
+   "converged": true
+  },
+  {
+   "enzyme": "FabI",
+   "multiplier": 20.0,
+   "c16_150s": 9.945225817714716,
+   "frac_of_ref": 1.0374504342173558,
+   "sep_decades": 0.015967356796074725,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9855072463768116,
+   "converged": true
+  },
+  {
+   "enzyme": "FabI",
+   "multiplier": 30.0,
+   "c16_150s": 9.949513684937568,
+   "frac_of_ref": 1.0378977292103253,
+   "sep_decades": 0.016154561770797285,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9846014492753623,
+   "converged": true
+  },
+  {
+   "enzyme": "FabA",
+   "multiplier": 0.0,
+   "c16_150s": 9.089782288551394,
+   "frac_of_ref": 0.9482136207909467,
+   "sep_decades": 0.023093810468379983,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 1.0099637681159421,
+   "converged": true
+  },
+  {
+   "enzyme": "FabA",
+   "multiplier": 0.1,
+   "c16_150s": 9.176043947955042,
+   "frac_of_ref": 0.9572121289842166,
+   "sep_decades": 0.018991807010602726,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 1.0090579710144927,
+   "converged": true
+  },
+  {
+   "enzyme": "FabA",
+   "multiplier": 0.2,
+   "c16_150s": 9.248835194251331,
+   "frac_of_ref": 0.9648054517967357,
+   "sep_decades": 0.015560251142409333,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 1.0072463768115942,
+   "converged": true
+  },
+  {
+   "enzyme": "FabA",
+   "multiplier": 0.5,
+   "c16_150s": 9.413013040944149,
+   "frac_of_ref": 0.9819318983412619,
+   "sep_decades": 0.007918631561521871,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 1.0045289855072463,
+   "converged": true
+  },
+  {
+   "enzyme": "FabA",
+   "multiplier": 2.0,
+   "c16_150s": 9.77767228430711,
+   "frac_of_ref": 1.0199718480922682,
+   "sep_decades": 0.008588185108086822,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 0.9945652173913043,
+   "converged": true
+  },
+  {
+   "enzyme": "FabA",
+   "multiplier": 3.0,
+   "c16_150s": 9.886846460830307,
+   "frac_of_ref": 1.031360508230841,
+   "sep_decades": 0.013410497842668845,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 0.9909420289855072,
+   "converged": true
+  },
+  {
+   "enzyme": "FabA",
+   "multiplier": 5.0,
+   "c16_150s": 10.01205210937432,
+   "frac_of_ref": 1.0444215142682383,
+   "sep_decades": 0.018875809370499614,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9873188405797102,
+   "converged": true
+  },
+  {
+   "enzyme": "FabA",
+   "multiplier": 10.0,
+   "c16_150s": 10.139290912525212,
+   "frac_of_ref": 1.0576946117320545,
+   "sep_decades": 0.024360291910248844,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9818840579710145,
+   "converged": true
+  },
+  {
+   "enzyme": "FabA",
+   "multiplier": 20.0,
+   "c16_150s": 10.172625638330864,
+   "frac_of_ref": 1.0611719712606829,
+   "sep_decades": 0.025785770439976954,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9791666666666666,
+   "converged": true
+  },
+  {
+   "enzyme": "FabA",
+   "multiplier": 30.0,
+   "c16_150s": 10.121902003845495,
+   "frac_of_ref": 1.0558806628895654,
+   "sep_decades": 0.023614836401161743,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9791666666666666,
+   "converged": true
+  },
+  {
+   "enzyme": "ACP",
+   "multiplier": 0.0,
+   "c16_150s": 1.911392294833399e-30,
+   "frac_of_ref": 1.9938961694590057e-31,
+   "sep_decades": 30.700297460971743,
+   "steps_loose_ratio": 0.6,
+   "steps_strict_ratio": 45.289855072463766,
+   "converged": false
+  },
+  {
+   "enzyme": "ACP",
+   "multiplier": 0.1,
+   "c16_150s": 1.3108184556537545,
+   "frac_of_ref": 0.1367398992163459,
+   "sep_decades": 0.8641047445310588,
+   "steps_loose_ratio": 0.9571428571428572,
+   "steps_strict_ratio": 0.7472826086956522,
+   "converged": true
+  },
+  {
+   "enzyme": "ACP",
+   "multiplier": 0.2,
+   "c16_150s": 2.5532560663460346,
+   "frac_of_ref": 0.2663465529340257,
+   "sep_decades": 0.5745529194964549,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 0.8496376811594203,
+   "converged": true
+  },
+  {
+   "enzyme": "ACP",
+   "multiplier": 0.5,
+   "c16_150s": 5.7109549792787355,
+   "frac_of_ref": 0.5957464246307023,
+   "sep_decades": 0.22493855538992624,
+   "steps_loose_ratio": 1.0142857142857142,
+   "steps_strict_ratio": 0.9538043478260869,
+   "converged": true
+  },
+  {
+   "enzyme": "ACP",
+   "multiplier": 2.0,
+   "c16_150s": 14.442798434934874,
+   "frac_of_ref": 1.506621144886179,
+   "sep_decades": 0.1780040583062746,
+   "steps_loose_ratio": 0.9714285714285714,
+   "steps_strict_ratio": 1.0153985507246377,
+   "converged": true
+  },
+  {
+   "enzyme": "ACP",
+   "multiplier": 3.0,
+   "c16_150s": 17.292647517829078,
+   "frac_of_ref": 1.8039072219138306,
+   "sep_decades": 0.2562141972596829,
+   "steps_loose_ratio": 0.9714285714285714,
+   "steps_strict_ratio": 0.9945652173913043,
+   "converged": true
+  },
+  {
+   "enzyme": "ACP",
+   "multiplier": 5.0,
+   "c16_150s": 20.12365398329996,
+   "frac_of_ref": 2.0992277043953234,
+   "sep_decades": 0.32205954930123426,
+   "steps_loose_ratio": 0.9571428571428572,
+   "steps_strict_ratio": 1.0126811594202898,
+   "converged": true
+  },
+  {
+   "enzyme": "ACP",
+   "multiplier": 10.0,
+   "c16_150s": 20.839918473010094,
+   "frac_of_ref": 2.1739458575558723,
+   "sep_decades": 0.3372487237164552,
+   "steps_loose_ratio": 0.9428571428571428,
+   "steps_strict_ratio": 1.098731884057971,
+   "converged": true
+  },
+  {
+   "enzyme": "ACP",
+   "multiplier": 20.0,
+   "c16_150s": 15.656159161328002,
+   "frac_of_ref": 1.6331946018927184,
+   "sep_decades": 0.21303793580393557,
+   "steps_loose_ratio": 0.9285714285714286,
+   "steps_strict_ratio": 1.1485507246376812,
+   "converged": true
+  },
+  {
+   "enzyme": "ACP",
+   "multiplier": 30.0,
+   "c16_150s": 9.878989049341062,
+   "frac_of_ref": 1.0305408511299612,
+   "sep_decades": 0.013065212096481394,
+   "steps_loose_ratio": 0.9142857142857143,
+   "steps_strict_ratio": 1.1394927536231885,
+   "converged": true
+  },
+  {
+   "enzyme": "C3_MalCoA",
+   "multiplier": 0.0,
+   "c16_150s": -1.740111227498504e-21,
+   "frac_of_ref": -1.8152218779579699e-22,
+   "sep_decades": Infinity,
+   "steps_loose_ratio": 0.7428571428571429,
+   "steps_strict_ratio": 0.5543478260869565,
+   "converged": true
+  },
+  {
+   "enzyme": "C3_MalCoA",
+   "multiplier": 0.1,
+   "c16_150s": 4.921500917614139,
+   "frac_of_ref": 0.5133933967477426,
+   "sep_decades": 0.28954972151276476,
+   "steps_loose_ratio": 0.9428571428571428,
+   "steps_strict_ratio": 0.9139492753623188,
+   "converged": true
+  },
+  {
+   "enzyme": "C3_MalCoA",
+   "multiplier": 0.2,
+   "c16_150s": 6.776759298149107,
+   "frac_of_ref": 0.706927324257261,
+   "sep_decades": 0.150625231601101,
+   "steps_loose_ratio": 0.9571428571428572,
+   "steps_strict_ratio": 0.9402173913043478,
+   "converged": true
+  },
+  {
+   "enzyme": "C3_MalCoA",
+   "multiplier": 0.5,
+   "c16_150s": 8.664922332299827,
+   "frac_of_ref": 0.9038937477007207,
+   "sep_decades": 0.043882617643342045,
+   "steps_loose_ratio": 0.9714285714285714,
+   "steps_strict_ratio": 0.9692028985507246,
+   "converged": true
+  },
+  {
+   "enzyme": "C3_MalCoA",
+   "multiplier": 2.0,
+   "c16_150s": 10.150564962984754,
+   "frac_of_ref": 1.0588706804065142,
+   "sep_decades": 0.024842923076997505,
+   "steps_loose_ratio": 1.0285714285714285,
+   "steps_strict_ratio": 1.0307971014492754,
+   "converged": true
+  },
+  {
+   "enzyme": "C3_MalCoA",
+   "multiplier": 3.0,
+   "c16_150s": 10.360330769452714,
+   "frac_of_ref": 1.0807527000803665,
+   "sep_decades": 0.033726329219373415,
+   "steps_loose_ratio": 1.042857142857143,
+   "steps_strict_ratio": 1.0498188405797102,
+   "converged": true
+  },
+  {
+   "enzyme": "C3_MalCoA",
+   "multiplier": 5.0,
+   "c16_150s": 10.537670157269416,
+   "frac_of_ref": 1.099252111583579,
+   "sep_decades": 0.041097308540746016,
+   "steps_loose_ratio": 1.0571428571428572,
+   "steps_strict_ratio": 1.0742753623188406,
+   "converged": true
+  },
+  {
+   "enzyme": "C3_MalCoA",
+   "multiplier": 10.0,
+   "c16_150s": 10.67688398197627,
+   "frac_of_ref": 1.1137744005228534,
+   "sep_decades": 0.046797231654449024,
+   "steps_loose_ratio": 1.0714285714285714,
+   "steps_strict_ratio": 1.098731884057971,
+   "converged": true
+  },
+  {
+   "enzyme": "C3_MalCoA",
+   "multiplier": 20.0,
+   "c16_150s": 10.748636022264161,
+   "frac_of_ref": 1.1212593170764888,
+   "sep_decades": 0.049706064826369224,
+   "steps_loose_ratio": 1.0857142857142856,
+   "steps_strict_ratio": 1.1177536231884058,
+   "converged": true
+  },
+  {
+   "enzyme": "C3_MalCoA",
+   "multiplier": 30.0,
+   "c16_150s": 10.772876020194635,
+   "frac_of_ref": 1.1237879470783942,
+   "sep_decades": 0.05068436986119913,
+   "steps_loose_ratio": 1.1,
+   "steps_strict_ratio": 1.1259057971014492,
+   "converged": true
+  },
+  {
+   "enzyme": "C2_AcCoA",
+   "multiplier": 0.0,
+   "c16_150s": 7.944850089337806,
+   "frac_of_ref": 0.8287783833217474,
+   "sep_decades": 0.08156158497156518,
+   "steps_loose_ratio": 0.8714285714285714,
+   "steps_strict_ratio": 0.7264492753623188,
+   "converged": true
+  },
+  {
+   "enzyme": "C2_AcCoA",
+   "multiplier": 0.1,
+   "c16_150s": 9.1996310078183,
+   "frac_of_ref": 0.9596726468191621,
+   "sep_decades": 0.017876883548626953,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 0.9918478260869565,
+   "converged": true
+  },
+  {
+   "enzyme": "C2_AcCoA",
+   "multiplier": 0.2,
+   "c16_150s": 9.526793465145637,
+   "frac_of_ref": 0.9938010657847011,
+   "sep_decades": 0.002700541838658303,
+   "steps_loose_ratio": 0.9857142857142858,
+   "steps_strict_ratio": 1.0172101449275361,
+   "converged": true
+  },
+  {
+   "enzyme": "C2_AcCoA",
+   "multiplier": 0.5,
+   "c16_150s": 9.681602189558852,
+   "frac_of_ref": 1.009950158958337,
+   "sep_decades": 0.004299941878221646,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 1.016304347826087,
+   "converged": true
+  },
+  {
+   "enzyme": "C2_AcCoA",
+   "multiplier": 2.0,
+   "c16_150s": 9.277796438150459,
+   "frac_of_ref": 0.9678265853143986,
+   "sep_decades": 0.014202452389861831,
+   "steps_loose_ratio": 1.0,
+   "steps_strict_ratio": 0.9909420289855072,
+   "converged": true
+  },
+  {
+   "enzyme": "C2_AcCoA",
+   "multiplier": 3.0,
+   "c16_150s": 8.971711660055398,
+   "frac_of_ref": 0.9358969145595708,
+   "sep_decades": 0.02877198449206894,
+   "steps_loose_ratio": 1.0142857142857142,
+   "steps_strict_ratio": 0.9945652173913043,
+   "converged": true
+  },
+  {
+   "enzyme": "C2_AcCoA",
+   "multiplier": 5.0,
+   "c16_150s": 8.426241926270464,
+   "frac_of_ref": 0.878995460279909,
+   "sep_decades": 0.05601336790742963,
+   "steps_loose_ratio": 1.0142857142857142,
+   "steps_strict_ratio": 0.9990942028985508,
+   "converged": true
+  },
+  {
+   "enzyme": "C2_AcCoA",
+   "multiplier": 10.0,
+   "c16_150s": 7.386030013652876,
+   "frac_of_ref": 0.7704842690608079,
+   "sep_decades": 0.11323622382398975,
+   "steps_loose_ratio": 1.0142857142857142,
+   "steps_strict_ratio": 1.0009057971014492,
+   "converged": true
+  },
+  {
+   "enzyme": "C2_AcCoA",
+   "multiplier": 20.0,
+   "c16_150s": 6.079190596576726,
+   "frac_of_ref": 0.6341594489362561,
+   "sep_decades": 0.19780153220214144,
+   "steps_loose_ratio": 1.042857142857143,
+   "steps_strict_ratio": 1.0117753623188406,
+   "converged": true
+  },
+  {
+   "enzyme": "C2_AcCoA",
+   "multiplier": 30.0,
+   "c16_150s": 5.270446423038568,
+   "frac_of_ref": 0.5497941454844821,
+   "sep_decades": 0.25979988907843793,
+   "steps_loose_ratio": 1.1,
+   "steps_strict_ratio": 1.026268115942029,
+   "converged": true
+  }
+ ]
+}
