@@ -1,0 +1,2566 @@
+{
+  "groups": [
+    "a1",
+    "a2",
+    "b3",
+    "c1",
+    "d1",
+    "b1",
+    "x2"
+  ],
+  "systems": [
+    "C4_NoFB",
+    "C6",
+    "C8"
+  ],
+  "per_system": {
+    "a1": {
+      "C4_NoFB": {
+        "informative": [
+          1.0,
+          1000
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          1.0,
+          1000
+        ],
+        "why_inf_lo": "sensitivity 3.1% < 10%",
+        "why_inf_hi": "reached end of ladder",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.4816786910178327,
+            "steps": 74,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.6828618510016118,
+            "steps": 72,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.76436605589622,
+            "steps": 70,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.8260926712150524,
+            "steps": 68,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.880149090211743,
+            "steps": 64,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.8991128999547542,
+            "steps": 64,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.9073316386014411,
+            "steps": 63,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.9010065172582897,
+            "steps": 60,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.03065278335096225,
+            "steps": 79,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.010505663712687224,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.005148769950826561,
+            "steps": 88,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.002662227925036411,
+            "steps": 92,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.001172646662084189,
+            "steps": 96,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.0006380286496452622,
+            "steps": 99,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.00021441257943311619,
+            "steps": 101,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 7.536860785451324e-05,
+            "steps": 108,
+            "within_budget": true
+          }
+        ]
+      },
+      "C6": {
+        "informative": [
+          0.003,
+          1000
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          0.003,
+          1000
+        ],
+        "why_inf_lo": "sensitivity 8.7% < 10%",
+        "why_inf_hi": "reached end of ladder",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.8472310372028632,
+            "steps": 79,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.9548554233379356,
+            "steps": 75,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.9744996264238571,
+            "steps": 72,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.9795367572430961,
+            "steps": 71,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.9323250588473799,
+            "steps": 69,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.9339270944669317,
+            "steps": 68,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.9832576653801688,
+            "steps": 70,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.9363642876346091,
+            "steps": 72,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.830355195014109,
+            "steps": 88,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.43503558667748443,
+            "steps": 94,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.43527068810548236,
+            "steps": 97,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.4315335168973911,
+            "steps": 97,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.3935525450306829,
+            "steps": 96,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.3340161984743435,
+            "steps": 97,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.1926676935302798,
+            "steps": 100,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.08694403340832468,
+            "steps": 101,
+            "within_budget": true
+          }
+        ]
+      },
+      "C8": {
+        "informative": [
+          0.001,
+          1000
+        ],
+        "solvable": [
+          0.001,
+          300
+        ],
+        "usable": [
+          0.001,
+          300
+        ],
+        "why_inf_lo": "reached end of ladder",
+        "why_inf_hi": "reached end of ladder",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "steps 785 > budget 420",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.8930046863458077,
+            "steps": 80,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.9823647743823596,
+            "steps": 76,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.9913538713269137,
+            "steps": 73,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.9800221887541889,
+            "steps": 70,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.9323250217386996,
+            "steps": 68,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.933927044036519,
+            "steps": 67,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.9831593958920026,
+            "steps": 69,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.9363642869070123,
+            "steps": 785,
+            "within_budget": false
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.8564302376492394,
+            "steps": 90,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.7335567366216951,
+            "steps": 98,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.7412131212467887,
+            "steps": 106,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.7214271250965336,
+            "steps": 106,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.6571944716133615,
+            "steps": 95,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.572565777656254,
+            "steps": 95,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.3557795720108323,
+            "steps": 101,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.16965119170475573,
+            "steps": 103,
+            "within_budget": true
+          }
+        ]
+      }
+    },
+    "a2": {
+      "C4_NoFB": {
+        "informative": [
+          0.001,
+          1000
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          0.001,
+          1000
+        ],
+        "why_inf_lo": "sensitivity 4.7% < 10%",
+        "why_inf_hi": "reached end of ladder",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.2497892767746684,
+            "steps": 76,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.4503146177284082,
+            "steps": 75,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.5939990210347321,
+            "steps": 75,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.699303069206314,
+            "steps": 75,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.7871508020796167,
+            "steps": 75,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.8262558950395185,
+            "steps": 75,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.8549831741509217,
+            "steps": 76,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.8677101595542642,
+            "steps": 76,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.04697762612640713,
+            "steps": 76,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.01592631355261893,
+            "steps": 77,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.007337031168562177,
+            "steps": 77,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.016155515896074918,
+            "steps": 78,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.04810414318735587,
+            "steps": 79,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.09397604703768861,
+            "steps": 80,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.23373264681741868,
+            "steps": 80,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.3566073397093319,
+            "steps": 79,
+            "within_budget": true
+          }
+        ]
+      },
+      "C6": {
+        "informative": [
+          0.001,
+          1000
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          0.001,
+          1000
+        ],
+        "why_inf_lo": "sensitivity 6.3% < 10%",
+        "why_inf_hi": "reached end of ladder",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.8524925603397437,
+            "steps": 82,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.9445345853920791,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.9696324584135892,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.9763229875395969,
+            "steps": 80,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.8330688932955763,
+            "steps": 79,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.8398070758450635,
+            "steps": 79,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.8615557317227173,
+            "steps": 79,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.8692745721782511,
+            "steps": 79,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.27941520775119033,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.1236001688796554,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.06254003880615967,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.0473909754813521,
+            "steps": 85,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.10258172362261665,
+            "steps": 86,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.18748929594916214,
+            "steps": 87,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.39694882557598565,
+            "steps": 87,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.5736495665882045,
+            "steps": 87,
+            "within_budget": true
+          }
+        ]
+      },
+      "C8": {
+        "informative": [
+          0.001,
+          1000
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          0.001,
+          1000
+        ],
+        "why_inf_lo": "sensitivity 8.3% < 10%",
+        "why_inf_hi": "reached end of ladder",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "steps 464 > budget 420",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.9480504784706559,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.988063021755049,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.9961684841905506,
+            "steps": 82,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.9815977846912205,
+            "steps": 79,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.833068892145842,
+            "steps": 78,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.8398025043838573,
+            "steps": 78,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.8615524272426188,
+            "steps": 464,
+            "within_budget": false
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.8692743226109947,
+            "steps": 214,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.6837485859525767,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.21960625566085584,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.11073762382085003,
+            "steps": 85,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.08315895547599203,
+            "steps": 85,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.16260098397094486,
+            "steps": 86,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.287169767784222,
+            "steps": 86,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.5386063548998263,
+            "steps": 86,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.7388307006522662,
+            "steps": 86,
+            "within_budget": true
+          }
+        ]
+      }
+    },
+    "b3": {
+      "C4_NoFB": {
+        "informative": [
+          1.0,
+          1000
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          1.0,
+          1000
+        ],
+        "why_inf_lo": "sensitivity 1.5% < 10%",
+        "why_inf_hi": "reached end of ladder",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.12965069822173597,
+            "steps": 75,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.2553970206099325,
+            "steps": 74,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.3389483099445969,
+            "steps": 73,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.40179638660845063,
+            "steps": 72,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.4680030076347786,
+            "steps": 69,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.5152894749258734,
+            "steps": 67,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.5927169368012981,
+            "steps": 63,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.670235938030252,
+            "steps": 61,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.015051177832558934,
+            "steps": 77,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.005928709830036181,
+            "steps": 79,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.0038916604580465273,
+            "steps": 80,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.0021247612257154344,
+            "steps": 81,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.0008479353753679502,
+            "steps": 82,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.00042363377230193646,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.00012701944606651158,
+            "steps": 86,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 4.232654849316106e-05,
+            "steps": 87,
+            "within_budget": true
+          }
+        ]
+      },
+      "C6": {
+        "informative": [
+          1.0,
+          1000
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          1.0,
+          1000
+        ],
+        "why_inf_lo": "sensitivity 5.9% < 10%",
+        "why_inf_hi": "reached end of ladder",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.6658410117427953,
+            "steps": 81,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.8241459228046571,
+            "steps": 78,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.8792298604764988,
+            "steps": 76,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.911904948039445,
+            "steps": 73,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.9283138755280087,
+            "steps": 71,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.9311427770250191,
+            "steps": 69,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.7470435869111449,
+            "steps": 68,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.7491137622913726,
+            "steps": 69,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.05857600855462653,
+            "steps": 86,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.037056289956081394,
+            "steps": 89,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.03423618317100071,
+            "steps": 92,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.017215806379445094,
+            "steps": 93,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.006669794174240231,
+            "steps": 95,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.003312078098546638,
+            "steps": 96,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.0010101502692616013,
+            "steps": 98,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.00033930411903963667,
+            "steps": 99,
+            "within_budget": true
+          }
+        ]
+      },
+      "C8": {
+        "informative": [
+          1.0,
+          1000
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          1.0,
+          1000
+        ],
+        "why_inf_lo": "sensitivity 7.1% < 10%",
+        "why_inf_hi": "reached end of ladder",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.7895718102955064,
+            "steps": 81,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.9173299249207201,
+            "steps": 79,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.9608721036225591,
+            "steps": 76,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.9730220222014507,
+            "steps": 73,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.9507296829937611,
+            "steps": 70,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.9329803564417409,
+            "steps": 68,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.7470434961148331,
+            "steps": 67,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.7490442403974197,
+            "steps": 66,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.07120118400837581,
+            "steps": 89,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.07056575150986344,
+            "steps": 92,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.03253920502268332,
+            "steps": 95,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.01896617304224068,
+            "steps": 95,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.008262837161733946,
+            "steps": 105,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.004245351288471233,
+            "steps": 106,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.001296007378393554,
+            "steps": 108,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.0004348613778381479,
+            "steps": 108,
+            "within_budget": true
+          }
+        ]
+      }
+    },
+    "c1": {
+      "C4_NoFB": {
+        "informative": [
+          0.001,
+          1.0
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          0.001,
+          1.0
+        ],
+        "why_inf_lo": "reached end of ladder",
+        "why_inf_hi": "sensitivity 3.4% < 10%",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.03400147770430226,
+            "steps": 77,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.01314165180695835,
+            "steps": 79,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.006402781610772625,
+            "steps": 80,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.0031141825453712972,
+            "steps": 82,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.0012076124024851746,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.0005942343777374128,
+            "steps": 85,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.00019576299482554195,
+            "steps": 85,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 5.843869173031301e-05,
+            "steps": 86,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.21618798405740192,
+            "steps": 74,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.3380063629306721,
+            "steps": 73,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.40464178836954234,
+            "steps": 71,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.4471970130063321,
+            "steps": 70,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.47728510254881273,
+            "steps": 69,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.4883321279661492,
+            "steps": 69,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.4964293675335013,
+            "steps": 68,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.4988027051644721,
+            "steps": 68,
+            "within_budget": true
+          }
+        ]
+      },
+      "C6": {
+        "informative": [
+          0.001,
+          300
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          0.001,
+          300
+        ],
+        "why_inf_lo": "reached end of ladder",
+        "why_inf_hi": "sensitivity 8.6% < 10%",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.7756213961591679,
+            "steps": 86,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.4498341316490456,
+            "steps": 91,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.3853907243052364,
+            "steps": 92,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.40544125741966464,
+            "steps": 91,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.38129294100947675,
+            "steps": 88,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.3268799613543155,
+            "steps": 87,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.20207012933000523,
+            "steps": 88,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.08582911049075384,
+            "steps": 88,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.38182120830467053,
+            "steps": 80,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.4305855835080371,
+            "steps": 78,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.4625647140790028,
+            "steps": 77,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.48058692601904274,
+            "steps": 75,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.49205820659675736,
+            "steps": 74,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.49599737938416943,
+            "steps": 73,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.4987913485046864,
+            "steps": 72,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.49959445834767835,
+            "steps": 72,
+            "within_budget": true
+          }
+        ]
+      },
+      "C8": {
+        "informative": [
+          0.001,
+          1000
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          0.001,
+          1000
+        ],
+        "why_inf_lo": "reached end of ladder",
+        "why_inf_hi": "reached end of ladder",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.736605328304976,
+            "steps": 88,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.6402894685048937,
+            "steps": 92,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.6804948366880726,
+            "steps": 92,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.6851431145574781,
+            "steps": 97,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.6393373583401617,
+            "steps": 91,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.5615321687251278,
+            "steps": 87,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.3707250845261988,
+            "steps": 87,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.16729971918402173,
+            "steps": 87,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.44390916130842195,
+            "steps": 81,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.46223938024484534,
+            "steps": 79,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.4802512642240818,
+            "steps": 77,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.49024608256212143,
+            "steps": 76,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.49618353470856785,
+            "steps": 75,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.4981414916557809,
+            "steps": 74,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.4994572199187147,
+            "steps": 73,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.49982028098882975,
+            "steps": 72,
+            "within_budget": true
+          }
+        ]
+      }
+    },
+    "d1": {
+      "C4_NoFB": {
+        "informative": [
+          0.001,
+          100
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          0.001,
+          100
+        ],
+        "why_inf_lo": "reached end of ladder",
+        "why_inf_hi": "sensitivity 9.6% < 10%",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.9351827988275643,
+            "steps": 75,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.8538482361678694,
+            "steps": 75,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.7480002168105144,
+            "steps": 74,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.6026656038184983,
+            "steps": 74,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.3845683196748534,
+            "steps": 74,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.24052458250482514,
+            "steps": 74,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.09574859028582593,
+            "steps": 74,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.0306856309340932,
+            "steps": 74,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.4978252181237532,
+            "steps": 76,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.4991271829208634,
+            "steps": 77,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.49956310463920395,
+            "steps": 78,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.49978143036073563,
+            "steps": 78,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.4999125428419811,
+            "steps": 79,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.499956266534557,
+            "steps": 79,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.49998687893404514,
+            "steps": 79,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.49999562621360855,
+            "steps": 79,
+            "within_budget": true
+          }
+        ]
+      },
+      "C6": {
+        "informative": [
+          0.001,
+          1000
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          0.001,
+          1000
+        ],
+        "why_inf_lo": "reached end of ladder",
+        "why_inf_hi": "reached end of ladder",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.9935597899937372,
+            "steps": 82,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.9842521870027066,
+            "steps": 82,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.9695865188823314,
+            "steps": 81,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.9429201855362368,
+            "steps": 81,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.8776023840386322,
+            "steps": 81,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.7965604500055123,
+            "steps": 81,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.6134920105129237,
+            "steps": 81,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.37033259561093834,
+            "steps": 80,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.499795957165308,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.49991830857157005,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.4999591418791286,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.49997956783550396,
+            "steps": 85,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.4999918263888464,
+            "steps": 85,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.4999959130720252,
+            "steps": 85,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.49999877389565783,
+            "steps": 85,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.4999995912960641,
+            "steps": 85,
+            "within_budget": true
+          }
+        ]
+      },
+      "C8": {
+        "informative": [
+          0.001,
+          1000
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          0.001,
+          1000
+        ],
+        "why_inf_lo": "reached end of ladder",
+        "why_inf_hi": "reached end of ladder",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.9925136267103771,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.9817654287436834,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.964898494488718,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.9153258847082714,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.8203199379102433,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.7303657993609638,
+            "steps": 82,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.5618330161657279,
+            "steps": 82,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.525240741520661,
+            "steps": 81,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.49976202918705936,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.4999046964125257,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.4999523288613521,
+            "steps": 85,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.4999761595814136,
+            "steps": 85,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.4999904626672781,
+            "steps": 86,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.4999952311392597,
+            "steps": 86,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.49999856930158904,
+            "steps": 87,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.49999952309597195,
+            "steps": 87,
+            "within_budget": true
+          }
+        ]
+      }
+    },
+    "b1": {
+      "C4_NoFB": {
+        "informative": [
+          0.001,
+          1.0
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          0.001,
+          1.0
+        ],
+        "why_inf_lo": "sensitivity 1.3% < 10%",
+        "why_inf_hi": "sensitivity 0.2% < 10%",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.0015270015380134728,
+            "steps": 76,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.0006077387913307898,
+            "steps": 76,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.0003033010700243628,
+            "steps": 76,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.00015154215478207226,
+            "steps": 76,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 6.057868691803092e-05,
+            "steps": 78,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 3.0305332853297335e-05,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 1.0104614691745187e-05,
+            "steps": 86,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 3.0204373191834795e-06,
+            "steps": 90,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.012654991625376078,
+            "steps": 76,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.03273008612822546,
+            "steps": 78,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.0667584169336281,
+            "steps": 78,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.13059031743973784,
+            "steps": 78,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.2607172439718095,
+            "steps": 77,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.35554341601480555,
+            "steps": 76,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.45081345795282,
+            "steps": 73,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.48420991580499545,
+            "steps": 70,
+            "within_budget": true
+          }
+        ]
+      },
+      "C6": {
+        "informative": [
+          0.001,
+          1.0
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          0.001,
+          1.0
+        ],
+        "why_inf_lo": "reached end of ladder",
+        "why_inf_hi": "sensitivity 3.8% < 10%",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.03772903950553411,
+            "steps": 82,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.03179925211619586,
+            "steps": 82,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.023020467545354136,
+            "steps": 82,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.014109135151081264,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.006277936794222434,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.003257659896539285,
+            "steps": 88,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.0011146847083587984,
+            "steps": 92,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.00033628619911938877,
+            "steps": 96,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.1512924971002894,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.29215937733369746,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.4107697856070973,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.49105166867401173,
+            "steps": 82,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.559737683017685,
+            "steps": 80,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.5878443825021169,
+            "steps": 78,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.6626818841530047,
+            "steps": 76,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.7146889224279905,
+            "steps": 74,
+            "within_budget": true
+          }
+        ]
+      },
+      "C8": {
+        "informative": [
+          0.001,
+          1.0
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          0.001,
+          1.0
+        ],
+        "why_inf_lo": "reached end of ladder",
+        "why_inf_hi": "sensitivity 5.5% < 10%",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.055038658863935816,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.04712387751754898,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.031063156196947984,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.0191833962115101,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.008527974034920525,
+            "steps": 86,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.0044276750904676376,
+            "steps": 89,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.0015153032960433807,
+            "steps": 92,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.00045828374698255223,
+            "steps": 97,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.18819539824366216,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 0.3385547806134849,
+            "steps": 85,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 0.4728577169522076,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 0.5796289839070669,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 0.674866944894951,
+            "steps": 81,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 0.7105418556866987,
+            "steps": 80,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 0.7997822056542918,
+            "steps": 78,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 0.8341692949309005,
+            "steps": 76,
+            "within_budget": true
+          }
+        ]
+      }
+    },
+    "x2": {
+      "C6": {
+        "informative": [
+          1.0,
+          1000
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          1.0,
+          1000
+        ],
+        "why_inf_lo": "sensitivity 0.0% < 10%",
+        "why_inf_hi": "sensitivity 0.1% < 10%",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.0010683501301408486,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.0026725816929371914,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.005350156052272041,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.01071087375609536,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.02673717248836316,
+            "steps": 82,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.052759687634670566,
+            "steps": 82,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.14140716703183742,
+            "steps": 82,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.3024841168237448,
+            "steps": 82,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.0001335487048045516,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 5.339626473028724e-05,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 2.6697073417845488e-05,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 1.3348271910713434e-05,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 5.339245575281057e-06,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 2.6696113622659033e-06,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 8.008813604527724e-07,
+            "steps": 83,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 2.6695983444581656e-07,
+            "steps": 83,
+            "within_budget": true
+          }
+        ]
+      },
+      "C8": {
+        "informative": [
+          1.0,
+          1000
+        ],
+        "solvable": [
+          0.001,
+          1000
+        ],
+        "usable": [
+          1.0,
+          1000
+        ],
+        "why_inf_lo": "sensitivity 0.0% < 10%",
+        "why_inf_hi": "sensitivity 0.1% < 10%",
+        "why_slv_lo": "reached end of ladder",
+        "why_slv_hi": "reached end of ladder",
+        "trace_up": [
+          {
+            "m": 2,
+            "sensitivity": 0.0012354316484481129,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 5,
+            "sensitivity": 0.003057045244894957,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 10,
+            "sensitivity": 0.006010877112846367,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 20,
+            "sensitivity": 0.011622961863569757,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 50,
+            "sensitivity": 0.027545285770263116,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 100,
+            "sensitivity": 0.05646830478610778,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 300,
+            "sensitivity": 0.16946390429180436,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 1000,
+            "sensitivity": 0.3864796719204507,
+            "steps": 83,
+            "within_budget": true
+          }
+        ],
+        "trace_dn": [
+          {
+            "m": 0.5,
+            "sensitivity": 0.00015538307998735573,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.2,
+            "sensitivity": 6.217941893618949e-05,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.1,
+            "sensitivity": 3.136188721586509e-05,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.05,
+            "sensitivity": 1.5548124898297767e-05,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.02,
+            "sensitivity": 6.219513261243798e-06,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.01,
+            "sensitivity": 3.1097969873941935e-06,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.003,
+            "sensitivity": 9.329485897053879e-07,
+            "steps": 84,
+            "within_budget": true
+          },
+          {
+            "m": 0.001,
+            "sensitivity": 3.1098792594446725e-07,
+            "steps": 84,
+            "within_budget": true
+          }
+        ]
+      }
+    }
+  },
+  "summary": {
+    "a1": {
+      "informative": [
+        1.0,
+        1000
+      ],
+      "solvable": [
+        0.001,
+        300
+      ],
+      "usable": [
+        1.0,
+        300
+      ],
+      "collapsed": false,
+      "collapse_cause": "n/a",
+      "binding_usable_lower": [
+        "C4_NoFB"
+      ],
+      "binding_usable_upper": [
+        "C8"
+      ]
+    },
+    "a2": {
+      "informative": [
+        0.001,
+        1000
+      ],
+      "solvable": [
+        0.001,
+        1000
+      ],
+      "usable": [
+        0.001,
+        1000
+      ],
+      "collapsed": false,
+      "collapse_cause": "n/a",
+      "binding_usable_lower": [
+        "C4_NoFB",
+        "C6",
+        "C8"
+      ],
+      "binding_usable_upper": [
+        "C4_NoFB",
+        "C6",
+        "C8"
+      ]
+    },
+    "b3": {
+      "informative": [
+        1.0,
+        1000
+      ],
+      "solvable": [
+        0.001,
+        1000
+      ],
+      "usable": [
+        1.0,
+        1000
+      ],
+      "collapsed": false,
+      "collapse_cause": "n/a",
+      "binding_usable_lower": [
+        "C4_NoFB",
+        "C6",
+        "C8"
+      ],
+      "binding_usable_upper": [
+        "C4_NoFB",
+        "C6",
+        "C8"
+      ]
+    },
+    "c1": {
+      "informative": [
+        0.001,
+        1.0
+      ],
+      "solvable": [
+        0.001,
+        1000
+      ],
+      "usable": [
+        0.001,
+        1.0
+      ],
+      "collapsed": false,
+      "collapse_cause": "n/a",
+      "binding_usable_lower": [
+        "C4_NoFB",
+        "C6",
+        "C8"
+      ],
+      "binding_usable_upper": [
+        "C4_NoFB"
+      ]
+    },
+    "d1": {
+      "informative": [
+        0.001,
+        100
+      ],
+      "solvable": [
+        0.001,
+        1000
+      ],
+      "usable": [
+        0.001,
+        100
+      ],
+      "collapsed": false,
+      "collapse_cause": "n/a",
+      "binding_usable_lower": [
+        "C4_NoFB",
+        "C6",
+        "C8"
+      ],
+      "binding_usable_upper": [
+        "C4_NoFB"
+      ]
+    },
+    "b1": {
+      "informative": [
+        0.001,
+        1.0
+      ],
+      "solvable": [
+        0.001,
+        1000
+      ],
+      "usable": [
+        0.001,
+        1.0
+      ],
+      "collapsed": false,
+      "collapse_cause": "n/a",
+      "binding_usable_lower": [
+        "C4_NoFB",
+        "C6",
+        "C8"
+      ],
+      "binding_usable_upper": [
+        "C4_NoFB",
+        "C6",
+        "C8"
+      ]
+    },
+    "x2": {
+      "informative": [
+        1.0,
+        1000
+      ],
+      "solvable": [
+        0.001,
+        1000
+      ],
+      "usable": [
+        1.0,
+        1000
+      ],
+      "collapsed": false,
+      "collapse_cause": "n/a",
+      "binding_usable_lower": [
+        "C6",
+        "C8"
+      ],
+      "binding_usable_upper": [
+        "C6",
+        "C8"
+      ]
+    }
+  }
+}

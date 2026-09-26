@@ -1,0 +1,330 @@
+{
+  "per_system": {
+    "a3": {
+      "C4_NoFB": {
+        "lower": 0.2,
+        "upper": 1000,
+        "reason_lo": "sensitivity 7.7% < 10% noise at m=0.1",
+        "reason_hi": "reached end of ladder"
+      },
+      "C6": {
+        "lower": 0.2,
+        "upper": 1000,
+        "reason_lo": "sensitivity 8.4% < 10% noise at m=0.1",
+        "reason_hi": "reached end of ladder"
+      },
+      "C8": {
+        "lower": 0.2,
+        "upper": 1000,
+        "reason_lo": "sensitivity 8.1% < 10% noise at m=0.1",
+        "reason_hi": "reached end of ladder"
+      },
+      "C10": {
+        "lower": 0.2,
+        "upper": 1000,
+        "reason_lo": "sensitivity 8.1% < 10% noise at m=0.1",
+        "reason_hi": "reached end of ladder"
+      },
+      "C12": {
+        "lower": 0.2,
+        "upper": 1000,
+        "reason_lo": "sensitivity 8.5% < 10% noise at m=0.1",
+        "reason_hi": "reached end of ladder"
+      },
+      "C12+unsat": {
+        "lower": 0.2,
+        "upper": 1000,
+        "reason_lo": "sensitivity 8.4% < 10% noise at m=0.1",
+        "reason_hi": "reached end of ladder"
+      },
+      "C14": {
+        "lower": 0.1,
+        "upper": 1000,
+        "reason_lo": "sensitivity 6.0% < 10% noise at m=0.05",
+        "reason_hi": "reached end of ladder"
+      },
+      "C14+unsat": {
+        "lower": 0.1,
+        "upper": 1000,
+        "reason_lo": "sensitivity 6.3% < 10% noise at m=0.05",
+        "reason_hi": "reached end of ladder"
+      },
+      "C16": {
+        "lower": 0.1,
+        "upper": 1000,
+        "reason_lo": "sensitivity 6.2% < 10% noise at m=0.05",
+        "reason_hi": "reached end of ladder"
+      },
+      "C16+unsat": {
+        "lower": 0.1,
+        "upper": 1000,
+        "reason_lo": "sensitivity 6.7% < 10% noise at m=0.05",
+        "reason_hi": "reached end of ladder"
+      },
+      "C18": {
+        "lower": 0.1,
+        "upper": 1000,
+        "reason_lo": "sensitivity 6.7% < 10% noise at m=0.05",
+        "reason_hi": "reached end of ladder"
+      },
+      "C18+unsat": {
+        "lower": 0.1,
+        "upper": 1000,
+        "reason_lo": "sensitivity 6.6% < 10% noise at m=0.05",
+        "reason_hi": "reached end of ladder"
+      },
+      "C20": {
+        "lower": 0.1,
+        "upper": 1000,
+        "reason_lo": "sensitivity 7.0% < 10% noise at m=0.05",
+        "reason_hi": "reached end of ladder"
+      },
+      "C20+unsat": {
+        "lower": 0.1,
+        "upper": 1000,
+        "reason_lo": "sensitivity 7.0% < 10% noise at m=0.05",
+        "reason_hi": "reached end of ladder"
+      }
+    },
+    "c3": {
+      "C4_NoFB": {
+        "lower": 0.001,
+        "upper": 10,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "sensitivity 7.3% < 10% noise at m=20"
+      },
+      "C6": {
+        "lower": 0.001,
+        "upper": 10,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "sensitivity 9.2% < 10% noise at m=20"
+      },
+      "C8": {
+        "lower": 0.001,
+        "upper": 10,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "sensitivity 9.1% < 10% noise at m=20"
+      },
+      "C10": {
+        "lower": 0.001,
+        "upper": 50,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "sensitivity 5.9% < 10% noise at m=100"
+      },
+      "C12": {
+        "lower": 0.001,
+        "upper": 20,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "sensitivity 8.7% < 10% noise at m=50"
+      },
+      "C12+unsat": {
+        "lower": 0.001,
+        "upper": 20,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "sensitivity 9.8% < 10% noise at m=50"
+      },
+      "C14": {
+        "lower": 0.001,
+        "upper": 20,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "sensitivity 8.3% < 10% noise at m=50"
+      },
+      "C14+unsat": {
+        "lower": 0.001,
+        "upper": 20,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "sensitivity 8.1% < 10% noise at m=50"
+      },
+      "C16": {
+        "lower": 0.001,
+        "upper": 20,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "sensitivity 8.2% < 10% noise at m=50"
+      },
+      "C16+unsat": {
+        "lower": 0.001,
+        "upper": 20,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "sensitivity 8.4% < 10% noise at m=50"
+      },
+      "C18": {
+        "lower": 0.001,
+        "upper": 20,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "sensitivity 8.1% < 10% noise at m=50"
+      },
+      "C18+unsat": {
+        "lower": 0.001,
+        "upper": 20,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "sensitivity 7.7% < 10% noise at m=50"
+      },
+      "C20": {
+        "lower": 0.001,
+        "upper": 20,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "sensitivity 8.3% < 10% noise at m=50"
+      },
+      "C20+unsat": {
+        "lower": 0.001,
+        "upper": 20,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "sensitivity 7.9% < 10% noise at m=50"
+      }
+    },
+    "a2": {
+      "C4_NoFB": {
+        "lower": 1.0,
+        "upper": 1000,
+        "reason_lo": "sensitivity 4.7% < 10% noise at m=0.5",
+        "reason_hi": "reached end of ladder"
+      },
+      "C6": {
+        "lower": 0.2,
+        "upper": 1000,
+        "reason_lo": "sensitivity 6.3% < 10% noise at m=0.1",
+        "reason_hi": "reached end of ladder"
+      },
+      "C8": {
+        "lower": 0.1,
+        "upper": 100,
+        "reason_lo": "sensitivity 8.3% < 10% noise at m=0.05",
+        "reason_hi": "step cap blown at m=300"
+      },
+      "C10": {
+        "lower": 0.1,
+        "upper": 20,
+        "reason_lo": "sensitivity 8.2% < 10% noise at m=0.05",
+        "reason_hi": "step cap blown at m=50"
+      },
+      "C12": {
+        "lower": 1.0,
+        "upper": 2,
+        "reason_lo": "step cap blown at m=0.5",
+        "reason_hi": "step cap blown at probe m=4"
+      },
+      "C12+unsat": {
+        "lower": 1.0,
+        "upper": 5,
+        "reason_lo": "step cap blown at m=0.5",
+        "reason_hi": "step cap blown at probe m=10"
+      },
+      "C14": {
+        "lower": 0.001,
+        "upper": 2,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "step cap blown at m=5"
+      },
+      "C14+unsat": {
+        "lower": 0.001,
+        "upper": 1.0,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "step cap blown at m=2"
+      },
+      "C16": {
+        "lower": 0.001,
+        "upper": 10,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "step cap blown at probe m=20"
+      },
+      "C16+unsat": {
+        "lower": 0.001,
+        "upper": 1.0,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "step cap blown at m=2"
+      },
+      "C18": {
+        "lower": 0.001,
+        "upper": 5,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "step cap blown at probe m=10"
+      },
+      "C18+unsat": {
+        "lower": 0.001,
+        "upper": 10,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "step cap blown at probe m=20"
+      },
+      "C20": {
+        "lower": 0.001,
+        "upper": 5,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "step cap blown at probe m=10"
+      },
+      "C20+unsat": {
+        "lower": 0.001,
+        "upper": 5,
+        "reason_lo": "reached end of ladder",
+        "reason_hi": "step cap blown at probe m=10"
+      }
+    }
+  },
+  "summary": {
+    "a3": {
+      "lower": 0.2,
+      "upper": 1000,
+      "binding_lower": [
+        "C4_NoFB",
+        "C6",
+        "C8",
+        "C10",
+        "C12",
+        "C12+unsat"
+      ],
+      "binding_upper": [
+        "C4_NoFB",
+        "C6",
+        "C8",
+        "C10",
+        "C12",
+        "C12+unsat",
+        "C14",
+        "C14+unsat",
+        "C16",
+        "C16+unsat",
+        "C18",
+        "C18+unsat",
+        "C20",
+        "C20+unsat"
+      ]
+    },
+    "c3": {
+      "lower": 0.001,
+      "upper": 10,
+      "binding_lower": [
+        "C4_NoFB",
+        "C6",
+        "C8",
+        "C10",
+        "C12",
+        "C12+unsat",
+        "C14",
+        "C14+unsat",
+        "C16",
+        "C16+unsat",
+        "C18",
+        "C18+unsat",
+        "C20",
+        "C20+unsat"
+      ],
+      "binding_upper": [
+        "C4_NoFB",
+        "C6",
+        "C8"
+      ]
+    },
+    "a2": {
+      "lower": 1.0,
+      "upper": 1.0,
+      "binding_lower": [
+        "C4_NoFB",
+        "C12",
+        "C12+unsat"
+      ],
+      "binding_upper": [
+        "C14+unsat",
+        "C16+unsat"
+      ]
+    }
+  }
+}

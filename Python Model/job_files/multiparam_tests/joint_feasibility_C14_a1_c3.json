@@ -1,0 +1,23 @@
+{
+  "system": "C14",
+  "params": [
+    "a1",
+    "c3"
+  ],
+  "bounds": [
+    [
+      0.1,
+      10.0
+    ],
+    [
+      0.1,
+      10.0
+    ]
+  ],
+  "n": 200,
+  "n_fail": 0,
+  "frac_fail": 0.0,
+  "threshold": 0.1,
+  "passed": true,
+  "fail_examples": []
+}
