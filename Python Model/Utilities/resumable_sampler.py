@@ -180,7 +180,7 @@ class SamplerSpec:
 # arviz_stats.ecdf_utils.ecdf_pit, which measures ~1.88 sd half-width -- roughly a
 # POINTWISE 92% band, not a band that is simultaneous over eval points and chains.
 # Measured against perfectly-mixed iid chains it fires on 100% of replicates, so
-# "a chain left the shaded band" in rank_plot.png is NOT on its own evidence of a
+# "a chain left the shaded band" in chain_mixing.png is NOT on its own evidence of a
 # mixing problem. This module therefore calibrates its own critical value by direct
 # simulation of the null (3.41 sd for 12 chains x 150 draws, ~5% false-alarm rate),
 # which is what makes a zero-tolerance pass/fail defensible as a stopping rule.
@@ -980,6 +980,7 @@ def prepare_from_pymc(
     random_seed: int = 0,
     jitter: bool = True,
     config_signature: str | None = None,
+    initvals: dict | None = None,
 ) -> PyMCBridge:
     """Build a :class:`PyMCBridge` from a PyMC model.
 
@@ -988,6 +989,10 @@ def prepare_from_pymc(
     own blackjax/numpyro paths use -- only the sampling loop is replaced. Works
     with the custom ODE ``SolOp`` because it registers a ``jax_funcify`` handler
     (same path as nutpie backend="jax").
+
+    ``initvals`` ({free RV name: value on its natural scale}) moves the chains' starting
+    point off PyMC's default (each prior's mean); the +/-1 jitter, in the unconstrained
+    space, is then applied around it.
     """
     import hashlib
 
@@ -1003,7 +1008,7 @@ def prepare_from_pymc(
     initial_points = _get_batched_jittered_initial_points(
         model=model,
         chains=n_chains,
-        initvals=None,
+        initvals=initvals,
         random_seed=random_seed,
         logp_fn=logdensity_fn,
         jitter=jitter,

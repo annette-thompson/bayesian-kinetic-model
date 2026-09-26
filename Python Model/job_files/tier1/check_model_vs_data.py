@@ -12,9 +12,9 @@ data's true scaling values, and reports three things per dataset:
                   columns describe the noise that was actually drawn (few points per dataset,
                   so expect scatter).
   logp / grad     (--grad) log posterior and its gradient at the sampler's un-jittered
-                  starting point (PyMC's initial point, i.e. the prior mean -- not the truth),
-                  through the full PyMC/JAX path. A non-finite gradient is a run that cannot
-                  start.
+                  starting point -- the config's posterior_sampling.initial_values if set, else
+                  PyMC's initial point (each prior's mean, not the truth) -- through the full
+                  PyMC/JAX path. A non-finite gradient is a run that cannot start.
 
 The truth is taken from the config's `tier1_truth` block and translated into the model's own
 groups: a split group (c3s, c3l) inherits its parent's value when the data were generated
@@ -126,7 +126,8 @@ def check(run, grad):
     if grad:
         import resumable_sampler as rs
         bundle = ir._build_model_bundle(ir.import_solver_params(cfg_path))
-        bridge = rs.prepare_from_pymc(bundle.pm_model, n_chains=1, jitter=False)
+        init = json.loads(Path(cfg_path).read_text()).get("posterior_sampling", {}).get("initial_values")
+        bridge = rs.prepare_from_pymc(bundle.pm_model, n_chains=1, jitter=False, initvals=init)
         x0 = [jnp.asarray(p[0]) for p in bridge.initial_positions]
         lp, g = jax.value_and_grad(lambda xs: bridge.logdensity_fn(xs))(x0)
         gflat = np.concatenate([np.ravel(np.asarray(v)) for v in g])

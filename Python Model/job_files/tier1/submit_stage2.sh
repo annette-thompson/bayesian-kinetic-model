@@ -1,10 +1,12 @@
 #!/bin/bash -l
-# Stage 2 of Notes/tier1_experiment_plan.md section 3: R1, R3, R5, R8 and the R4 pilot, 23 runs,
-# each one tier1.sbatch job queued on Blanca and Alpine through gpu_submit.sh.
+# Stage 2 of Notes/tier1_experiment_plan.md section 3 -- R1, R3, R5, R8 and the R4 pilot, 23
+# runs -- plus R7's two runs (added 2026-09-26; no gate holds them), each one tier1.sbatch job
+# queued on Blanca and Alpine through gpu_submit.sh. The default order puts the runs the
+# figures most need first: R1, the R4 pilot, R5, R3, R8, R7.
 #
 #   tier1/submit_stage2.sh --dry_run          # what would be submitted, and why anything is skipped
 #   tier1/submit_stage2.sh                    # submit all of it
-#   tier1/submit_stage2.sh --only R1,R3       # submit some of the groups
+#   tier1/submit_stage2.sh --only R1,R3       # submit some of the groups, in that order
 #
 # Guard: the plan holds Stage 2 until R0 has been inspected, so this refuses to submit until R0
 # ("Tier1 C8 - a1c3") has finalized (posterior_samples_pm.nc exists). --force skips that check.
@@ -21,9 +23,12 @@ declare -A GROUP
 GROUP[R1]="Tier1 C14+unsat - a1c3"
 GROUP[R3]="Tier1 C8 - d1d2|Tier1 C8 - d1d2 - dense|Tier1 C14+unsat - d1d2"
 GROUP[R5]="Tier1 C8_noise5 - a1c3|Tier1 C8_noise20 - a1c3|Tier1 C8_noise40 - a1c3|Tier1 C8 - a1c3 - prior+1sd|Tier1 C8 - a1c3 - prior+2sd|Tier1 C8 - a1c3 - prior+3sd|Tier1 C8 - a1c3 - prior+4sd"
+# R5's paired series: the same prior shifts, with the chains started at the ME1 values.
+GROUP[R5]+="|Tier1 C8 - a1c3 - prior+1sd - init1|Tier1 C8 - a1c3 - prior+2sd - init1|Tier1 C8 - a1c3 - prior+3sd - init1|Tier1 C8 - a1c3 - prior+4sd - init1"
 GROUP[R8]="Tier1 C8 - a1c3 - ta0.95|Tier1 C8 - a1c3 - rtol1e-5"
 GROUP[R4]="$(for i in $(seq 0 9); do printf 'Tier1 C8_sbc%03d - a1c3|' "$i"; done)"
-ORDER="R1 R3 R5 R8 R4"
+GROUP[R7]="Tier1 C14+unsat - a1c3 - profile|Tier1 C14+unsat - a1c3 - rates"
+ORDER="R1 R4 R5 R3 R8 R7"
 
 DRY=0; FORCE=0; ONLY=""
 while [[ $# -gt 0 ]]; do

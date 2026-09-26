@@ -540,6 +540,9 @@ def run_bayesian_inference(
     # Sampling-phase-only compute ceiling (see SamplerSpec.max_sampling_hours).
     max_sampling_hours = posterior_config.get("max_sampling_hours", None)
     max_sampling_hours = float(max_sampling_hours) if max_sampling_hours is not None else None
+    # Where the chains start, {free param: natural-scale value}; absent means PyMC's default,
+    # each prior's mean. Part of the resume signature, since it changes where chains go.
+    initial_values = posterior_config.get("initial_values")
 
     # Fast no-op if a prior job already finished this run (SLURM chains overshoot).
     results_file = savedir_path / imported.posterior_samples_file
@@ -607,9 +610,15 @@ def run_bayesian_inference(
         _print_kv("max_sampling_hours (sampling phase)", max_sampling_hours)
     if extra_draws:
         _print_kv("extra_draws requested", extra_draws)
+    if initial_values:
+        unknown = sorted(set(initial_values) - set(bundle.free_params))
+        if unknown:
+            raise ValueError(f"initial_values names {unknown}, which are not free parameters {bundle.free_params}")
+        _print_kv("initial values (then jittered)", initial_values)
 
     bridge = rs.prepare_from_pymc(
-        bundle.pm_model, n_chains=n_chains, random_seed=seed, config_signature=config_signature
+        bundle.pm_model, n_chains=n_chains, random_seed=seed, config_signature=config_signature,
+        initvals=initial_values,
     )
     spec = rs.SamplerSpec(
         n_tune=n_tune,
