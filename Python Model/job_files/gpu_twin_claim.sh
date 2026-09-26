@@ -2,9 +2,9 @@
 #
 #   source /projects/anth4580/Bayesian/job_files/gpu_twin_claim.sh || exit 0
 #
-# The first twin to start claims the work (an atomic mkdir on the shared /projects
-# filesystem) and cancels the twin still queued on the other cluster. A twin that
-# starts second finds the claim taken and returns 1, so its script exits without
+# The first copy to start claims the work (an atomic mkdir on the shared /projects
+# filesystem) and cancels every other copy still queued, on either cluster. A copy that
+# starts later finds the claim taken and returns 1, so its script exits without
 # running. A requeued job (Blanca preemption keeps the job ID) recognises its own
 # claim and carries on. A job not submitted as a twin (no twin: comment) is untouched.
 # Also exports GPU_MODEL for resumable_sampler's A100-equivalent time accounting.
@@ -29,7 +29,7 @@ if [[ -n "$_gtc_tok" ]]; then
     fi
     echo "==> twin claim: requeued job, still holds the claim"
   fi
-  # gpu_submit.sh writes the pair file right after its second sbatch; wait for it
+  # gpu_submit.sh writes the jobs file right after its last sbatch; wait for it
   # in case this job started within seconds of submission.
   for _gtc_i in $(seq 1 24); do
     [[ -s "$_gtc_claims/$_gtc_tok.jobs" ]] && break; sleep 5

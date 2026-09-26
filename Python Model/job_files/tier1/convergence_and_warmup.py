@@ -28,7 +28,20 @@ so that every run sampled the same way.
      early r-hat  r-hat over all sampling draws vs r-hat with the first block dropped; a
                   large improvement means the first block was still transient
 
-Usage: python convergence_and_warmup.py [run-dir-name ...]   (default: all)
+Usage:
+  python convergence_and_warmup.py [run-dir-name ...]            chain-count runs (default: all), JSON
+  python convergence_and_warmup.py --tier1 "Tier1 C14+unsat - a1c3a2" --summary
+                                                                  a Tier-1 run, e.g. R2's warmup check
+
+--tier1 reads Results/Tier1/ (on the cluster, or this checkout) and works mid-run: it needs
+only the checkpoint, and the drift test needs two blocks of sampling draws. The stopping-rule
+settings come from each run's own solver_params.json when it has them. --summary prints the
+plan's restart test instead of JSON (Notes/tier1_experiment_plan.md, Stage 3: restart with 600
+warmup steps if acceptance is well below 0.8 or the first block still drifts):
+
+  RESTART if  acceptance over the last 50 warmup steps < 0.7, or
+              |first-block drift| > 0.5 posterior sd, or
+              r-hat improves by > 0.01 when the first block is dropped
 """
 import json
 import re
@@ -37,7 +50,13 @@ from pathlib import Path
 
 import numpy as np
 
-BASE = Path("/projects/anth4580/Bayesian/Results/Chain Count Test")
+_CLUSTER = Path("/projects/anth4580/Bayesian")
+ROOT = _CLUSTER if _CLUSTER.is_dir() else Path(__file__).resolve().parent.parent.parent
+BASE = ROOT / "Results" / "Chain Count Test"
+TIER1 = ROOT / "Results" / "Tier1"
+ACCEPT_LOW = 0.7         # "well below" the 0.8 target
+DRIFT_MAX_SD = 0.5
+RHAT_DROP_MAX = 0.01
 BLOCK = 100          # matches rhat_check_every in the configs
 RHAT_MAX = 1.01
 PER_SPLIT_ESS = 50   # ess_per_split_chain; x2 splits x chains gives the bar
@@ -74,7 +93,8 @@ def compute_seconds(points):
 def _rhat_ess(arr):
     import arviz as az
     d = az.convert_to_dataset({"x": arr[:, :, None]})
-    return (float(az.rhat(d, method="rank").x.values), float(az.ess(d, method="bulk").x.values))
+    return (float(np.asarray(az.rhat(d, method="rank").x.values).item()),
+            float(np.asarray(az.ess(d, method="bulk").x.values).item()))
 
 
 def analyse(run_dir):
@@ -92,7 +112,13 @@ def analyse(run_dir):
         s = next((c for d, c in zip(samp_steps, samp_cum) if d >= draw), None)
         return float(s * f / 3600) if s is not None else None
 
-    ess_min = 2.0 * PER_SPLIT_ESS * int(meta["n_chains"])
+    cfg_path = run_dir / "solver_params.json"
+    ps = json.loads(cfg_path.read_text()).get("posterior_sampling", {}) if cfg_path.exists() else {}
+    per_split = ps.get("ess_per_split_chain", PER_SPLIT_ESS)
+    consecutive = ps.get("convergence_consecutive_checks", CONSECUTIVE)
+    post_blocks = ps.get("post_convergence_checks", POST_BLOCKS)
+    block = ps.get("rhat_check_every", BLOCK)
+    ess_min = 2.0 * per_split * int(meta["n_chains"])
     out = {"run": run_dir.name, "chains": meta["n_chains"], "tune": meta["n_tune"],
            "sampling_done": meta["sampling_done"], "gpu": meta.get("gpu"),
            "ess_threshold": ess_min, "warmup_hours": None, "params": {}}
@@ -110,13 +136,13 @@ def analyse(run_dir):
     # --- 1. when the production rule would have fired ---
     n_draws = min((v.shape[1] for v in draws.values()), default=0)
     checks, streak, fired_at = [], 0, None
-    for k in range(BLOCK, n_draws + 1, BLOCK):
+    for k in range(block, n_draws + 1, block):
         per = [_rhat_ess(v[:, :k]) for v in draws.values()]
         worst, worst_ess = max(p[0] for p in per), min(p[1] for p in per)
         checks.append({"draws": k, "rhat_max": round(worst, 4), "ess_bulk_min": round(worst_ess, 1)})
         streak = streak + 1 if (worst <= RHAT_MAX and worst_ess >= ess_min) else 0
-        if streak >= CONSECUTIVE and fired_at is None:
-            fired_at = k + POST_BLOCKS * BLOCK          # one further block, as in production
+        if streak >= consecutive and fired_at is None:
+            fired_at = k + post_blocks * block          # the further blocks, as in production
     out["rhat_checks"] = checks
     converged = fired_at is not None and fired_at <= n_draws
     out["converged"] = bool(converged)
@@ -157,10 +183,10 @@ def analyse(run_dir):
     if "warmup_stats" in z and "acceptance_rate" in z["warmup_stats"]:
         acc = np.asarray(z["warmup_stats"]["acceptance_rate"][:])
         warm["acceptance_last50"] = float(np.mean(acc[:, -50:]))
-    if draws and n_draws >= 2 * BLOCK:
+    if draws and n_draws >= 2 * block:
         drift = {}
         for n, v in draws.items():
-            first, rest = v[:, :BLOCK], v[:, BLOCK:]
+            first, rest = v[:, :block], v[:, block:]
             sd = rest.std()
             drift[n] = {"first_block_mean_minus_rest_in_sd":
                         float((first.mean() - rest.mean()) / sd) if sd else None,
@@ -171,10 +197,60 @@ def analyse(run_dir):
     return out
 
 
+def verdict(r):
+    """The plan's restart test, as (RESTART | OK | TOO EARLY, reasons)."""
+    w = r.get("warmup_check", {})
+    reasons = []
+    acc = w.get("acceptance_last50")
+    if acc is not None and acc < ACCEPT_LOW:
+        reasons.append(f"acceptance {acc:.2f} over the last 50 warmup steps")
+    for n, d in (w.get("drift") or {}).items():
+        dr = d.get("first_block_mean_minus_rest_in_sd")
+        if dr is not None and abs(dr) > DRIFT_MAX_SD:
+            reasons.append(f"{n} first block drifts {dr:+.2f} sd")
+        if d["rhat_all"] - d["rhat_dropping_first_block"] > RHAT_DROP_MAX:
+            reasons.append(f"{n} r-hat {d['rhat_all']:.3f} -> {d['rhat_dropping_first_block']:.3f} without the first block")
+    if reasons:
+        return "RESTART", reasons
+    if not w.get("drift"):
+        return "TOO EARLY", ["needs two blocks of sampling draws for the drift test"]
+    return "OK", []
+
+
+def summary(r):
+    if "error" in r:
+        print(f"{r['run']}: {r['error']}")
+        return
+    w = r.get("warmup_check", {})
+    state, reasons = verdict(r)
+    print(f"{r['run']}: {state}" + (" -- " + "; ".join(reasons) if reasons else ""))
+    print(f"  chains {r['chains']}, tune {r['tune']}, sampling draws so far {r['sampling_done']}, "
+          f"warmup {r['warmup_hours'] or 0:.2f} A100-h")
+    if "acceptance_last50" in w:
+        print(f"  acceptance over the last 50 warmup steps {w['acceptance_last50']:.3f}")
+    if "final_step_size_by_chain" in w:
+        # Instantaneous dual-averaging values, which swing during adaptation; sampling uses the
+        # averaged step size, so a spread here is not itself a problem.
+        print(f"  last warmup step size by chain (instantaneous) {[round(x, 3) for x in w['final_step_size_by_chain']]}"
+              f" (spread {w['step_size_spread_across_chains']:.2f}x)")
+    for n, d in (w.get("drift") or {}).items():
+        print(f"  {n}: first-block drift {d['first_block_mean_minus_rest_in_sd']:+.2f} sd, r-hat "
+              f"{d['rhat_all']:.4f} -> {d['rhat_dropping_first_block']:.4f} without it")
+    if r.get("converged"):
+        print(f"  the stopping rule fires at draw {r['converged_at_draw']}")
+    elif r.get("rhat_checks"):
+        c = r["rhat_checks"][-1]
+        print(f"  latest check at {c['draws']} draws: r-hat {c['rhat_max']}, ESS {c['ess_bulk_min']} "
+              f"(blocked by {r.get('blocked_by')})")
+
+
 def main():
-    wanted = sys.argv[1:]
-    runs = [BASE / w for w in wanted] if wanted else sorted(
-        (d for d in BASE.iterdir() if (d / "checkpoint" / "checkpoint_meta.json").exists()),
+    args = sys.argv[1:]
+    as_summary = "--summary" in args
+    base = TIER1 if "--tier1" in args else BASE
+    wanted = [a for a in args if a not in ("--summary", "--tier1")]
+    runs = [base / w for w in wanted] if wanted else sorted(
+        (d for d in base.iterdir() if (d / "checkpoint" / "checkpoint_meta.json").exists()),
         key=lambda d: int(re.search(r"_(\d+)chains", d.name).group(1)) if re.search(r"_(\d+)chains", d.name) else 0)
     out = {}
     for r in runs:
@@ -182,6 +258,10 @@ def main():
             out[r.name] = analyse(r)
         except Exception as e:
             out[r.name] = {"run": r.name, "error": f"{type(e).__name__}: {e}"}
+    if as_summary:
+        for r in out.values():
+            summary(r)
+        return
     json.dump(out, sys.stdout, indent=1)
     sys.stdout.write("\n")
 

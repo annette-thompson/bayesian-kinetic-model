@@ -1,20 +1,22 @@
 #!/bin/bash -l
-# Submit one GPU job to BOTH Blanca and Alpine; whichever starts first runs it.
+# Submit one GPU job to Blanca and Alpine at once; whichever copy starts first runs it.
+# Only cards at least as fast as an A100 in double precision, which is what the ODE solves
+# run in:
 #
-#   Blanca: preemptable, any FULL A100, V100 or H100 (the Intel H100 node -- the AMD
-#           H100 nodes are split into MIG slices, which a bare gpu:1 could land on).
-#   Alpine: aa100, a full 40 GB A100 (Alpine requires a GRES type on aa100 and
-#           substitutes a100-40gb when none is given; typed, the MIG node is excluded).
+#   Blanca: preemptable, a full A100 or H100 (the Intel H100 node -- the AMD H100 nodes are
+#           split into MIG slices, which a bare gpu:1 could land on). No V100 (0.67-0.75x).
+#   Alpine: three copies, one per card type: a full 40 GB A100 and a full 80 GB A100 on
+#           aa100, and a full H200 on ah200. Typed requests keep off the MIG slices; the
+#           gpu-normal QOS allows 6, 3 and 4 of them per user.
 #
-# The job script must source gpu_twin_claim.sh before doing any work: the first twin
-# to start claims the work and cancels the other; a twin that starts second exits.
+# The job script must source gpu_twin_claim.sh before doing any work: the first copy to
+# start claims the work and cancels the others; a copy that starts later exits.
 #
 # Time. --time is used as-is on both clusters: right for resumable segment jobs, whose
 # limit is a budget they checkpoint within. --a100_hours H is for work of a fixed size
 # measured on an A100: each cluster's limit becomes H / (slowest card it can land on),
-# using the measured speed factors in resumable_sampler.GPU_SPEED_VS_A100 -- Blanca
-# 0.67 (V100-SXM2), Alpine 1.00 (A100) -- so a job that lands on a V100 is not killed
-# short. Alpine's gpu-normal QOS caps at 24 h.
+# using the measured speed factors in resumable_sampler.GPU_SPEED_VS_A100 -- 1.00 (A100)
+# on both, now that V100s are excluded. Alpine's gpu-normal QOS caps at 24 h.
 #
 # Usage:
 #   gpu_submit.sh [--time HH:MM:SS | --a100_hours H] [--cpus N] [--mem M] [--name NAME]
@@ -25,7 +27,7 @@ set -uo pipefail
 type module >/dev/null 2>&1 || source /etc/profile >/dev/null 2>&1
 CLAIMS=/projects/anth4580/Bayesian/job_files/gpu_claims
 ALPINE_ACCOUNT=ucb634_asc2
-BLANCA_SLOWEST=0.67
+BLANCA_SLOWEST=1.00     # A100; with --a100_only too
 ALPINE_SLOWEST=1.00
 ALPINE_MAX_S=$((24 * 3600))
 
@@ -79,14 +81,17 @@ if [[ "${GPU_SUBMIT_PROFILE:-gpu}" == cpu_test ]]; then
   BLANCA=(--partition=blanca --qos=preemptable)
   ALPINE=(--partition=acpu --qos=cpu-normal --account="$ALPINE_ACCOUNT")
 else
-  # --a100_only: for timing comparisons that must not mix card types. Alpine's aa100 is
-  # already A100-only, so only the Blanca side changes.
+  # --a100_only: for timing comparisons that must not mix card types -- A100s only, and on
+  # Alpine only the 40 GB kind.
   if [[ $A100_ONLY -eq 1 ]]; then
     BLANCA=(--partition=blanca --qos=preemptable --gres=gpu:a100:1 --constraint=A100)
   else
-    BLANCA=(--partition=blanca --qos=preemptable --gres=gpu:1 --constraint="A100|V100|(h100&xeon)")
+    BLANCA=(--partition=blanca --qos=preemptable --gres=gpu:1 --constraint="A100|(h100&xeon)")
   fi
-  ALPINE=(--partition=aa100 --qos=gpu-normal --account="$ALPINE_ACCOUNT" --gres=gpu:a100-40gb:1)
+  ALPINE_BASE=(--qos=gpu-normal --account="$ALPINE_ACCOUNT")
+  ALPINE_A100_40=("${ALPINE_BASE[@]}" --partition=aa100 --gres=gpu:a100-40gb:1)
+  ALPINE_A100_80=("${ALPINE_BASE[@]}" --partition=aa100 --gres=gpu:a100_80gb:1)
+  ALPINE_H200=("${ALPINE_BASE[@]}" --partition=ah200 --gres=gpu:h200:1)
 fi
 
 # The job id is stdout's last line (--parsable); Alpine prints submission warnings on
@@ -110,7 +115,17 @@ if [[ "$WHERE" != alpine ]]; then
 fi
 if [[ "$WHERE" != blanca ]]; then
   _use_cluster alpine
-  _submit alpine "${COMMON[@]}" "${ALPINE[@]}" --time="$(_limit "$ALPINE_SLOWEST" "$ALPINE_MAX_S")" "$@"
+  if [[ "${GPU_SUBMIT_PROFILE:-gpu}" == cpu_test ]]; then
+    _submit alpine "${COMMON[@]}" "${ALPINE[@]}" --time="$(_limit "$ALPINE_SLOWEST" "$ALPINE_MAX_S")" "$@"
+  else
+    variants=(ALPINE_A100_40)
+    [[ $A100_ONLY -eq 1 ]] || variants+=(ALPINE_A100_80 ALPINE_H200)
+    for v in "${variants[@]}"; do
+      declare -n args="$v"
+      _submit alpine "${COMMON[@]}" "${args[@]}" --time="$(_limit "$ALPINE_SLOWEST" "$ALPINE_MAX_S")" "$@"
+      unset -n args
+    done
+  fi
 fi
 mv "$CLAIMS/$TOKEN.jobs.tmp" "$CLAIMS/$TOKEN.jobs"
 echo "$(date +%FT%T) $TOKEN $(tr '\n' ' ' < "$CLAIMS/$TOKEN.jobs")-- $*" >> "$CLAIMS/submissions.log"

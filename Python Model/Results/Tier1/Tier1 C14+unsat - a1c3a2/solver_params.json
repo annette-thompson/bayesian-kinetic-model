@@ -62,7 +62,7 @@
     "convergence_consecutive_checks": 2,
     "post_convergence_checks": 1,
     "checkpoint_every_steps": 5,
-    "max_total_hours": 24.0
+    "max_total_hours": null
   },
   "ODE_solver": {
     "solver_name": "Kvaerno5",

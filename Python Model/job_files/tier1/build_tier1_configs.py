@@ -114,7 +114,7 @@ def datasets_for(data_name):
 
 def build(system, params, reactions=None, data_name=None, tag=None, dense=False,
           target_accept=0.8, rtol=None, prior_shift_sd=0.0, chains=4, tune=300,
-          draws=5000, seed=42, max_total_hours=24.0, datasets=None):
+          draws=5000, seed=42, max_total_hours=24.0, datasets=None, init_nominal=False):
     reactions = reactions or system
     data_name = data_name or f"Chain_{reactions}"
     cfg = base_config(system)
@@ -152,6 +152,12 @@ def build(system, params, reactions=None, data_name=None, tag=None, dense=False,
         "convergence_consecutive_checks": 2, "post_convergence_checks": 1,
         "checkpoint_every_steps": 5, "max_total_hours": max_total_hours,
     }
+    if init_nominal:
+        # Start the chains at the ME1 (nominal) values instead of PyMC's default, each prior's
+        # mean. Used for R5's paired "init1" series: with the start taken out of the question,
+        # those runs measure only how far a misplaced prior pulls the posterior, which tells a
+        # failure of the default-start series apart (search vs posterior). (2026-09-26.)
+        cfg["posterior_sampling"]["initial_values"] = {p: cfg["scaling_groups"][p] for p in params}
     cfg["datasets"] = datasets_for(data_name)
     if datasets:                      # a subset, by kind: timeseries, profile, rates
         keep = [d for d in cfg["datasets"] if d["name"].split("_", 1)[0] in datasets]
@@ -182,17 +188,19 @@ def plan_runs():
     runs = [
         ("R0", dict(system="C8", params=["a1", "c3"])),
         ("R1", dict(system="C14+unsat", params=["a1", "c3"])),
-        ("R2", dict(system="C14+unsat", params=["a1", "c3", "a2"])),
+        # The three-parameter fits run without a compute cap: estimated at ~60 A100-h at R1's
+        # rate, past the 24 h runaway guard the rest keep (decided 2026-09-26).
+        ("R2", dict(system="C14+unsat", params=["a1", "c3", "a2"], max_total_hours=None)),
         ("R3", dict(system="C8", params=["d1", "d2"])),
         ("R3", dict(system="C8", params=["d1", "d2"], dense=True, tag="dense")),
         ("R3", dict(system="C14+unsat", params=["d1", "d2"])),
         # R6: split model on standard data; both models on off-grouping data. The grouped
         # model on standard data is R1.
         ("R6", dict(system="C14+unsat", reactions="C14+unsat+c3split", params=["a1", "c3s", "c3l"],
-                    data_name="Chain_C14+unsat")),
+                    data_name="Chain_C14+unsat", max_total_hours=None)),
         ("R6", dict(system="C14+unsat", params=["a1", "c3"], data_name="Chain_C14+unsat+c3split_c3l3")),
         ("R6", dict(system="C14+unsat", reactions="C14+unsat+c3split", params=["a1", "c3s", "c3l"],
-                    data_name="Chain_C14+unsat+c3split_c3l3")),
+                    data_name="Chain_C14+unsat+c3split_c3l3", max_total_hours=None)),
         # R7: two data-type cells sampled against the expected-information grid, on subsets of
         # the standard data. The full-data cell is R1.
         ("R7", dict(system="C14+unsat", params=["a1", "c3"], datasets=["profile"], tag="profile")),
@@ -203,8 +211,12 @@ def plan_runs():
     for pct in (5, 20, 40):
         runs.append(("R5", dict(system="C8", params=["a1", "c3"], data_name=f"Chain_C8_noise{pct}")))
     for k in (1, 2, 3, 4):
+        # Main series: PyMC's default start, the shifted prior's mean -- what someone with no idea
+        # where the answer is would get. Paired series: started at the ME1 values ("init1").
         runs.append(("R5", dict(system="C8", params=["a1", "c3"], prior_shift_sd=k,
                                 tag=f"prior+{k}sd")))
+        runs.append(("R5", dict(system="C8", params=["a1", "c3"], prior_shift_sd=k,
+                                tag=f"prior+{k}sd - init1", init_nominal=True)))
     return runs
 
 
@@ -221,12 +233,14 @@ def main():
     ap.add_argument("--target_accept", type=float, default=0.8)
     ap.add_argument("--rtol", type=float, default=None, help="override the system's ODE rtol")
     ap.add_argument("--prior_shift_sd", type=float, default=0.0)
+    ap.add_argument("--init_nominal", action="store_true",
+                    help="start the chains at the ME1 (nominal) values instead of each prior's mean")
     ap.add_argument("--chains", type=int, default=4)
     ap.add_argument("--tune", type=int, default=300)
     ap.add_argument("--draws", type=int, default=5000, help="ceiling; convergence ends the run first")
     ap.add_argument("--seed", type=int, default=42)
-    ap.add_argument("--max_total_hours", type=float, default=24.0,
-                    help="runaway guard in A100-equivalent hours")
+    ap.add_argument("--max_total_hours", type=lambda v: None if v.lower() == "none" else float(v), default=24.0,
+                    help="runaway guard in A100-equivalent hours; 'none' for no cap")
     ap.add_argument("--datasets", default=None,
                     help="comma-separated subset of timeseries,profile,rates (default all three)")
     ap.add_argument("--dry_run", action="store_true")
@@ -243,7 +257,8 @@ def main():
     run, cfg = build(a.system, [p.strip() for p in a.params.split(",")], a.reactions, a.data_name,
                      a.tag, a.dense, a.target_accept, a.rtol, a.prior_shift_sd, a.chains, a.tune,
                      a.draws, a.seed, a.max_total_hours,
-                     [d.strip() for d in a.datasets.split(",")] if a.datasets else None)
+                     [d.strip() for d in a.datasets.split(",")] if a.datasets else None,
+                     a.init_nominal)
     write(run, cfg, a.dry_run)
 
 
