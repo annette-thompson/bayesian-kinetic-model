@@ -1,0 +1,18 @@
+{
+  "system": "C6",
+  "params": [
+    "a1"
+  ],
+  "bounds": [
+    [
+      0.1,
+      10.0
+    ]
+  ],
+  "n": 50,
+  "n_fail": 0,
+  "frac_fail": 0.0,
+  "threshold": 0.1,
+  "passed": true,
+  "fail_examples": []
+}

@@ -1,0 +1,461 @@
+{
+  "system": "C8",
+  "per_condition_steps": [
+    84,
+    62,
+    64,
+    66,
+    67,
+    69,
+    70,
+    71,
+    73,
+    73
+  ],
+  "cheapest_order": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    0
+  ],
+  "rows": [
+    {
+      "ncond": 2,
+      "t1": 50.0,
+      "ts": true,
+      "pick": "order",
+      "sec_per_grad": 1.043658177057902,
+      "total_steps": 135,
+      "n_saved": 3
+    },
+    {
+      "ncond": 2,
+      "t1": 50.0,
+      "ts": true,
+      "pick": "cheap",
+      "sec_per_grad": 0.8828214009602865,
+      "total_steps": 116,
+      "n_saved": 3
+    },
+    {
+      "ncond": 2,
+      "t1": 50.0,
+      "ts": false,
+      "pick": "order",
+      "sec_per_grad": 1.0469404061635335,
+      "total_steps": 135,
+      "n_saved": 1
+    },
+    {
+      "ncond": 2,
+      "t1": 50.0,
+      "ts": false,
+      "pick": "cheap",
+      "sec_per_grad": 0.8823897043863932,
+      "total_steps": 116,
+      "n_saved": 1
+    },
+    {
+      "ncond": 2,
+      "t1": 100.0,
+      "ts": true,
+      "pick": "order",
+      "sec_per_grad": 1.1044230461120605,
+      "total_steps": 142,
+      "n_saved": 6
+    },
+    {
+      "ncond": 2,
+      "t1": 100.0,
+      "ts": true,
+      "pick": "cheap",
+      "sec_per_grad": 0.930122454961141,
+      "total_steps": 122,
+      "n_saved": 6
+    },
+    {
+      "ncond": 2,
+      "t1": 100.0,
+      "ts": false,
+      "pick": "order",
+      "sec_per_grad": 1.0994904041290283,
+      "total_steps": 142,
+      "n_saved": 1
+    },
+    {
+      "ncond": 2,
+      "t1": 100.0,
+      "ts": false,
+      "pick": "cheap",
+      "sec_per_grad": 0.9273108641306559,
+      "total_steps": 122,
+      "n_saved": 1
+    },
+    {
+      "ncond": 2,
+      "t1": 150.0,
+      "ts": true,
+      "pick": "order",
+      "sec_per_grad": 1.1363105773925781,
+      "total_steps": 146,
+      "n_saved": 10
+    },
+    {
+      "ncond": 2,
+      "t1": 150.0,
+      "ts": true,
+      "pick": "cheap",
+      "sec_per_grad": 0.9588619073232015,
+      "total_steps": 126,
+      "n_saved": 10
+    },
+    {
+      "ncond": 2,
+      "t1": 150.0,
+      "ts": false,
+      "pick": "order",
+      "sec_per_grad": 1.1338404814402263,
+      "total_steps": 146,
+      "n_saved": 1
+    },
+    {
+      "ncond": 2,
+      "t1": 150.0,
+      "ts": false,
+      "pick": "cheap",
+      "sec_per_grad": 0.9598960081736246,
+      "total_steps": 126,
+      "n_saved": 1
+    },
+    {
+      "ncond": 4,
+      "t1": 50.0,
+      "ts": true,
+      "pick": "order",
+      "sec_per_grad": 1.9588833649953206,
+      "total_steps": 254,
+      "n_saved": 3
+    },
+    {
+      "ncond": 4,
+      "t1": 50.0,
+      "ts": true,
+      "pick": "cheap",
+      "sec_per_grad": 1.8030951023101807,
+      "total_steps": 237,
+      "n_saved": 3
+    },
+    {
+      "ncond": 4,
+      "t1": 50.0,
+      "ts": false,
+      "pick": "order",
+      "sec_per_grad": 1.9556485017140706,
+      "total_steps": 254,
+      "n_saved": 1
+    },
+    {
+      "ncond": 4,
+      "t1": 50.0,
+      "ts": false,
+      "pick": "cheap",
+      "sec_per_grad": 1.8004928429921467,
+      "total_steps": 237,
+      "n_saved": 1
+    },
+    {
+      "ncond": 4,
+      "t1": 100.0,
+      "ts": true,
+      "pick": "order",
+      "sec_per_grad": 2.0612056255340576,
+      "total_steps": 268,
+      "n_saved": 6
+    },
+    {
+      "ncond": 4,
+      "t1": 100.0,
+      "ts": true,
+      "pick": "cheap",
+      "sec_per_grad": 1.9150962829589844,
+      "total_steps": 251,
+      "n_saved": 6
+    },
+    {
+      "ncond": 4,
+      "t1": 100.0,
+      "ts": false,
+      "pick": "order",
+      "sec_per_grad": 2.0503693421681723,
+      "total_steps": 268,
+      "n_saved": 1
+    },
+    {
+      "ncond": 4,
+      "t1": 100.0,
+      "ts": false,
+      "pick": "cheap",
+      "sec_per_grad": 1.9091338316599529,
+      "total_steps": 251,
+      "n_saved": 1
+    },
+    {
+      "ncond": 4,
+      "t1": 150.0,
+      "ts": true,
+      "pick": "order",
+      "sec_per_grad": 2.129521369934082,
+      "total_steps": 276,
+      "n_saved": 10
+    },
+    {
+      "ncond": 4,
+      "t1": 150.0,
+      "ts": true,
+      "pick": "cheap",
+      "sec_per_grad": 1.9735682010650635,
+      "total_steps": 259,
+      "n_saved": 10
+    },
+    {
+      "ncond": 4,
+      "t1": 150.0,
+      "ts": false,
+      "pick": "order",
+      "sec_per_grad": 2.121316115061442,
+      "total_steps": 276,
+      "n_saved": 1
+    },
+    {
+      "ncond": 4,
+      "t1": 150.0,
+      "ts": false,
+      "pick": "cheap",
+      "sec_per_grad": 1.973394552866618,
+      "total_steps": 259,
+      "n_saved": 1
+    },
+    {
+      "ncond": 6,
+      "t1": 50.0,
+      "ts": true,
+      "pick": "order",
+      "sec_per_grad": 2.903089920679728,
+      "total_steps": 377,
+      "n_saved": 3
+    },
+    {
+      "ncond": 6,
+      "t1": 50.0,
+      "ts": true,
+      "pick": "cheap",
+      "sec_per_grad": 2.7606404622395835,
+      "total_steps": 362,
+      "n_saved": 3
+    },
+    {
+      "ncond": 6,
+      "t1": 50.0,
+      "ts": false,
+      "pick": "order",
+      "sec_per_grad": 2.905486742655436,
+      "total_steps": 377,
+      "n_saved": 1
+    },
+    {
+      "ncond": 6,
+      "t1": 50.0,
+      "ts": false,
+      "pick": "cheap",
+      "sec_per_grad": 2.773733059565226,
+      "total_steps": 362,
+      "n_saved": 1
+    },
+    {
+      "ncond": 6,
+      "t1": 100.0,
+      "ts": true,
+      "pick": "order",
+      "sec_per_grad": 3.0734434127807617,
+      "total_steps": 399,
+      "n_saved": 6
+    },
+    {
+      "ncond": 6,
+      "t1": 100.0,
+      "ts": true,
+      "pick": "cheap",
+      "sec_per_grad": 2.9520371754964194,
+      "total_steps": 385,
+      "n_saved": 6
+    },
+    {
+      "ncond": 6,
+      "t1": 100.0,
+      "ts": false,
+      "pick": "order",
+      "sec_per_grad": 3.0717663764953613,
+      "total_steps": 399,
+      "n_saved": 1
+    },
+    {
+      "ncond": 6,
+      "t1": 100.0,
+      "ts": false,
+      "pick": "cheap",
+      "sec_per_grad": 2.9441069761912027,
+      "total_steps": 385,
+      "n_saved": 1
+    },
+    {
+      "ncond": 6,
+      "t1": 150.0,
+      "ts": true,
+      "pick": "order",
+      "sec_per_grad": 3.184677759806315,
+      "total_steps": 412,
+      "n_saved": 10
+    },
+    {
+      "ncond": 6,
+      "t1": 150.0,
+      "ts": true,
+      "pick": "cheap",
+      "sec_per_grad": 3.049521525700887,
+      "total_steps": 398,
+      "n_saved": 10
+    },
+    {
+      "ncond": 6,
+      "t1": 150.0,
+      "ts": false,
+      "pick": "order",
+      "sec_per_grad": 3.1826042334238687,
+      "total_steps": 412,
+      "n_saved": 1
+    },
+    {
+      "ncond": 6,
+      "t1": 150.0,
+      "ts": false,
+      "pick": "cheap",
+      "sec_per_grad": 3.04671573638916,
+      "total_steps": 398,
+      "n_saved": 1
+    },
+    {
+      "ncond": 10,
+      "t1": 50.0,
+      "ts": true,
+      "pick": "order",
+      "sec_per_grad": 4.911459843317668,
+      "total_steps": 636,
+      "n_saved": 3
+    },
+    {
+      "ncond": 10,
+      "t1": 50.0,
+      "ts": true,
+      "pick": "cheap",
+      "sec_per_grad": 4.892098506291707,
+      "total_steps": 636,
+      "n_saved": 3
+    },
+    {
+      "ncond": 10,
+      "t1": 50.0,
+      "ts": false,
+      "pick": "order",
+      "sec_per_grad": 4.8921364943186445,
+      "total_steps": 636,
+      "n_saved": 1
+    },
+    {
+      "ncond": 10,
+      "t1": 50.0,
+      "ts": false,
+      "pick": "cheap",
+      "sec_per_grad": 4.893021901448567,
+      "total_steps": 636,
+      "n_saved": 1
+    },
+    {
+      "ncond": 10,
+      "t1": 100.0,
+      "ts": true,
+      "pick": "order",
+      "sec_per_grad": 5.222737709681193,
+      "total_steps": 677,
+      "n_saved": 6
+    },
+    {
+      "ncond": 10,
+      "t1": 100.0,
+      "ts": true,
+      "pick": "cheap",
+      "sec_per_grad": 5.202447334925334,
+      "total_steps": 677,
+      "n_saved": 6
+    },
+    {
+      "ncond": 10,
+      "t1": 100.0,
+      "ts": false,
+      "pick": "order",
+      "sec_per_grad": 5.219348112742106,
+      "total_steps": 677,
+      "n_saved": 1
+    },
+    {
+      "ncond": 10,
+      "t1": 100.0,
+      "ts": false,
+      "pick": "cheap",
+      "sec_per_grad": 5.202233552932739,
+      "total_steps": 677,
+      "n_saved": 1
+    },
+    {
+      "ncond": 10,
+      "t1": 150.0,
+      "ts": true,
+      "pick": "order",
+      "sec_per_grad": 5.377955277760823,
+      "total_steps": 699,
+      "n_saved": 10
+    },
+    {
+      "ncond": 10,
+      "t1": 150.0,
+      "ts": true,
+      "pick": "cheap",
+      "sec_per_grad": 5.38456654548645,
+      "total_steps": 699,
+      "n_saved": 10
+    },
+    {
+      "ncond": 10,
+      "t1": 150.0,
+      "ts": false,
+      "pick": "order",
+      "sec_per_grad": 5.375816901524861,
+      "total_steps": 699,
+      "n_saved": 1
+    },
+    {
+      "ncond": 10,
+      "t1": 150.0,
+      "ts": false,
+      "pick": "cheap",
+      "sec_per_grad": 5.373049259185791,
+      "total_steps": 699,
+      "n_saved": 1
+    }
+  ]
+}
