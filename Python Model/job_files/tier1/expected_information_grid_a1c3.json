@@ -2,8 +2,7 @@
  "system": "C14+unsat",
  "params": [
   "a1",
-  "c3",
-  "a2"
+  "c3"
  ],
  "prior_sd_log": 1.1748098908929174,
  "conditions": [
@@ -77,197 +76,183 @@
   ]
  },
  "fd_step_log": 0.001,
- "fd_max_relative_difference_h_vs_3h": 1.1066451756006547e-05,
+ "fd_max_relative_difference_h_vs_3h": 1.6218776646376682e-05,
  "grid": {
   "total fatty acid | endpoint (720 s)": {
    "measurement": "total fatty acid",
    "timing": "endpoint (720 s)",
    "n_points": 5,
    "shrinkage_log": {
-    "a1": 0.92519,
-    "c3": 0.36732,
-    "a2": 0.64009
+    "a1": 0.94152,
+    "c3": 0.44351
    },
-   "mean_shrinkage_log": 0.6442,
-   "info_nats": 4.4496,
-   "info_nats_per_point": 0.88991,
-   "mean_shrinkage_per_point": 0.12884
+   "mean_shrinkage_log": 0.69252,
+   "info_nats": 3.4277,
+   "info_nats_per_point": 0.68553,
+   "mean_shrinkage_per_point": 0.138504
   },
   "total fatty acid | initial (150 s)": {
    "measurement": "total fatty acid",
    "timing": "initial (150 s)",
    "n_points": 5,
    "shrinkage_log": {
-    "a1": 0.91296,
-    "c3": 0.80138,
-    "a2": 0.68943
+    "a1": 0.91543,
+    "c3": 0.82815
    },
-   "mean_shrinkage_log": 0.80126,
-   "info_nats": 5.441,
-   "info_nats_per_point": 1.08819,
-   "mean_shrinkage_per_point": 0.160251
+   "mean_shrinkage_log": 0.87179,
+   "info_nats": 4.2716,
+   "info_nats_per_point": 0.85432,
+   "mean_shrinkage_per_point": 0.174358
   },
   "total fatty acid | both": {
    "measurement": "total fatty acid",
    "timing": "both",
    "n_points": 10,
    "shrinkage_log": {
-    "a1": 0.94637,
-    "c3": 0.83091,
-    "a2": 0.78253
+    "a1": 0.95183,
+    "c3": 0.83727
    },
-   "mean_shrinkage_log": 0.85327,
-   "info_nats": 6.3898,
-   "info_nats_per_point": 0.63898,
-   "mean_shrinkage_per_point": 0.085327
+   "mean_shrinkage_log": 0.89455,
+   "info_nats": 4.8641,
+   "info_nats_per_point": 0.48641,
+   "mean_shrinkage_per_point": 0.089455
   },
   "FA species | endpoint (720 s)": {
    "measurement": "FA species",
    "timing": "endpoint (720 s)",
    "n_points": 40,
    "shrinkage_log": {
-    "a1": 0.97163,
-    "c3": 0.94032,
-    "a2": 0.96062
+    "a1": 0.97754,
+    "c3": 0.966
    },
-   "mean_shrinkage_log": 0.95752,
-   "info_nats": 10.4513,
-   "info_nats_per_point": 0.26128,
-   "mean_shrinkage_per_point": 0.023938
+   "mean_shrinkage_log": 0.97177,
+   "info_nats": 7.2167,
+   "info_nats_per_point": 0.18042,
+   "mean_shrinkage_per_point": 0.024294
   },
   "FA species | initial (150 s)": {
    "measurement": "FA species",
    "timing": "initial (150 s)",
    "n_points": 40,
    "shrinkage_log": {
-    "a1": 0.95342,
-    "c3": 0.93714,
-    "a2": 0.95857
+    "a1": 0.96109,
+    "c3": 0.9539
    },
-   "mean_shrinkage_log": 0.94971,
-   "info_nats": 9.5116,
-   "info_nats_per_point": 0.23779,
-   "mean_shrinkage_per_point": 0.023743
+   "mean_shrinkage_log": 0.9575,
+   "info_nats": 6.328,
+   "info_nats_per_point": 0.1582,
+   "mean_shrinkage_per_point": 0.023937
   },
   "FA species | both": {
    "measurement": "FA species",
    "timing": "both",
    "n_points": 80,
    "shrinkage_log": {
-    "a1": 0.97618,
-    "c3": 0.9572,
-    "a2": 0.97172
+    "a1": 0.98065,
+    "c3": 0.97268
    },
-   "mean_shrinkage_log": 0.96837,
-   "info_nats": 11.1364,
-   "info_nats_per_point": 0.1392,
-   "mean_shrinkage_per_point": 0.012105
+   "mean_shrinkage_log": 0.97667,
+   "info_nats": 7.5706,
+   "info_nats_per_point": 0.09463,
+   "mean_shrinkage_per_point": 0.012208
   },
   "FA species + ACP intermediates | endpoint (720 s)": {
    "measurement": "FA species + ACP intermediates",
    "timing": "endpoint (720 s)",
    "n_points": 205,
    "shrinkage_log": {
-    "a1": 0.98011,
-    "c3": 0.96229,
-    "a2": 0.97917
+    "a1": 0.98151,
+    "c3": 0.96862
    },
-   "mean_shrinkage_log": 0.97386,
-   "info_nats": 11.3848,
-   "info_nats_per_point": 0.05554,
-   "mean_shrinkage_per_point": 0.004751
+   "mean_shrinkage_log": 0.97506,
+   "info_nats": 7.5132,
+   "info_nats_per_point": 0.03665,
+   "mean_shrinkage_per_point": 0.004756
   },
   "FA species + ACP intermediates | initial (150 s)": {
    "measurement": "FA species + ACP intermediates",
    "timing": "initial (150 s)",
    "n_points": 205,
    "shrinkage_log": {
-    "a1": 0.98066,
-    "c3": 0.96828,
-    "a2": 0.98074
+    "a1": 0.98177,
+    "c3": 0.96967
    },
-   "mean_shrinkage_log": 0.97656,
-   "info_nats": 11.4694,
-   "info_nats_per_point": 0.05595,
-   "mean_shrinkage_per_point": 0.004764
+   "mean_shrinkage_log": 0.97572,
+   "info_nats": 7.5195,
+   "info_nats_per_point": 0.03668,
+   "mean_shrinkage_per_point": 0.00476
   },
   "FA species + ACP intermediates | both": {
    "measurement": "FA species + ACP intermediates",
    "timing": "both",
    "n_points": 410,
    "shrinkage_log": {
-    "a1": 0.98614,
-    "c3": 0.97592,
-    "a2": 0.98608
+    "a1": 0.98705,
+    "c3": 0.97825
    },
-   "mean_shrinkage_log": 0.98271,
-   "info_nats": 12.4866,
-   "info_nats_per_point": 0.03046,
+   "mean_shrinkage_log": 0.98265,
+   "info_nats": 8.2123,
+   "info_nats_per_point": 0.02003,
    "mean_shrinkage_per_point": 0.002397
   }
  },
  "tier1_design": {
   "n_points": 23,
   "shrinkage_log": {
-   "a1": 0.9623,
-   "c3": 0.90082,
-   "a2": 0.9341
+   "a1": 0.96921,
+   "c3": 0.94226
   },
-  "mean_shrinkage_log": 0.9324,
-  "info_nats": 9.0549,
-  "info_nats_per_point": 0.39369,
-  "mean_shrinkage_per_point": 0.040539
+  "mean_shrinkage_log": 0.95574,
+  "info_nats": 6.3353,
+  "info_nats_per_point": 0.27545,
+  "mean_shrinkage_per_point": 0.041554
  },
  "tier1_design_parts": {
   "timeseries": {
    "n_points": 10,
    "shrinkage_log": {
-    "a1": 0.91998,
-    "c3": 0.20529,
-    "a2": 0.31354
+    "a1": 0.94738,
+    "c3": 0.49972
    },
-   "mean_shrinkage_log": 0.4796,
-   "info_nats": 4.1937,
-   "info_nats_per_point": 0.41937,
-   "mean_shrinkage_per_point": 0.04796
+   "mean_shrinkage_log": 0.72355,
+   "info_nats": 3.8175,
+   "info_nats_per_point": 0.38175,
+   "mean_shrinkage_per_point": 0.072355
   },
   "profile": {
    "n_points": 8,
    "shrinkage_log": {
-    "a1": 0.92768,
-    "c3": 0.84051,
-    "a2": 0.89673
+    "a1": 0.94957,
+    "c3": 0.9381
    },
-   "mean_shrinkage_log": 0.88831,
-   "info_nats": 8.0403,
-   "info_nats_per_point": 1.00504,
-   "mean_shrinkage_per_point": 0.111038
+   "mean_shrinkage_log": 0.94384,
+   "info_nats": 5.7698,
+   "info_nats_per_point": 0.72123,
+   "mean_shrinkage_per_point": 0.11798
   },
   "rates": {
    "n_points": 5,
    "shrinkage_log": {
-    "a1": 0.91296,
-    "c3": 0.80138,
-    "a2": 0.68943
+    "a1": 0.91543,
+    "c3": 0.82815
    },
-   "mean_shrinkage_log": 0.80126,
-   "info_nats": 5.441,
-   "info_nats_per_point": 1.08819,
-   "mean_shrinkage_per_point": 0.160251
+   "mean_shrinkage_log": 0.87179,
+   "info_nats": 4.2716,
+   "info_nats_per_point": 0.85432,
+   "mean_shrinkage_per_point": 0.174358
   },
   "full": {
    "n_points": 23,
    "shrinkage_log": {
-    "a1": 0.9623,
-    "c3": 0.90082,
-    "a2": 0.9341
+    "a1": 0.96921,
+    "c3": 0.94226
    },
-   "mean_shrinkage_log": 0.9324,
-   "info_nats": 9.0549,
-   "info_nats_per_point": 0.39369,
-   "mean_shrinkage_per_point": 0.040539
+   "mean_shrinkage_log": 0.95574,
+   "info_nats": 6.3353,
+   "info_nats_per_point": 0.27545,
+   "mean_shrinkage_per_point": 0.041554
   }
  },
  "best_cell_per_point": "total fatty acid | initial (150 s)",
- "seconds": 504.8
+ "seconds": 354.9
 }

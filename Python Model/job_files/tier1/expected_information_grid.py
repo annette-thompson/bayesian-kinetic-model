@@ -139,17 +139,29 @@ def main():
             grid[f"{mname} | {tname}"] = {"measurement": mname, "timing": tname,
                                           **summarize(params, post_sd, info, len(vc))}
 
-    # The Tier-1 design itself: baseline time series + baseline profile + five initial rates.
+    # The Tier-1 design itself (baseline time series + baseline profile + five initial rates),
+    # and each of its three datasets alone. Profile-only and rates-only are R7's sampled cells,
+    # and the full design is R1, so these are the predictions R7 checks.
     bl = 0                                                    # CONDITIONS[0] is the baseline
     t = np.asarray(fm.times)
     si = [int(np.argmin(np.abs(t - s))) for s in SERIES_TIMES]
     ei, ri = int(np.argmin(np.abs(t - END_TIME))), int(np.argmin(np.abs(t - RATE_TIME)))
-    parts_J = [J[TOTAL][bl, si, :]] + [J[n][bl, ei, :][None, :] for n in sets["FA species"]] + [J[RATE][:, ri, :]]
-    parts_v = [base[TOTAL][bl, si]] + [base[n][bl, ei][None] for n in sets["FA species"]] + [base[RATE][:, ri]]
-    parts_f = [np.full(len(si), FLOOR_CONC), np.full(len(sets["FA species"]), FLOOR_CONC), np.full(len(CONDITIONS), FLOOR_RATE)]
-    Jt, vt, ft = np.concatenate(parts_J), np.concatenate(parts_v), np.concatenate(parts_f)
-    post_sd, info = score(Jt, vt, ft)
-    tier1 = summarize(params, post_sd, info, len(vt))
+    parts = {
+        "timeseries": (J[TOTAL][bl, si, :], base[TOTAL][bl, si], np.full(len(si), FLOOR_CONC)),
+        "profile": (np.stack([J[n][bl, ei, :] for n in sets["FA species"]]),
+                    np.array([base[n][bl, ei] for n in sets["FA species"]]),
+                    np.full(len(sets["FA species"]), FLOOR_CONC)),
+        "rates": (J[RATE][:, ri, :], base[RATE][:, ri], np.full(len(CONDITIONS), FLOOR_RATE)),
+    }
+    tier1_parts = {}
+    for name, keys in [("timeseries", ["timeseries"]), ("profile", ["profile"]), ("rates", ["rates"]),
+                       ("full", ["timeseries", "profile", "rates"])]:
+        Jt = np.concatenate([parts[k][0] for k in keys])
+        vt = np.concatenate([parts[k][1] for k in keys])
+        ft = np.concatenate([parts[k][2] for k in keys])
+        post_sd, info = score(Jt, vt, ft)
+        tier1_parts[name] = summarize(params, post_sd, info, len(vt))
+    tier1 = tier1_parts["full"]
 
     best = max(grid, key=lambda k: grid[k]["info_nats_per_point"])
     out = {"system": a.system, "params": params, "prior_sd_log": PRIOR_SD_LOG,
@@ -157,13 +169,14 @@ def main():
                                                                 "floor_rate": FLOOR_RATE},
            "measurement_sets": sets, "fd_step_log": a.h,
            "fd_max_relative_difference_h_vs_3h": fd_agreement,
-           "grid": grid, "tier1_design": tier1, "best_cell_per_point": best,
+           "grid": grid, "tier1_design": tier1, "tier1_design_parts": tier1_parts, "best_cell_per_point": best,
            "seconds": round(time.perf_counter() - t0, 1)}
     Path(a.out).write_text(json.dumps(out, indent=1) + "\n")
 
     print(f"{a.system}, params {params}; finite-difference check (h vs 3h): max relative difference {fd_agreement:.1e}")
     print(f"{'cell':52s} {'points':>6s} {'info (nats)':>11s} {'per point':>9s}  shrinkage_log " + " ".join(f"{p:>6s}" for p in params))
-    for k, v in list(grid.items()) + [("Tier-1 design (series + profile + rates)", tier1)]:
+    rows = list(grid.items()) + [(f"Tier-1 design: {k}", v) for k, v in tier1_parts.items()]
+    for k, v in rows:
         print(f"{k:52s} {v['n_points']:6d} {v['info_nats']:11.3f} {v['info_nats_per_point']:9.4f}  "
               f"{'':13s} " + " ".join(f"{v['shrinkage_log'][p]:6.3f}" for p in params))
     print(f"best cell per data point: {best}")
