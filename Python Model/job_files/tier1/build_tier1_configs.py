@@ -1,8 +1,8 @@
 """Tier-1 run configs: one per (system, parameter set, variant), with early stopping ON.
 
 Run IDs and their purpose are in Notes/tier1_experiment_plan.md. `--plan` writes every
-config the plan needs before the SBC and data-type runs (R0, R1, R2, R3, R5, R6, R8);
-the flags below build any single one.
+config the plan needs except the SBC replicates (R4, built by sbc.py): R0, R1, R2, R3, R5, R6,
+R7 and R8. The flags below build any single one.
 
 Data: Data/Tier1_rates/<data_name>/ (make_tier1_rate_data.py), three datasets, each with
 its sigma read straight from the file (noise_model "column"), so the likelihood uses exactly
@@ -30,6 +30,7 @@ Usage:
   python build_tier1_configs.py --system C8 --params a1,c3 --data_name Chain_C8_noise20
   python build_tier1_configs.py --system C8 --params a1,c3 --prior_shift_sd 2
   python build_tier1_configs.py --system C14+unsat --reactions C14+unsat+c3split --params a1,c3s,c3l
+  python build_tier1_configs.py --system C14+unsat --params a1,c3 --datasets profile --tag profile
 """
 import argparse
 import json
@@ -113,7 +114,7 @@ def datasets_for(data_name):
 
 def build(system, params, reactions=None, data_name=None, tag=None, dense=False,
           target_accept=0.8, rtol=None, prior_shift_sd=0.0, chains=4, tune=300,
-          draws=5000, seed=42, max_total_hours=24.0):
+          draws=5000, seed=42, max_total_hours=24.0, datasets=None):
     reactions = reactions or system
     data_name = data_name or f"Chain_{reactions}"
     cfg = base_config(system)
@@ -152,6 +153,11 @@ def build(system, params, reactions=None, data_name=None, tag=None, dense=False,
         "checkpoint_every_steps": 5, "max_total_hours": max_total_hours,
     }
     cfg["datasets"] = datasets_for(data_name)
+    if datasets:                      # a subset, by kind: timeseries, profile, rates
+        keep = [d for d in cfg["datasets"] if d["name"].split("_", 1)[0] in datasets]
+        if len(keep) != len(set(datasets)):
+            raise SystemExit(f"--datasets {sorted(datasets)}: kinds are timeseries, profile, rates")
+        cfg["datasets"] = keep
     label = data_name[len("Chain_"):] if data_name.startswith("Chain_") else data_name
     run = f"Tier1 {label} - {''.join(params)}" + (f" - {tag}" if tag else "")
     cfg["output_paths"]["results_save_dir"] = f"Results/Tier1/{run}"
@@ -172,7 +178,7 @@ def write(run, cfg, dry_run=False):
 
 
 def plan_runs():
-    """Every config in the plan that needs no further code (R4 SBC and R7 come later)."""
+    """Every config in the plan except R4, whose replicates sbc.py builds."""
     runs = [
         ("R0", dict(system="C8", params=["a1", "c3"])),
         ("R1", dict(system="C14+unsat", params=["a1", "c3"])),
@@ -187,6 +193,10 @@ def plan_runs():
         ("R6", dict(system="C14+unsat", params=["a1", "c3"], data_name="Chain_C14+unsat+c3split_c3l3")),
         ("R6", dict(system="C14+unsat", reactions="C14+unsat+c3split", params=["a1", "c3s", "c3l"],
                     data_name="Chain_C14+unsat+c3split_c3l3")),
+        # R7: two data-type cells sampled against the expected-information grid, on subsets of
+        # the standard data. The full-data cell is R1.
+        ("R7", dict(system="C14+unsat", params=["a1", "c3"], datasets=["profile"], tag="profile")),
+        ("R7", dict(system="C14+unsat", params=["a1", "c3"], datasets=["rates"], tag="rates")),
         ("R8", dict(system="C8", params=["a1", "c3"], target_accept=0.95, tag="ta0.95")),
         ("R8", dict(system="C8", params=["a1", "c3"], rtol=1e-5, tag="rtol1e-5")),
     ]
@@ -217,6 +227,8 @@ def main():
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--max_total_hours", type=float, default=24.0,
                     help="runaway guard in A100-equivalent hours")
+    ap.add_argument("--datasets", default=None,
+                    help="comma-separated subset of timeseries,profile,rates (default all three)")
     ap.add_argument("--dry_run", action="store_true")
     a = ap.parse_args()
 
@@ -230,7 +242,8 @@ def main():
         ap.error("--system and --params are required without --plan")
     run, cfg = build(a.system, [p.strip() for p in a.params.split(",")], a.reactions, a.data_name,
                      a.tag, a.dense, a.target_accept, a.rtol, a.prior_shift_sd, a.chains, a.tune,
-                     a.draws, a.seed, a.max_total_hours)
+                     a.draws, a.seed, a.max_total_hours,
+                     [d.strip() for d in a.datasets.split(",")] if a.datasets else None)
     write(run, cfg, a.dry_run)
 
 
