@@ -3,20 +3,28 @@
 #   conda env create -f environment.yml        # or: mamba env create -f ...
 #   conda activate Bayesian
 #
-# On nate this is built for you by Sync/setup_nate_env.sh, which streams
-# Sync/provision_nate_env.sh over ssh. Keep the two package lists in step.
+# Pinned to the Alpine environment that runs the cluster fits, read on 2026-09-25 by importing
+# each package (not from `conda list`, which misreports packages with stale duplicate install
+# records), with one deliberate difference: pymc 6.1.0, not Alpine's 6.0.1. Alpine runs pymc
+# 6.0.1 with pytensor 3.1.2, but pymc 6.0.1 declares pytensor < 3.1, so that pair cannot be
+# installed from pins; pymc 6.1.0 declares pytensor >= 3.1.2, < 3.2. requirements.txt carries
+# the same pins for pip.
 #
-# Channel is conda-forge, NOT defaults: defaults does not carry pymc/diffrax/
-# blackjax at usable versions, and conda-forge is what both working environments
-# (Alpine and nate) were actually built from.
+# Channel is conda-forge, not defaults: defaults does not carry pymc/diffrax/blackjax at usable
+# versions.
 #
-# GPU JAX: conda-forge's pymc/numpyro/blackjax now pull in a CUDA-capable jax
-# (jax-cuda12-pjrt / jax-cuda12-plugin) on linux-64, so no pip step is needed.
-# Do NOT try to `pip install jax[cuda12]==<ver>` over the top -- pip cannot
-# uninstall the conda-installed plugin (no RECORD file) and the install aborts
-# midway, which is how nate's first provisioning run failed. If you must pin a
-# different jax, install jax, jaxlib, jax-cuda12-plugin and jax-cuda12-pjrt at
-# MATCHING versions or the plugin fails to import.
+# jax 0.7.0 pairs with equinox 0.13.0, diffrax 0.7.1 and optimistix 0.0.10. Later equinox (0.13.x)
+# and optimistix (0.1.0) releases declare jax 0.7.0 and 0.7.1 incompatible, so move these together.
+#
+# GPU JAX (Linux only): the CUDA plugin comes from pip, at exactly jax's version. Mismatched
+# versions fail at import ("cannot import name 'make_single_device_sharding'"). Do not
+# `pip install jax[cuda12]` over the conda jax; pip cannot uninstall conda's jaxlib cleanly.
+#
+# nutpie comes from pip (Alpine has 0.16.11 from conda): conda-forge has no Python 3.12 build of
+# 0.16.11 for osx-64, and pip has wheels for both platforms. Only
+# Bayesian Inference/optimize_pymc_solver.ipynb uses it.
+#
+# netcdf4 is required, not optional: inference_runner writes its posterior as NETCDF4.
 name: Bayesian
 channels:
   - conda-forge
@@ -24,51 +32,49 @@ dependencies:
   - python=3.12
 
   # --- sampling / probabilistic stack ---
-  - pymc
-  - pytensor
-  - blackjax          # the resumable sampler this project uses
-  - numpyro
-  - nutpie
-  - arviz
-  - arviz-base
-  - preliz
+  - pymc=6.1.0
+  - pytensor=3.1.2
+  - blackjax=1.3
+  - numpyro=0.21.0
+  - arviz=1.2.0
+  - arviz-base=1.2.0
+  - preliz=0.27.1
 
   # --- ODE solving and JAX ---
-  - jax
-  - jaxlib
-  - diffrax           # Kvaerno5 + PIDController; its adjoint is the gradient path
-  - equinox
-  - jaxtyping
+  - jax=0.7.0
+  - jaxlib=0.7.0
+  - diffrax=0.7.1
+  - equinox=0.13.0
+  - lineax=0.1.0
+  - optimistix=0.0.10
+  - jaxopt=0.8.3
+  - jaxtyping=0.3.11
 
   # --- numerics / IO ---
-  # netcdf4 is REQUIRED, not optional: inference_runner writes its posterior with
-  # idata.to_netcdf(format="NETCDF4"), which raises
-  #   "cannot write NetCDF files ... none of the suitable backend libraries
-  #    (netCDF4, h5netcdf) are installed"
-  # if no backend is present. Sampling completes first, so the failure lands at the
-  # very END of a multi-hour run -- an env without this silently cannot produce a
-  # single completed inference. Omitting it is what made every nate run fail.
-  - netcdf4
-  - numpy
-  - scipy
-  - zarr>=3           # checkpoint store format for the resumable sampler
-  - numba=0.65.1      # pinned: 0.66+ needs a newer llvmlite than pytensor accepts
-  - llvmlite
-  - libsqlite>=3.53
-  - sqlite>=3.53
+  - netcdf4=1.7.4
+  - numpy=2.0.0
+  - scipy=1.18.0
+  - zarr=3.2.1
+  - numba=0.65.1
+  - llvmlite=0.47.0
+  - xarray=2026.4.0
+  - libsqlite
+  - sqlite
 
   # --- imported directly by Utilities/ and Calculation Files/ ---
-  # sympy and seaborn are NOT pulled in transitively by anything above. Omitting
-  # them is what made nate's first real run die on `import sympy` several seconds
-  # into a GPU job, so list every direct import explicitly rather than relying on
-  # another package to drag it in.
-  - sympy
-  - seaborn
-  - matplotlib
-  - pandas
-  - pyyaml
-  - platformdirs
+  - sympy=1.14.0
+  - seaborn=0.13.2
+  - matplotlib-base=3.11.0
+  - pandas=3.0.3
+  - pyyaml=6.0.3
+  - platformdirs=4.10.0
 
   # --- notebooks ---
-  - ipykernel
-  - ipython
+  - ipykernel=7.3.0
+  - ipython=9.15.0
+
+  - pip
+  - pip:
+      - "jax-cuda12-plugin[with-cuda]==0.7.0; sys_platform == 'linux'"
+      - "jax-cuda12-pjrt==0.7.0; sys_platform == 'linux'"
+      - nutpie==0.16.11
