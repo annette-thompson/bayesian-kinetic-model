@@ -327,8 +327,8 @@ This is decided with every Tier-1 draft in hand. The default:
 
 The Tier-2 core is therefore **one three-parameter fit** of the full model to the real data,
 plus grouping fits only if Fig 5 earns them. Its parameters come from the Tier-1 Fig 6
-results and the sensitivity screen. Tier 2 is blocked until the FabH-knockout conditions
-(outline 2.8) are resolved.
+results and the sensitivity screen. The FabH-knockout kinetics conditions in ME1 Dataset S1
+are old data and are not used (outline 2.8).
 
 ---
 

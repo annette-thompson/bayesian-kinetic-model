@@ -78,12 +78,9 @@ behind it.
 | SI | Methodological-validity checks | Chain-count and stranded-chain items done; the rest are planned alongside Tier 1 |
 
 **Open items:**
-1. Six of the real kinetics conditions remove FabH, and the model produces exactly zero
-   fatty acid in all of them, while the measurements show substantial production (Section
-   2.8). This must be resolved before Tier 2.
-2. Which parameters to fit at Tier 2. Choose after the Tier-1 identifiability results
+1. Which parameters to fit at Tier 2. Choose after the Tier-1 identifiability results
    (Fig 6), holding to three free parameters unless a four-parameter cost has been measured.
-3. Confirm which datasets the ME1 point-estimate fit used (Section 2.1).
+2. Confirm which datasets the ME1 point-estimate fit used (Section 2.1).
 
 ---
 
@@ -428,20 +425,17 @@ Tier 1 before any Tier-2 run. The default expectation:
 
 **Tier 2 data (ME1 Dataset S1):**
 - 17 initial-rate conditions (µM C16/min). These are the reference plus FabH, FabF, FabB and
-  acetyl-CoA knockouts, and a FabB × FabH titration without FabF.
+  acetyl-CoA knockouts, and a FabB × FabH titration without FabF. The FabH-knockout
+  conditions among them are old data and are not used.
 - 14 GC/MS chain-length profiles (C4-C18, µM) across FabF/TesA/FabH/FabB combinations.
 - One reference time course (6 points to 720 s).
 
-**Open issue blocking Tier 2:** six of the seven FabH-knockout kinetics conditions produce
-exactly zero fatty acid in the model, while the measurements show 19-64% of the reference
-rate. The sharpest case, no FabH *and* no acetyl-CoA, measures 63% of reference; the model has
-no initiation route without a primer and FabH. The model's reference condition agrees well
-(rate within 1.11x, time course within 0.78-1.19x). A condition whose prediction is zero at
-every parameter value contributes no gradient and only a constant penalty. Two explanations
-are untested: that "0" in the dataset doesn't mean zero concentration, which is free to check
-first, or that FabH-independent initiation (malonyl-ACP decarboxylation) is missing from the
-model. The Tier-1 perturbations were chosen independently of these conditions. So the Tier-1
-drafts preview the methods, not the exact information content of the real data.
+**FabH-knockout conditions: excluded.** They are old data and are not used at Tier 2
+(decided 2026-09-25), so the model's zero fatty acid in six of them no longer blocks Tier 2.
+The model's reference condition agrees well with the measurements (rate within 1.11x, time
+course within 0.78-1.19x). The Tier-1 perturbations were chosen independently of the real
+conditions, so the Tier-1 drafts preview the methods, not the exact information content of the
+real data.
 
 ## 3. Results / Discussion
 
