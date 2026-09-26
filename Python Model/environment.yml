@@ -1,3 +1,30 @@
+# Conda environment for the Bayesian kinetic model.
+#
+#   conda env create -f environment.yml        # or: mamba env create -f ...
+#   conda activate Bayesian
+#
+# Pinned to the Alpine environment that runs the cluster fits, read on 2026-09-25 by importing
+# each package (not from `conda list`, which misreports packages with stale duplicate install
+# records), with one deliberate difference: pymc 6.1.0, not Alpine's 6.0.1. Alpine runs pymc
+# 6.0.1 with pytensor 3.1.2, but pymc 6.0.1 declares pytensor < 3.1, so that pair cannot be
+# installed from pins; pymc 6.1.0 declares pytensor >= 3.1.2, < 3.2. requirements.txt carries
+# the same pins for pip.
+#
+# Channel is conda-forge, not defaults: defaults does not carry pymc/diffrax/blackjax at usable
+# versions.
+#
+# jax 0.7.0 pairs with equinox 0.13.0, diffrax 0.7.1 and optimistix 0.0.10. Later equinox (0.13.x)
+# and optimistix (0.1.0) releases declare jax 0.7.0 and 0.7.1 incompatible, so move these together.
+#
+# GPU JAX (Linux only): the CUDA plugin comes from pip, at exactly jax's version. Mismatched
+# versions fail at import ("cannot import name 'make_single_device_sharding'"). Do not
+# `pip install jax[cuda12]` over the conda jax; pip cannot uninstall conda's jaxlib cleanly.
+#
+# nutpie comes from pip (Alpine has 0.16.11 from conda): conda-forge has no Python 3.12 build of
+# 0.16.11 for osx-64, and pip has wheels for both platforms. Only
+# Bayesian Inference/optimize_pymc_solver.ipynb uses it.
+#
+# netcdf4 is required, not optional: inference_runner writes its posterior as NETCDF4.
 name: Bayesian
 channels:
   - conda-forge
@@ -5,40 +32,49 @@ dependencies:
   - python=3.12
 
   # --- sampling / probabilistic stack ---
-  - pymc>=6
-  - pytensor
-  - blackjax
-  - numpyro
-  - nutpie
-  - arviz
-  - arviz-base
-  - preliz
+  - pymc=6.1.0
+  - pytensor=3.1.2
+  - blackjax=1.3
+  - numpyro=0.21.0
+  - arviz=1.2.0
+  - arviz-base=1.2.0
+  - preliz=0.27.1
 
   # --- ODE solving and JAX ---
-  - jax==0.7.2
-  - jaxlib
-  - diffrax>=0.7.2
-  - equinox
-  - jaxtyping
+  - jax=0.7.0
+  - jaxlib=0.7.0
+  - diffrax=0.7.1
+  - equinox=0.13.0
+  - lineax=0.1.0
+  - optimistix=0.0.10
+  - jaxopt=0.8.3
+  - jaxtyping=0.3.11
 
   # --- numerics / IO ---
-  - netcdf4
-  - numpy
-  - scipy
-  - zarr
-  - numba
-  - llvmlite
+  - netcdf4=1.7.4
+  - numpy=2.0.0
+  - scipy=1.18.0
+  - zarr=3.2.1
+  - numba=0.65.1
+  - llvmlite=0.47.0
+  - xarray=2026.4.0
   - libsqlite
   - sqlite
 
   # --- imported directly by Utilities/ and Calculation Files/ ---
-  - sympy
-  - seaborn
-  - matplotlib
-  - pandas
-  - pyyaml
-  - platformdirs
+  - sympy=1.14.0
+  - seaborn=0.13.2
+  - matplotlib-base=3.11.0
+  - pandas=3.0.3
+  - pyyaml=6.0.3
+  - platformdirs=4.10.0
 
   # --- notebooks ---
-  - ipykernel
-  - ipython
+  - ipykernel=7.3.0
+  - ipython=9.15.0
+
+  - pip
+  - pip:
+      - "jax-cuda12-plugin[with-cuda]==0.7.0; sys_platform == 'linux'"
+      - "jax-cuda12-pjrt==0.7.0; sys_platform == 'linux'"
+      - nutpie==0.16.11
