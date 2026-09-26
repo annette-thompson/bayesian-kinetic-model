@@ -1,5 +1,6 @@
-"""Draft figures from the Tier-1 post-processing JSON (Figs 7, 8 and 9).
+"""Draft figures from the Tier-1 post-processing JSON (Figs 6, 7, 8 and 9).
 
+  python plot_tier1_drafts.py fig6 [identifiability.json]
   python plot_tier1_drafts.py fig9 [expected_information_grid.json]
   python plot_tier1_drafts.py fig7 [posterior_morris.json]
   python plot_tier1_drafts.py fig8 [posterior_ratio_response.json]
@@ -22,6 +23,9 @@ SURFACE, INK, INK_2, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#e4e3df"
 POSTERIOR, POINT = "#2a78d6", "#eb6834"          # categorical slots 1 and 2
 BLUE_RAMP = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"]
 SEQ = LinearSegmentedColormap.from_list("seq_blue", BLUE_RAMP)
+# Diverging: red arm, gray midpoint, blue arm, equal steps per side (for signed values in [-1, 1]).
+DIV = LinearSegmentedColormap.from_list(
+    "div_red_blue", ["#8f2424", "#e34948", "#f4b3b0", "#f0efec", "#9ec5f4", "#3987e5", "#184f95"])
 
 
 def style(ax):
@@ -33,13 +37,16 @@ def style(ax):
     ax.tick_params(colors=INK_2, labelsize=8)
 
 
-def heatmap(ax, values, rows, cols, fmt, title):
-    im = ax.imshow(values, cmap=SEQ, aspect="auto")
+def heatmap(ax, values, rows, cols, fmt, title, signed=False):
+    if signed:
+        im = ax.imshow(values, cmap=DIV, vmin=-1, vmax=1, aspect="auto")
+    else:
+        im = ax.imshow(values, cmap=SEQ, aspect="auto")
     lo, hi = np.nanmin(values), np.nanmax(values)
     for i in range(len(rows)):
         for j in range(len(cols)):
             v = values[i, j]
-            dark = (v - lo) / (hi - lo + 1e-300) > 0.55
+            dark = abs(v) > 0.6 if signed else (v - lo) / (hi - lo + 1e-300) > 0.55
             ax.text(j, i, fmt.format(v), ha="center", va="center", fontsize=9,
                     color="#ffffff" if dark else INK)
     ax.set_xticks(range(len(cols)), cols, fontsize=8, color=INK_2)
@@ -49,6 +56,45 @@ def heatmap(ax, values, rows, cols, fmt, title):
         s.set_visible(False)
     ax.tick_params(length=0)
     return im
+
+
+def fig6(path):
+    d = json.loads(Path(path).read_text())
+    names = d["params"]
+    fig, axes = plt.subplots(1, 3, figsize=(12, 3.4), dpi=150, facecolor=SURFACE,
+                             gridspec_kw={"width_ratios": [1, 1, 1.2]})
+    ax = axes[0]
+    style(ax)
+    y = np.arange(len(names))[::-1]
+    shrink = [d["shrinkage"][p] for p in names]
+    ax.barh(y, shrink, height=0.5, color=POSTERIOR)
+    for yi, v in zip(y, shrink):
+        ax.text(max(v, 0) + 0.02, yi, f"{v:.2f}", va="center", fontsize=8, color=INK)
+    ax.axvline(0.5, color=INK_2, lw=1, ls="--")
+    ax.set_ylim(-0.85, y[0] + 0.4)
+    ax.text(0.48, -0.62, "weak below 0.5", ha="right", va="center", fontsize=7, color=INK_2)
+    ax.set_yticks(y, [f"{p} ({d['scale'][p]})" for p in names], fontsize=8, color=INK_2)
+    ax.set_xlim(min(0, min(shrink)) - 0.02, 1.12)
+    ax.set_xlabel("1 - posterior sd / prior sd", fontsize=8, color=INK_2)
+    ax.set_title("A  Shrinkage per parameter", fontsize=9, color=INK, loc="left")
+    ax.grid(axis="x", color=GRID, lw=0.6)
+    ax.set_axisbelow(True)
+    heatmap(axes[1], np.array(d["correlation"]), names, names, "{:+.2f}", "B  Posterior correlation",
+            signed=True)
+    eig = d["eigen"]
+    loadings = np.array([[e["direction"][p] for p in names] for e in eig])
+    heatmap(axes[2], loadings, [f"{e['variance_left']:.2g} left" for e in eig], names, "{:+.2f}",
+            "C  Covariance directions, tightest first", signed=True)
+    axes[2].set_ylabel("fraction of prior variance", fontsize=8, color=INK_2)
+    fig.suptitle(f"Identifiability from {d['n_draws']} posterior draws ({Path(d['posterior']).parent.name}"
+                 + (f", {d['key']}" if d.get("key") else "") + ")", fontsize=10, color=INK, x=0.01, ha="left")
+    fig.text(0.01, 0.01, "Log scale for LogNormal parameters. C: eigenvectors of the posterior covariance with "
+             "each parameter scaled by its prior sd (prior = identity); rows sum to 1 in squares.",
+             fontsize=7, color=INK_2)
+    fig.tight_layout(rect=(0, 0.05, 1, 1))
+    out = Path(path).with_suffix(".png")
+    fig.savefig(out, facecolor=SURFACE)
+    return out
 
 
 def fig9(path):
@@ -149,7 +195,7 @@ def fig8(path):
 
 if __name__ == "__main__":
     which = sys.argv[1]
-    default = {"fig9": "expected_information_grid.json", "fig7": "posterior_morris.json",
+    default = {"fig6": "identifiability.json", "fig9": "expected_information_grid.json", "fig7": "posterior_morris.json",
                "fig8": "posterior_ratio_response.json"}[which]
     src = Path(sys.argv[2]) if len(sys.argv) > 2 else HERE / default
-    print("wrote", {"fig9": fig9, "fig7": fig7, "fig8": fig8}[which](src))
+    print("wrote", {"fig6": fig6, "fig9": fig9, "fig7": fig7, "fig8": fig8}[which](src))
