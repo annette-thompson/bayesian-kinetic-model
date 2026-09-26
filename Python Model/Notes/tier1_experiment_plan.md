@@ -154,6 +154,21 @@ model, at zero sampling cost, and that draws the figure. Three cells are then sa
 
 This checks that the information ranking matches real posterior shrinkage.
 
+Built 2026-09-25 as `Tier1 C14+unsat - a1c3 - profile` and `Tier1 C14+unsat - a1c3 - rates`,
+each a subset of the standard data. The rates dataset is the best-per-point cell. The five
+initial rates carry exactly the information of total fatty acid at 150 s (4.27 nats either
+way). For a like-for-like prediction the grid was re-run on the `a1`+`c3` model
+(`expected_information_grid_a1c3.json`). Predicted log-scale shrinkage for `a1` / `c3`:
+
+| Cell | Points | Information (nats) | `a1` | `c3` |
+|---|---|---|---|---|
+| full data (R1) | 23 | 6.34 | 0.969 | 0.942 |
+| profile only | 8 | 5.77 | 0.950 | 0.938 |
+| rates only | 5 | 4.27 | 0.915 | 0.828 |
+
+So the sampled order to check is full > profile > rates, with `c3` separating the cells most.
+Per point, the ranking reverses (rates 0.85 nats, profile 0.72, full 0.28).
+
 **R4/R5 on C8.** Calibration and robustness test whether stated uncertainty is honest, which
 doesn't depend on network size. R4 starts with a 10-replicate pilot and continues to 40 only
 if the pilot's coverage and rank histogram look sane. SBC ranks and coverage come from the
@@ -250,17 +265,34 @@ Done 2026-09-25, once CURC was back:
 - R0 submitted: Blanca job 28506399 runs it on an A100 (`bgpu-biokem2`), and the Alpine twin
   was cancelled.
 
-Still open: pinning `environment.yml` and `requirements.txt`. Alpine's working stack cannot be
-reinstalled from pins as it stands. It runs pymc 6.0.1 with pytensor 3.1.2, but pymc 6.0.1
-declares pytensor < 3.1 (`pip check` flags it there), and conda-forge will not solve that pair.
-pymc 6.1.0 declares pytensor ≥ 3.1.2, < 3.2.
+Done 2026-09-25, while R0 runs:
+- `environment.yml` and `requirements.txt` are pinned to Alpine's stack, except pymc 6.1.0
+  where Alpine has 6.0.1. Alpine runs pymc 6.0.1 with pytensor 3.1.2, but 6.0.1 declares
+  pytensor < 3.1 (`pip check` flags it there), so that pair cannot be installed from pins.
+  pymc 6.1.0 declares pytensor ≥ 3.1.2, < 3.2. nutpie comes from pip, because conda-forge has
+  no Python 3.12 build of it for osx-64. The conda part solves on osx-64 and linux-64 (dry
+  run). Tabled: bringing the laptop env and Alpine's pymc in line with the files.
+- R7's two configs (section 2, R7 notes), pre-flighted: profile noise z mean −0.75 sd 0.70,
+  rates +0.41 sd 0.74, logp and gradient finite.
+- Fig 6/6b module (`identifiability_report.py`). Its `--selftest` recovers a synthetic
+  `12*d1 + d2` ridge (tight direction at 5% of prior variance, flat one at 1.0). On the C14
+  `a1`+`c3` pilot posterior it gives correlation −0.47.
+- `submit_stage2.sh` for Stage 2.
+- R4's other 30 replicates (`sbc.py generate --start 10 --n 30`, `sbc010`-`sbc039`), so all
+  40 are built. These truths span a1 0.062-3.46 and c3 0.14-5.53. All 30 pass the pre-flight
+  (clean-data error ≤ 1.7×10⁻⁵, finite logp and gradient). They are submitted only once the
+  pilot passes (Stage 3).
+- The cluster-only analysis tools under `job_files/` (`multiparam_tests`,
+  `chain_system_sensitivity_analysis`, `warmup_rates.py`, job-ID records) are now in git.
 
 **Stage 1: R0 (~2.5 A100-h).** Checks plumbing: resume, stopping on r-hat + ESS, finalize,
 figures, `recovery_report.py`. It also decides the replicate system. Nothing else is queued
 until R0 has been inspected.
 
 **Stage 2: everything cheap and independent, one batch (~70 A100-h).** R1, R3, R5, R8 and the
-R4 pilot.
+R4 pilot, 23 runs, submitted by `tier1/submit_stage2.sh` from `job_files/` (`--dry_run`
+first). It refuses until R0 has finalized, and it skips runs that are finished or already
+queued, so rerunning it resumes the ones that stopped at the wall clock.
 - Gate to R2: R1 converges and recovers both parameters.
 - Gate to the full R4: the pilot looks sane.
 
@@ -269,7 +301,7 @@ R4 pilot.
   acceptance is well below 0.8, or the first block still drifts, restart with 600 warmup
   steps and record it.
 - R6 (b), then (c) once (b)'s cost is known.
-- R7, and the remaining R4 replicates.
+- R7, and the remaining R4 replicates (both built and pre-flighted).
 
 **Stage 4: post-processing (forward solves).** Figs 6/6b from R2 and R3. Figs 7 and 8 from
 R2's posterior (`posterior_morris.py`, `posterior_ratio_response.py`). Fig 9's grid is done
@@ -282,7 +314,8 @@ at the truth (item 8), and R7 checks it against sampled shrinkage.
 ## 4. Code status
 
 **Exists** (all in `job_files/tier1/` unless noted):
-- `build_tier1_configs.py`: `--plan` writes every config in section 2 except R4 and R7
+- `build_tier1_configs.py`: `--plan` writes every config in section 2 except R4's (`sbc.py`
+  builds those); `--datasets` fits a subset of the standard data (R7)
 - `make_tier1_rate_data.py`: the data above, including off-grouping and noise-level variants
 - `make_c3_split_variant.py`: R6's reaction variant, with an exact-equivalence check
 - `check_model_vs_data.py`: pre-flight (model vs. clean data, noise z, logp/gradient)
@@ -299,13 +332,17 @@ at the truth (item 8), and R7 checks it against sampled shrinkage.
 - `forward_model.py`: the batched forward solver shared by Figs 7-9. It is compiled once, so
   it takes any scaling values and initial conditions, and it loads posterior draws.
 - `expected_information_grid.py` (Fig 9), `posterior_morris.py` (Fig 7),
-  `posterior_ratio_response.py` (Fig 8), and `plot_tier1_drafts.py` for their drafts
+  `posterior_ratio_response.py` (Fig 8), `identifiability_report.py` (Figs 6/6b: shrinkage,
+  correlations, prior-standardised covariance eigen-directions), and `plot_tier1_drafts.py`
+  for their drafts
 - `sbc.py` (Fig 3): `generate` draws truths from the prior and builds each replicate's data and
   config. `ranks` scores finished runs (rank histograms, a uniformity test, coverage and a draft
   figure). `selftest` checks the rank code on a known answer.
 
-Nothing in the plan's to-build list remains. Figs 7 and 8 wait on R2's posterior, and Fig 3
-on the R4 fits.
+- `submit_stage2.sh`: Stage 2's 23 submissions, with the R0 gate
+
+Nothing in the plan's to-build list remains. Figs 6/6b wait on R2 and R3, Figs 7 and 8 on R2's
+posterior, and Fig 3 on the R4 fits.
 
 ---
 

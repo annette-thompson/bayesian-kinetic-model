@@ -68,12 +68,12 @@ behind it.
 | Section | What it answers | Status |
 |---|---|---|
 | 2. Methods | How the model is solved and fit | Solver settings, negative-concentration handling, sampler settings, Tier-1 data design and Tier-1 systems all settled |
-| 3.1 Recovery + calibration | Does it work? | **Single-parameter recovery complete on all 14 truncated systems** (truth recovered everywhere; shrinkage 0.94 to >0.9999). Two-parameter pilots done. Multi-parameter recovery (Fig 2), calibration (Fig 3) and robustness (Fig 4) planned, not run |
+| 3.1 Recovery + calibration | Does it work? | **Single-parameter recovery complete on all 14 truncated systems** (truth recovered everywhere; shrinkage 0.94 to >0.9999). Two-parameter pilots done. R0 (the first Tier-1 fit) running since 2026-09-25. Stage 2 (R1, R3, R5, R8 and the 10-replicate SBC pilot) is configured and waits on R0. All 40 SBC replicates for Fig 3 are built |
 | 3.2 Parameter grouping | Were the groupings justified? | Designed (split-group test on `c3`); not run |
-| 3.3 Identifiability | What does the data constrain? | Parameter-level sensitivity screen complete across all 14 systems and 3 objectives; posterior analysis waits on Fig 2's fit |
-| 3.4 Sensitivity vs. Morris | Same enzyme targets as before? | Designed; needs a posterior-integrated sensitivity module |
-| 3.5 Ratiometric strategy | Is the enzyme-ratio heuristic robust? | Designed; needs an optimisation-across-draws module |
-| 3.6 Experimental design | What should we measure next? | Designed; initial-rate data exists, the acyl-ACP observable module does not |
+| 3.3 Identifiability | What does the data constrain? | Parameter-level sensitivity screen complete across all 14 systems and 3 objectives. Figs 6/6b module built and tested on a pilot posterior (`identifiability_report.py`); waits on R2 and R3 |
+| 3.4 Sensitivity vs. Morris | Same enzyme targets as before? | Module built and tested on a pilot posterior (`posterior_morris.py`); waits on R2 |
+| 3.5 Ratiometric strategy | Is the enzyme-ratio heuristic robust? | Module built and tested on a pilot posterior (`posterior_ratio_response.py`); waits on R2 |
+| 3.6 Experimental design | What should we measure next? | Expected-information grid computed at the truth, including the ACP intermediates (`FA_acylACP_conc.py`); R7's two sampled cells are configured |
 | 4. Conclusion | Synthesis | Waits on 3.2-3.5 |
 | SI | Methodological-validity checks | Chain-count and stranded-chain items done; the rest are planned alongside Tier 1 |
 
