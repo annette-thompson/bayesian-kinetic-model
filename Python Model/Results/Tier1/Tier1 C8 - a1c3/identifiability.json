@@ -1,0 +1,55 @@
+{
+ "params": [
+  "a1",
+  "c3"
+ ],
+ "scale": {
+  "a1": "log",
+  "c3": "log"
+ },
+ "shrinkage": {
+  "a1": 0.9555967481063481,
+  "c3": 0.9464669373062752
+ },
+ "weakly_identified": [],
+ "posterior_sd": {
+  "a1": 0.052165379923945834,
+  "c3": 0.0628911720384561
+ },
+ "prior_sd": {
+  "a1": 1.174809900159668,
+  "c3": 1.174809900159668
+ },
+ "correlation": [
+  [
+   1.0,
+   0.4490685309655571
+  ],
+  [
+   0.4490685309655571,
+   0.9999999999999998
+  ]
+ ],
+ "eigen": [
+  {
+   "variance_left": 0.0012614239606565509,
+   "shrinkage_along": 0.9644834691917052,
+   "direction": {
+    "a1": 0.8325581255287783,
+    "c3": -0.5539376929005708
+   }
+  },
+  {
+   "variance_left": 0.003576013619444823,
+   "shrinkage_along": 0.9402002205736106,
+   "direction": {
+    "a1": 0.5539376929005708,
+    "c3": 0.8325581255287783
+   }
+  }
+ ],
+ "posterior": "/Users/annettethompson/Projects/Bayesian Kinetic Model/Python Model/Results/Tier1/Tier1 C8 - a1c3/posterior_samples_pm.nc",
+ "key": null,
+ "config": "/Users/annettethompson/Projects/Bayesian Kinetic Model/Python Model/Results/Tier1/Tier1 C8 - a1c3/solver_params.json",
+ "n_draws": 4000
+}

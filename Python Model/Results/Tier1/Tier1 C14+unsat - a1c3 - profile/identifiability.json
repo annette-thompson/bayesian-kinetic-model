@@ -1,0 +1,55 @@
+{
+ "params": [
+  "a1",
+  "c3"
+ ],
+ "scale": {
+  "a1": "log",
+  "c3": "log"
+ },
+ "shrinkage": {
+  "a1": 0.9462417525274087,
+  "c3": 0.9304628693460544
+ },
+ "weakly_identified": [],
+ "posterior_sd": {
+  "a1": 0.06315572134603373,
+  "c3": 0.08169290952095158
+ },
+ "prior_sd": {
+  "a1": 1.174809900159668,
+  "c3": 1.174809900159668
+ },
+ "correlation": [
+  [
+   0.9999999999999998,
+   -0.03149905192256944
+  ],
+  [
+   -0.03149905192256943,
+   1.0
+  ]
+ ],
+ "eigen": [
+  {
+   "variance_left": 0.0028828482718565094,
+   "shrinkage_along": 0.9463078378917694,
+   "direction": {
+    "a1": 0.9981865923213122,
+    "c3": 0.06019573830402245
+   }
+  },
+  {
+   "variance_left": 0.004842513439051737,
+   "shrinkage_along": 0.9304118297477816,
+   "direction": {
+    "a1": -0.06019573830402245,
+    "c3": 0.9981865923213122
+   }
+  }
+ ],
+ "posterior": "/Users/annettethompson/Projects/Bayesian Kinetic Model/Python Model/Results/Tier1/Tier1 C14+unsat - a1c3 - profile/posterior_samples_pm.nc",
+ "key": null,
+ "config": "/Users/annettethompson/Projects/Bayesian Kinetic Model/Python Model/Results/Tier1/Tier1 C14+unsat - a1c3 - profile/solver_params.json",
+ "n_draws": 4000
+}

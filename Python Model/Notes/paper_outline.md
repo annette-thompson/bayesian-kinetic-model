@@ -68,12 +68,12 @@ behind it.
 | Section | What it answers | Status |
 |---|---|---|
 | 2. Methods | How the model is solved and fit | Solver settings, negative-concentration handling, sampler settings, Tier-1 data design and Tier-1 systems all settled |
-| 3.1 Recovery + calibration | Does it work? | **Single-parameter recovery complete on all 14 truncated systems** (truth recovered everywhere; shrinkage 0.94 to >0.9999). Two-parameter pilots done. R0 (the first Tier-1 fit) running since 2026-09-25. Stage 2 (R1, R3, R5, R8 and the 10-replicate SBC pilot) is configured and waits on R0. All 40 SBC replicates for Fig 3 are built |
+| 3.1 Recovery + calibration | Does it work? | **Single-parameter recovery complete on all 14 truncated systems** (truth recovered everywhere; shrinkage 0.94 to >0.9999). Two-parameter pilots done. R0, the first Tier-1 fit (C8, `a1`+`c3`), recovered both parameters (z +0.90 and −0.32, shrinkage 0.98) and converged cleanly in 5.7 A100-h. Stage 2 (29 runs, ~225 A100-h) has run since 2026-09-26: as of that evening 13 had finished, every one with the truth inside the 95% interval for every parameter, including R1 on the main system (z −0.04 and −0.97) and 5 of the 10 SBC pilot replicates. All 40 SBC replicates for Fig 3 are built |
 | 3.2 Parameter grouping | Were the groupings justified? | Designed (split-group test on `c3`); not run |
 | 3.3 Identifiability | What does the data constrain? | Parameter-level sensitivity screen complete across all 14 systems and 3 objectives. Figs 6/6b module built and tested on a pilot posterior (`identifiability_report.py`); waits on R2 and R3 |
 | 3.4 Sensitivity vs. Morris | Same enzyme targets as before? | Module built and tested on a pilot posterior (`posterior_morris.py`); waits on R2 |
 | 3.5 Ratiometric strategy | Is the enzyme-ratio heuristic robust? | Module built and tested on a pilot posterior (`posterior_ratio_response.py`); waits on R2 |
-| 3.6 Experimental design | What should we measure next? | Expected-information grid computed at the truth, including the ACP intermediates (`FA_acylACP_conc.py`); R7's two sampled cells are configured |
+| 3.6 Experimental design | What should we measure next? | Expected-information grid computed at the truth, including the ACP intermediates (`FA_acylACP_conc.py`). Sampled shrinkage matches its predictions to within 0.01 on the full data (R1) and the profile-only cell (R7); the rates-only cell is running |
 | 4. Conclusion | Synthesis | Waits on 3.2-3.5 |
 | SI | Methodological-validity checks | Chain-count and stranded-chain items done; the rest are planned alongside Tier 1 |
 
@@ -411,9 +411,14 @@ condition-design analyses were run on it:
 - It is where the two TesA free-energy parameters `d1` and `d2` begin to separate (3.3).
 
 Figures that need many repeated fits (calibration, robustness) use a cheap two-parameter
-model on **C8**, provided C8 recovers both parameters cleanly; otherwise they use C12.
-Calibration tests whether the machinery's stated uncertainty is honest, which does not depend
-on network size.
+model on **C8**. The first C8 fit recovered both parameters cleanly, so C12, the fallback,
+is not needed. Calibration tests whether the machinery's stated uncertainty is honest, which
+does not depend on network size. C8 is the smallest truncation where the chain-length
+specificity of FabA, FabZ and TesA is substantially present. On C6, TesA's two hydrolysis
+constants are nearly equal, so `c3` has no internal spread to test, and C6 is no cheaper per
+gradient. FabH's specificity first appears at C14. FabB/FabF's slowdown from C16, which ends
+elongation in the full system, is in no Tier-1 system; every truncation stops at its cap
+instead.
 
 **Drafting first, then choosing what goes to Tier 2.** All Section 3 figures are drafted at
 Tier 1 before any Tier-2 run. The default expectation:
@@ -812,3 +817,83 @@ never as speed claims.
   (3.1), which the diagonal matrix can't sample and a dense one doesn't rescue in 12 h.
 - **Prior width and form:** the prior is wide enough not to presuppose the answer. The
   evidence is the ladder's shrinkage (3.1) and the prior-misspecification curve (Fig 4).
+
+---
+
+## References (working list)
+
+The papers the paper is likely to cite, grouped by what they support. Entries marked [verify]
+need their details checked; add to this list as sections are written. Sources that Tier-1
+settings actually rest on are also listed, with the decision each informed, in
+`tier1_experiment_plan.md`.
+
+**Our prior work**
+- Ruppe et al. (2020). *PNAS*. The enzyme-level Morris screen (Fig. 3E) this paper compares
+  against. [verify full citation]
+- Mains et al. (2022). "ME1": the full kinetic model refitted here, and the ratiometric
+  FabF/FabB-vs-TesA prediction tested in 3.5. [verify full citation]
+
+**Bayesian workflow and HMC**
+- Gelman A, Vehtari A, Simpson D, et al. (2020). Bayesian workflow. arXiv:2011.01808.
+- Betancourt M (2017). A conceptual introduction to Hamiltonian Monte Carlo. arXiv:1701.02434.
+- Hoffman MD, Gelman A (2014). The No-U-Turn Sampler: adaptively setting path lengths in
+  Hamiltonian Monte Carlo. *JMLR* 15:1593-1623.
+
+**Convergence and sampler diagnostics**
+- Vehtari A, Gelman A, Simpson D, Carpenter B, Bürkner P-C (2021). Rank-normalization,
+  folding, and localization: an improved R̂ for assessing convergence of MCMC. *Bayesian
+  Analysis* 16(2):667-718.
+- Betancourt M (2016). Diagnosing suboptimal cotangent disintegrations in Hamiltonian Monte
+  Carlo. arXiv:1604.00695. (BFMI)
+- Säilynoja T, Bürkner P-C, Vehtari A (2022). Graphical test for discrete uniformity and its
+  applications in goodness-of-fit evaluation and multiple sample comparison. *Statistics and
+  Computing* 32:32. (Rank-ECDF plots and simultaneous envelopes; the SI's mixing-check point.)
+
+**Calibration (Fig 3)**
+- Talts S, Betancourt M, Simpson D, Vehtari A, Gelman A (2018). Validating Bayesian inference
+  algorithms with simulation-based calibration. arXiv:1804.06788.
+- Modrák M, et al. (2023). Simulation-based calibration checking for Bayesian computation: the
+  choice of test quantities shapes sensitivity. *Bayesian Analysis*. [verify]
+
+**Model comparison (Fig 5)**
+- Vehtari A, Gelman A, Gabry J (2017). Practical Bayesian model evaluation using leave-one-out
+  cross-validation and WAIC. *Statistics and Computing* 27:1413-1432.
+- Vehtari A, Simpson D, Gelman A, Yao Y, Gabry J (2024). Pareto smoothed importance sampling.
+  *JMLR* 25(72):1-58.
+
+**Identifiability and sensitivity (3.3, 3.4)**
+- Brun R, Reichert P, Künsch HR (2001). Practical identifiability analysis of large
+  environmental simulation models. *Water Resources Research* 37(4):1015-1030.
+- Gutenkunst RN, Waterfall JJ, Casey FP, Brown KS, Myers CR, Sethna JP (2007). Universally
+  sloppy parameter sensitivities in systems biology models. *PLoS Computational Biology*
+  3(10):e189.
+- Raue A, Kreutz C, Maiwald T, et al. (2009). Structural and practical identifiability
+  analysis of partially observed dynamical models by exploiting the profile likelihood.
+  *Bioinformatics* 25(15):1923-1929.
+- Morris MD (1991). Factorial sampling plans for preliminary computational experiments.
+  *Technometrics* 33(2):161-174.
+- Campolongo F, Cariboni J, Saltelli A (2007). An effective screening design for sensitivity
+  analysis of large models. *Environmental Modelling & Software* 22(10):1509-1518.
+
+**Experimental design (3.6, Fig 9)**
+- Lindley DV (1956). On a measure of the information provided by an experiment. *Annals of
+  Mathematical Statistics* 27(4):986-1005.
+- Chaloner K, Verdinelli I (1995). Bayesian experimental design: a review. *Statistical
+  Science* 10(3):273-304.
+
+**Numerics and software (Methods)**
+- Kværnø A (2004). Singly diagonally implicit Runge-Kutta methods with an explicit first stage.
+  *BIT Numerical Mathematics* 44(3):489-502. (Kvaerno5)
+- Söderlind G (2003). Digital filters in adaptive time-stepping. *ACM Transactions on
+  Mathematical Software* 29(1):1-26. (PID step-size control)
+- Kidger P (2021). On neural differential equations. PhD thesis, University of Oxford.
+  arXiv:2202.02435. (diffrax)
+- Bradbury J, Frostig R, Hawkins P, et al. (2018). JAX: composable transformations of
+  Python+NumPy programs. http://github.com/google/jax
+- Abril-Pla O, Andreani V, Carroll C, et al. (2023). PyMC: a modern, and comprehensive
+  probabilistic programming framework in Python. *PeerJ Computer Science* 9:e1516.
+- Cabezas A, Corenflos A, Lao J, Louf R, et al. (2024). BlackJAX: composable Bayesian
+  inference in JAX. arXiv:2402.10797. [verify author list]
+- Kumar R, Carroll C, Hartikainen A, Martin O (2019). ArviZ a unified library for exploratory
+  analysis of Bayesian models in Python. *Journal of Open Source Software* 4(33):1143.
+
