@@ -1,8 +1,7 @@
-"""Plot the standard trace diagnostics for a finished (or in-progress)
-resumable run, from its saved posterior netcdf -- the same trace_plot.png
-artifact the notebook workflow produces, without needing to open the
-notebook. (trace_plot_hist.pdf is intentionally not produced here -- the
-prior/posterior panels in trace_plot.png already cover that.)
+"""Plot prior vs. posterior and the chain traces, prior_posterior_traces.png, for a finished
+(or in-progress) resumable run from its saved posterior netcdf: the same figure the notebook
+workflow draws, without opening the notebook. (trace_plot_hist.pdf is intentionally not
+produced here -- the prior/posterior panels already cover that.)
 
 Usage (from the "Python Model" directory):
     python Utilities/plot_trace_diagnostics.py --solver_params_file "Results/<run>/solver_params.json"
@@ -14,6 +13,7 @@ import argparse
 import arviz as az
 
 from inference_plotting import (
+    DIAGNOSTIC_FILES,
     compute_convergence_criteria_met_at,
     ess_threshold_for,
     plot_posterior_trace_diagnostics,
@@ -75,7 +75,7 @@ def main() -> None:
     trace_result = plot_posterior_trace_diagnostics(
         inf_data=inf_data,
         free_params=free_params,
-        save_file=str(imported.results_save_dir / "trace_plot.png"),
+        save_file=str(imported.results_save_dir / DIAGNOSTIC_FILES["trace"]),
         include_tuning=include_tuning,
         criteria_met_at=criteria_met_at,
         system_name=system_name,

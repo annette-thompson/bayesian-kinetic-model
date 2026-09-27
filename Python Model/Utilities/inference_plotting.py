@@ -308,7 +308,7 @@ def plot_posterior_trace_diagnostics(
 
     n_params = len(selected_free_params)
     # 3 rows: prior, posterior, trace; one (wide) column per param.
-    fig, axes = plt.subplots(3, n_params, figsize=(10.0 * n_params, 12.0), squeeze=False)
+    fig, axes = plt.subplots(3, n_params, figsize=(10.0 * n_params, 13.5), squeeze=False)
 
     prior_group = getattr(inf_data, "prior", None)
 
@@ -366,9 +366,9 @@ def plot_posterior_trace_diagnostics(
 
         prior_ax.set_title(f"{param_name} Prior vs. Posterior")
         prior_ax.set_xlabel("Parameter Value")
-        prior_ax.set_ylabel("Relative density (each scaled to peak 1)")
+        prior_ax.set_ylabel("Normalized Density")
         if drew_prior or posterior_flat.size:
-            prior_ax.legend(loc="best")
+            prior_ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.3), ncol=2)
 
         # Panel 2: posterior alone, true density, auto-scaled -- necessarily far more
         # zoomed than panel 1 because the posterior is the narrower of the two.
@@ -386,9 +386,10 @@ def plot_posterior_trace_diagnostics(
         else:
             density_ax.text(0.5, 0.5, "No finite samples", ha="center", va="center")
 
-        density_ax.set_title(f"{param_name} Posterior (zoomed)")
+        density_ax.set_title(f"{param_name} Posterior")
         density_ax.set_xlabel("Parameter Value")
         density_ax.set_ylabel("Density")
+        _plain_ticks_if_narrow_log(density_ax, "x")
 
         trace_ax = axes[2, col_index]
         trace_series, posterior_start_idx = _extract_trace_series(
@@ -404,6 +405,9 @@ def plot_posterior_trace_diagnostics(
             chain_lines.append(line)
 
         marker_lines = []
+        if include_tuning and posterior_start_idx > 0:
+            # Shade warmup as in the convergence figure, so it reads as context.
+            trace_ax.axvspan(0, posterior_start_idx - 0.5, color="0.85", alpha=0.45, zorder=0)
         if include_tuning and posterior_start_line and posterior_start_idx > 0:
             start_line = trace_ax.axvline(
                 posterior_start_idx - 0.5,
@@ -411,7 +415,7 @@ def plot_posterior_trace_diagnostics(
                 linestyle="--",
                 linewidth=1.5,
                 alpha=0.8,
-                label="Posterior start (end of warmup)",
+                label="End of Warmup",
             )
             marker_lines.append(start_line)
 
@@ -425,12 +429,14 @@ def plot_posterior_trace_diagnostics(
                 color="firebrick",
                 linestyle=":",
                 linewidth=1.8,
-                label=f"Criteria met (draw {criteria_met_at})",
+                label="Criteria Met",
             )
             marker_lines.append(criteria_line)
+            _mark_criteria_met(trace_ax, criteria_met_at)
 
         if marker_lines:
-            trace_ax.legend(handles=marker_lines, loc="lower right", fontsize="small")
+            # Below the axes, beside the chain legend, rather than over the traces.
+            trace_ax.legend(handles=marker_lines, loc="upper left", bbox_to_anchor=(0.52, -0.32))
             trace_ax.add_artist(trace_ax.get_legend())
 
         # Warmup can span orders of magnitude more than the settled posterior
@@ -439,23 +445,24 @@ def plot_posterior_trace_diagnostics(
         finite_trace = trace_series[np.isfinite(trace_series)]
         if include_tuning and finite_trace.size > 0 and np.all(finite_trace > 0.0):
             trace_ax.set_yscale("log")
+            _plain_ticks_if_narrow_log(trace_ax, "y")
 
         trace_ax.set_title(f"{param_name} Trace")
-        trace_ax.set_xlabel("Draw")
+        trace_ax.set_xlabel("Cumulative Draws" if include_tuning else "Sampling Draws")
         trace_ax.set_ylabel("Parameter Value")
         trace_ax.legend(
             handles=chain_lines,
             title="Chains",
-            loc="upper center",
-            bbox_to_anchor=(0.5, -0.32),
+            loc="upper right" if marker_lines else "upper center",
+            bbox_to_anchor=(0.48 if marker_lines else 0.5, -0.32),
             ncol=min(len(chain_lines), 12),
             handlelength=1.0,
             columnspacing=0.8,
             handletextpad=0.4,
         )
 
-    fig.suptitle(f"{system_name} — Posterior Trace Diagnostics" if system_name else "Posterior Trace Diagnostics")
-    fig.tight_layout(rect=(0.0, 0.05, 1.0, 0.98))
+    fig.tight_layout(rect=(0.0, 0.05, 1.0, 0.97))
+    place_suptitle(fig, _diagnostic_title("trace", system_name))
 
     plot_file = None
     if save_file:
@@ -640,51 +647,46 @@ def plot_convergence_diagnostics(
 
     fig, (rhat_ax, ess_ax, div_ax) = plt.subplots(3, 1, figsize=(9.0, 9.0), sharex=True)
 
-    rhat_ax.plot(draw_counts, rhats, marker="o", markersize=3.0, linewidth=1.5, label="Worst-case r-hat")
-    rhat_ax.axhline(rhat_threshold, color="black", linestyle="--", linewidth=1.2, label=f"Threshold ({rhat_threshold})")
-    rhat_ax.set_ylabel("r-hat")
-    rhat_ax.set_title("r-hat")
-    rhat_ax.legend(loc="best")
+    # Each threshold's value is labelled on the right of its panel, and the draw the criteria
+    # were met at along the top; the legend below names the lines without their values.
+    rhat_ax.plot(draw_counts, rhats, marker="o", markersize=3.0, linewidth=1.5)
+    threshold_handle = _threshold_lines(rhat_ax, [rhat_threshold])
+    rhat_ax.set_ylabel("Worst-Case r-hat")
     plt.setp(rhat_ax.get_xticklabels(), visible=False)
 
-    ess_ax.plot(draw_counts, esses, marker="o", markersize=3.0, linewidth=1.5, color="tab:orange", label="Min bulk-ESS")
-    ess_ax.axhline(ess_threshold, color="black", linestyle="--", linewidth=1.2, label=f"Threshold ({ess_threshold:.0f})")
-    ess_ax.set_ylabel("Bulk-ESS")
-    ess_ax.legend(loc="best")
+    ess_ax.plot(draw_counts, esses, marker="o", markersize=3.0, linewidth=1.5, color="tab:orange")
+    _threshold_lines(ess_ax, [ess_threshold])
+    ess_ax.set_ylabel("Min Bulk-ESS")
     plt.setp(ess_ax.get_xticklabels(), visible=False)
 
     div_x = np.arange(1, n_draws + 1) + n_tune
-    div_ax.plot(div_x, cum_divergences, linewidth=1.5, color="tab:red", label=f"Cumulative divergences (total={total_divergences})")
-    div_ax.set_xlabel("Cumulative draws (including warmup)" if n_tune else "Cumulative sampling draws")
-    div_ax.set_ylabel("Divergences")
+    div_ax.plot(div_x, cum_divergences, linewidth=1.5, color="tab:red")
+    div_ax.set_xlabel("Cumulative Draws" if n_tune else "Sampling Draws")
+    div_ax.set_ylabel("Cumulative Divergences")
     if total_divergences == 0:
         div_ax.set_ylim(-0.5, 1.0)
-    div_ax.legend(loc="best")
 
+    from matplotlib.lines import Line2D
+    legend_handles = []
     if n_tune:
         for ax in (rhat_ax, ess_ax, div_ax):
             # Shade warmup so it reads as context, not as part of the criterion.
             ax.axvspan(0, n_tune, color="0.85", alpha=0.45, zorder=0)
-            ax.axvline(n_tune, color="black", linestyle="--", linewidth=1.2, alpha=0.7,
-                       label=f"End of warmup ({n_tune}, excluded from criteria)")
-        rhat_ax.legend(loc="best")
-        ess_ax.legend(loc="best")
-        div_ax.legend(loc="best")
+            ax.axvline(n_tune, color="black", linestyle="--", linewidth=1.2, alpha=0.7)
+        legend_handles.append(Line2D([], [], color="black", linestyle="--", linewidth=1.2, alpha=0.7,
+                                     label="End of Warmup"))
 
     if criteria_met_at is not None:
         for ax in (rhat_ax, ess_ax, div_ax):
-            ax.axvline(
-                criteria_met_at, color="firebrick", linestyle=":", linewidth=1.8,
-                label=f"Criteria met ({criteria_met_sampling} sampling draws)",
-            )
-        rhat_ax.legend(loc="best")
-        ess_ax.legend(loc="best")
-        div_ax.legend(loc="best")
+            ax.axvline(criteria_met_at, color="firebrick", linestyle=":", linewidth=1.8)
+        _mark_criteria_met(rhat_ax, criteria_met_at)
+        legend_handles.append(Line2D([], [], color="firebrick", linestyle=":", linewidth=1.8, label="Criteria Met"))
+    legend_handles.append(threshold_handle)
+    div_ax.legend(handles=legend_handles, loc="upper center", bbox_to_anchor=(0.5, -0.35),
+                  ncol=len(legend_handles))
 
-    fig.suptitle(
-        f"{system_name} — Convergence Diagnostics" if system_name else "Convergence Diagnostics vs. Sampling Draws"
-    )
     fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.96))
+    place_suptitle(fig, _diagnostic_title("convergence", system_name))
 
     plot_file = None
     if save_file:
@@ -738,37 +740,37 @@ def plot_energy_diagnostics(
     except Exception:  # noqa: BLE001 - BFMI needs sample_stats.energy; absent on older saved runs
         bfmi = np.array([])
 
-    fig, (bfmi_ax, energy_ax) = plt.subplots(1, 2, figsize=(11.0, 4.5))
+    fig, (bfmi_ax, energy_ax) = plt.subplots(1, 2, figsize=(12.0, 4.5))
 
     if bfmi.size:
         chain_idx = np.arange(bfmi.size)
         colors = ["tab:red" if b < bfmi_threshold else "tab:blue" for b in bfmi]
         bfmi_ax.bar(chain_idx, bfmi, color=colors)
-        bfmi_ax.axhline(bfmi_threshold, color="black", linestyle="--", linewidth=1.2, label=f"Caution threshold ({bfmi_threshold})")
+        threshold_handle = _threshold_lines(bfmi_ax, [bfmi_threshold])
         bfmi_ax.set_xticks(chain_idx)
-        bfmi_ax.legend(loc="best")
+        bfmi_ax.legend(handles=[threshold_handle], loc="upper center", bbox_to_anchor=(0.5, -0.33))
     else:
         bfmi_ax.text(0.5, 0.5, "BFMI unavailable\n(no energy stat)", ha="center", va="center")
     bfmi_ax.set_xlabel("Chain")
     bfmi_ax.set_ylabel("BFMI")
-    bfmi_ax.set_title("Energy Fraction of\nMissing Information")
+    bfmi_ax.set_title("Energy Fraction of Missing Information")
 
     energy_vals = np.asarray(inf_data.sample_stats["energy"].values, dtype=float) if "energy" in inf_data.sample_stats else None
     if energy_vals is not None and energy_vals.size:
         centered = energy_vals - energy_vals.mean(axis=1, keepdims=True)
         marginal = centered.reshape(-1)
         transition = np.diff(centered, axis=1).reshape(-1)
-        sns.kdeplot(marginal, ax=energy_ax, fill=True, alpha=0.4, label="marginal")
-        sns.kdeplot(transition, ax=energy_ax, fill=True, alpha=0.4, label="transition")
-        energy_ax.legend(loc="best")
+        sns.kdeplot(marginal, ax=energy_ax, fill=True, alpha=0.4, label="Marginal")
+        sns.kdeplot(transition, ax=energy_ax, fill=True, alpha=0.4, label="Transition")
+        energy_ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.33), ncol=2)
     else:
         energy_ax.text(0.5, 0.5, "Energy distribution\nunavailable", ha="center", va="center")
-    energy_ax.set_xlabel("Energy - mean(Energy)")
+    energy_ax.set_xlabel("Energy - Mean(Energy)")
     energy_ax.set_ylabel("Density")
     energy_ax.set_title("Marginal vs. Transition Energy")
 
-    fig.suptitle(f"{system_name} — Energy Diagnostics" if system_name else "Energy Diagnostics")
     fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.92))
+    place_suptitle(fig, _diagnostic_title("energy", system_name))
 
     plot_file = None
     if save_file:
@@ -788,14 +790,63 @@ def plot_energy_diagnostics(
     }
 
 
+def plot_rank_diagnostics(
+    inf_data: az.InferenceData,
+    free_params: list[str],
+    save_file: str | None = None,
+    show: bool = False,
+    system_name: str | None = None,
+) -> dict[str, Any]:
+    """Per-chain rank ECDF against the 95% envelope expected of well-mixed chains (arviz's
+    plot_rank), restyled to match the other diagnostic figures. A mixing check that is more
+    informative than overlaid traces once there are several correlated parameters."""
+    _apply_plot_style()
+    rank_pc = az.plot_rank(inf_data, var_names=free_params, backend="matplotlib")
+    # arviz leaves the y-axis unlabelled, has no legend and sizes its own text smaller than the
+    # other figures. The PlotCollection exposes the real matplotlib Axes and Line2D objects
+    # under viz["plot"] and viz["ecdf_lines"], so all of that is set on them directly.
+    fig = rank_pc.viz["figure"].item()
+    for var_name in free_params:
+        try:
+            ax = rank_pc.viz["plot"][var_name].item()
+            lines = rank_pc.viz["ecdf_lines"][var_name].values
+        except (KeyError, AttributeError):
+            continue
+        ax.set_xlabel("Fractional Ranks", fontsize=PLOT_FONT_SIZE)
+        ax.set_ylabel("ECDF - Uniform", fontsize=PLOT_FONT_SIZE)
+        ax.title.set_fontsize(PLOT_FONT_SIZE)
+        ax.tick_params(labelsize=PLOT_FONT_SIZE)
+        ax.legend(
+            handles=list(lines),
+            labels=[str(i) for i in range(len(lines))],
+            title="Chains",
+            loc="upper center",
+            bbox_to_anchor=(0.5, -0.3),
+            ncol=min(len(lines), 12),
+            handlelength=1.0,
+            columnspacing=0.8,
+            handletextpad=0.4,
+            fontsize=PLOT_FONT_SIZE,
+            title_fontsize=PLOT_FONT_SIZE,
+        )
+    fig.set_size_inches(6.0 * len(free_params), 4.5)
+    fig.tight_layout()
+    place_suptitle(fig, _diagnostic_title("rank", system_name))
+
+    plot_file = _save_figure(fig, save_file)
+    if not show:
+        plt.close(fig)
+    return {"figure": fig, "plot_file": plot_file}
+
+
 def plot_loo_diagnostics(
     inf_data: az.InferenceData,
     save_file: str | None = None,
     show: bool = False,
     system_name: str | None = None,
 ) -> dict[str, Any]:
-    """PSIS-LOO model-comparison diagnostics in one figure: per-observation
-    Pareto k (left) plus an elpd_loo/p_loo text summary (right).
+    """PSIS-LOO model-comparison diagnostics: per-observation Pareto k against arviz's good /
+    bad / very bad grades, with elpd_loo and p_loo below the legend.
 
     WAIC is intentionally not included -- this arviz version has dropped it
     from the public API entirely (only loo and its variants remain), which
@@ -809,8 +860,7 @@ def plot_loo_diagnostics(
     caught here and shown as a placeholder rather than raised.
     """
     _apply_plot_style()
-    fig, (khat_ax, text_ax) = plt.subplots(1, 2, figsize=(12.0, 4.5), gridspec_kw={"width_ratios": (2.0, 1.0)})
-    text_ax.axis("off")
+    fig, khat_ax = plt.subplots(figsize=(7.5, 5.0))
 
     loo_result = None
     error_message = None
@@ -820,36 +870,45 @@ def plot_loo_diagnostics(
         error_message = f"{type(exc).__name__}: {exc}"
 
     if loo_result is not None:
+        from matplotlib.patches import Patch
+        from matplotlib.ticker import MultipleLocator
+
         khat = np.asarray(loo_result.pareto_k.values, dtype=float).reshape(-1)
         obs_index = np.arange(khat.size)
         good_k = float(loo_result.good_k) if loo_result.good_k is not None else 0.7
-        colors = np.where(khat > 1.0, "darkred", np.where(khat > good_k, "tab:orange", "tab:blue"))
-        khat_ax.scatter(obs_index, khat, c=colors, s=25.0)
-        for threshold, style in ((good_k, "--"), (1.0, ":")):
-            khat_ax.axhline(threshold, color="black", linestyle=style, linewidth=1.0)
-        khat_ax.set_xlabel("Observation index")
+        # arviz's three grades, shaded behind the points in the status colours: good (the
+        # estimate is reliable), bad (noisy and biased), very bad (the importance weights have
+        # infinite mean, so there is no usable estimate for that observation).
+        y_low = min(0.0, float(khat.min())) - 0.05
+        y_high = max(1.2, float(khat.max()) + 0.05)
+        bands = [("Good", y_low, good_k, "#0ca30c"), ("Bad", good_k, 1.0, "#fab219"),
+                 ("Very Bad", 1.0, y_high, "#d03b3b")]
+        for _, lo, hi, color in bands:
+            khat_ax.axhspan(lo, hi, color=color, alpha=0.12, linewidth=0, zorder=0)
+        khat_ax.scatter(obs_index, khat, color="tab:blue", s=25.0, zorder=3)
+        threshold_handle = _threshold_lines(khat_ax, [good_k, 1.0])
+        khat_ax.set_ylim(y_low, y_high)
+        khat_ax.xaxis.set_major_locator(MultipleLocator(3))
+        band_handles = [Patch(color=color, alpha=0.25, label=label) for label, _, _, color in bands]
+        legend = khat_ax.legend(handles=band_handles + [threshold_handle], loc="upper center",
+                                bbox_to_anchor=(0.5, -0.3), ncol=len(band_handles) + 1)
+        khat_ax.set_xlabel("Observation Index")
         khat_ax.set_ylabel("Pareto k")
         khat_ax.set_title("PSIS-LOO Pareto k Diagnostic")
 
-        n_bad = int(np.sum(khat > good_k))
-        summary_lines = [
-            f"elpd_loo = {loo_result.elpd:.2f} ± {loo_result.se:.2f}",
-            f"p_loo = {loo_result.p:.2f}",
-            f"n observations = {loo_result.n_data_points}",
-            f"good_k threshold = {good_k:.2f}",
-            f"k > threshold: {n_bad}/{khat.size}"
-            + (" (unreliable -- treat elpd_loo cautiously)" if n_bad else " (all reliable)"),
-        ]
+        # Anchored to the legend box, so it stays just below it whatever the figure size.
+        khat_ax.annotate(f"elpd_loo = {loo_result.elpd:.2f} ± {loo_result.se:.2f}      p_loo = {loo_result.p:.2f}",
+                         xy=(0.5, 0.0), xycoords=legend, xytext=(0, -8), textcoords="offset points",
+                         ha="center", va="top", fontsize=PLOT_FONT_SIZE)
     else:
-        khat_ax.text(0.5, 0.5, "LOO unavailable\n(see summary panel)", ha="center", va="center")
+        khat_ax.text(0.5, 0.5, "LOO unavailable", ha="center", va="center")
         khat_ax.set_xticks([])
         khat_ax.set_yticks([])
-        summary_lines = ["LOO could not be computed:", error_message or "unknown error"]
+        khat_ax.annotate(error_message or "unknown error", xy=(0.5, 0.0), xycoords="axes fraction",
+                         xytext=(0, -12), textcoords="offset points", ha="center", va="top", wrap=True)
 
-    text_ax.text(0.0, 0.95, "\n".join(summary_lines), transform=text_ax.transAxes, va="top", fontsize=13)
-
-    fig.suptitle(f"{system_name} — LOO Diagnostics" if system_name else "LOO Diagnostics")
     fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.92))
+    place_suptitle(fig, _diagnostic_title("loo", system_name))
 
     plot_file = None
     if save_file:
@@ -863,7 +922,7 @@ def plot_loo_diagnostics(
 
     return {
         "figure": fig,
-        "axes": (khat_ax, text_ax),
+        "axes": (khat_ax,),
         "loo_result": loo_result,
         "error_message": error_message,
         "plot_file": plot_file,
@@ -1407,6 +1466,105 @@ def _validate_feasibility_mask(
     return mask
 
 
+# Each diagnostic figure's title: "<run> — <title>" on its own, and its section heading in
+# plot_run_summary.py's combined figure.
+DIAGNOSTIC_TITLES = {
+    "trace": "Prior vs. Posterior and Chain Traces",
+    "convergence": "Convergence: r-hat, Bulk-ESS and Divergences",
+    "energy": "Sampler Energy: BFMI and Energy Transitions",
+    "loo": "Leave-One-Out Cross-Validation (PSIS-LOO)",
+    "rank": "Chain Mixing: Rank ECDF vs 95% Envelope",
+    "predictive": "Posterior Predictive Checks",
+}
+
+
+# ...and its file in the run folder, named after that title.
+DIAGNOSTIC_FILES = {
+    "trace": "prior_posterior_traces.png",
+    "convergence": "convergence.png",
+    "energy": "sampler_energy.png",
+    "loo": "leave_one_out.png",
+    "rank": "chain_mixing.png",
+    "predictive": "predictive_checks.png",
+}
+
+
+def _diagnostic_title(kind: str, system_name: str | None) -> str:
+    return f"{system_name} — {DIAGNOSTIC_TITLES[kind]}" if system_name else DIAGNOSTIC_TITLES[kind]
+
+
+# Every threshold line, in every diagnostic figure: dash-dot, so it reads differently from the
+# dashed end-of-warmup line, with its value labelled on the right of the axes.
+THRESHOLD_STYLE = {"color": "black", "linestyle": "-.", "linewidth": 1.2}
+
+
+def _threshold_lines(ax: Any, values: list[float]) -> Any:
+    """Draw each threshold across ax and label its value on the right. Returns a legend handle."""
+    from matplotlib.lines import Line2D
+
+    for value in values:
+        ax.axhline(value, **THRESHOLD_STYLE)
+    right = ax.secondary_yaxis("right")
+    right.set_yticks(list(values), [f"{round(v, 3):g}" for v in values])   # 0.687902 -> 0.688
+    right.tick_params(length=4)
+    return Line2D([], [], **THRESHOLD_STYLE, label="Threshold")
+
+
+def _mark_criteria_met(ax: Any, x: float) -> None:
+    """Label the criteria-met draw along the top of ax, in the marker line's colour."""
+    top = ax.secondary_xaxis("top")
+    top.set_xticks([x], [f"{x:g}"])
+    top.tick_params(colors="firebrick", length=4)
+
+
+def _plain_ticks_if_narrow_log(ax: Any, which: str) -> None:
+    """On a log axis spanning under a decade, label a few round values as plain decimals
+    (0.9, 1, 1.1) instead of the log formatter's 9×10⁻¹ style."""
+    from matplotlib.ticker import FixedLocator, FuncFormatter, MaxNLocator, NullLocator
+
+    axis = ax.xaxis if which == "x" else ax.yaxis
+    if axis.get_scale() != "log":
+        return
+    ax.autoscale_view()
+    lo, hi = sorted(ax.get_xlim() if which == "x" else ax.get_ylim())
+    if lo <= 0 or hi / lo >= 10:
+        return
+    ticks = [t for t in MaxNLocator(nbins=5).tick_values(lo, hi) if lo <= t <= hi]
+    axis.set_major_locator(FixedLocator(ticks))
+    axis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:g}"))
+    axis.set_minor_locator(NullLocator())
+
+
+def _display_units(text: str) -> str:
+    """uM -> µM for display; data columns and observable names keep the ASCII spelling."""
+    return re.sub(r"\buM\b", "µM", text)
+
+
+def figure_renderer(fig: Any) -> Any:
+    """The figure's renderer. A figure closed through pyplot keeps only a FigureCanvasBase in
+    matplotlib 3.11, which has no get_renderer, so an Agg canvas is attached first."""
+    if not hasattr(fig.canvas, "get_renderer"):
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+        FigureCanvasAgg(fig)
+    return fig.canvas.get_renderer()
+
+
+def place_suptitle(fig: Any, text: str, gap_in: float = 0.15, **text_kwargs: Any) -> Any:
+    """Put the figure title gap_in inches above the highest thing any axes draws (its title,
+    tick labels, secondary axes), instead of at the figure's top edge, where layouts with
+    spare headroom leave it floating well clear of the plots. Call after the layout is final;
+    save with bbox_inches="tight", since the title can land above y = 1."""
+    renderer = figure_renderer(fig)
+    to_fig = fig.transFigure.inverted()
+    top = 0.0
+    for ax in fig.axes:
+        if not ax.get_visible():
+            continue
+        box = ax.get_tightbbox(renderer)
+        top = max(top, float(to_fig.transform((0.0, box.y1))[1]))
+    return fig.suptitle(text, y=top + gap_in / fig.get_size_inches()[1], va="bottom", **text_kwargs)
+
+
 def _save_figure(fig: Any, save_file: str | None) -> str | None:
     if not save_file:
         return None
@@ -1428,6 +1586,7 @@ def plot_predictive_time_vs_observable(
     posterior_color: str = "C0",
     observed_color: str = "C1",
     ax: Any | None = None,
+    title: str | None = None,
 ) -> tuple[Any, Any]:
     _apply_plot_style()
     standalone = ax is None
@@ -1460,9 +1619,9 @@ def plot_predictive_time_vs_observable(
         label="Observed",
     )
 
-    ax.set_title(f"Time Course: {output_name}")
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y_label)
+    ax.set_title(_display_units(title if title is not None else f"Time Course: {output_name}"))
+    ax.set_xlabel(_display_units(x_label))
+    ax.set_ylabel(_display_units(y_label))
     ax.legend(loc="best")
     if standalone:
         fig.tight_layout()
@@ -1537,8 +1696,8 @@ def plot_predictive_observable_vs_initial_concentration_table(
     ax.set_xlim(-0.5, n_points - 0.5)
     ax.margins(x=0.0)
 
-    ax.set_title(f"Final Concentration vs Initial Conditions: {output_name}")
-    ax.set_ylabel(y_label)
+    ax.set_title(_display_units(f"Final Concentration vs Initial Conditions: {output_name}"))
+    ax.set_ylabel(_display_units(y_label))
     # The table columns provide the bar reference, so hide numeric x-axis tick labels.
     ax.set_xticks([])
     ax.legend(loc="best")
@@ -1598,7 +1757,7 @@ def plot_predictive_observable_vs_initial_concentration_table(
             fig.text(
                 0.5,
                 0.03,
-                "Initial Conditions (uM)",
+                _display_units("Initial Conditions (uM)"),
                 ha="center",
                 va="center",
                 fontsize=TABLE_FONT_SIZE,
@@ -1610,7 +1769,7 @@ def plot_predictive_observable_vs_initial_concentration_table(
             ax.text(
                 0.5,
                 table_bottom - 0.04,
-                "Initial Conditions (uM)",
+                _display_units("Initial Conditions (uM)"),
                 ha="center",
                 va="top",
                 fontsize=TABLE_FONT_SIZE,
@@ -1620,6 +1779,210 @@ def plot_predictive_observable_vs_initial_concentration_table(
         ax.set_xlabel("Initial Conditions")
 
     return fig, ax
+
+# --- Tier-1 layout: time series (A) over product profile (B), initial rates with their
+# conditions table (C) to the right. Used when the datasets have that shape; anything else
+# keeps the one-row-per-observable layout in plot_predictive.
+_PROFILE_OBSERVABLE = re.compile(r"^C(\d+)_FA(_unsat)? \(uM\)$")
+
+
+def _tier1_predictive_panels(panel_specs: list[dict[str, Any]]) -> tuple | None:
+    """(time series spec or None, [profile specs], rates spec or None), or None when the
+    specs are not one time-series observable, one single-condition chain-length profile and
+    one observable across conditions."""
+    specs = [spec for spec in panel_specs if spec["output_name"] != "Total FA (uM)"]
+    series = [spec for spec in specs if spec["dataset_type"] != "endpoint"]
+    endpoint = [spec for spec in specs if spec["dataset_type"] == "endpoint"]
+    profile = [spec for spec in endpoint
+               if _PROFILE_OBSERVABLE.match(spec["output_name"]) and spec["observed_values"].size == 1]
+    rates = [spec for spec in endpoint if spec not in profile]
+    if (len(series) > 1 or len(rates) > 1 or len({spec["dataset_name"] for spec in profile}) > 1
+            or (rates and rates[0]["observed_values"].size < 2) or not (profile or rates)):
+        return None
+    return (series[0] if series else None), profile, (rates[0] if rates else None)
+
+
+def _format_concentration(text: str) -> str:
+    """'1e+03' -> '1000', '0.1' -> '0.1': the table reads better without exponents."""
+    value = float(text)
+    return str(int(value)) if value == int(value) and abs(value) < 1e5 else f"{value:.3g}"
+
+
+def _plot_profile_panel(ax: Any, profile_specs: list[dict[str, Any]], posterior_color: str,
+                        observed_color: str) -> None:
+    """Posterior (mean, 95% interval) and observed bars for each chain length. An unsaturated
+    product is stacked, hatched, on its chain length's saturated bar, with its own interval
+    drawn at the top of the stack."""
+    from matplotlib.colors import to_rgba
+    from matplotlib.patches import Patch
+
+    by_length: dict[int, dict[bool, dict[str, Any]]] = {}
+    for spec in profile_specs:
+        match = _PROFILE_OBSERVABLE.match(spec["output_name"])
+        by_length.setdefault(int(match.group(1)), {})[bool(match.group(2))] = spec
+    lengths = sorted(by_length)
+    positions = np.arange(len(lengths))
+    width = 0.38
+
+    def stats(spec):
+        if spec is None:
+            return 0.0, 0.0, 0.0, 0.0, 0.0
+        draws = spec["posterior_chunk"][:, 0]
+        low, high = np.nanpercentile(draws, [2.5, 97.5])
+        return (float(np.nanmean(draws)), float(low), float(high), float(spec["observed_values"][0]),
+                float(spec["observed_sigma"][0]))
+
+    tops = []
+    for x, n in zip(positions, lengths):
+        sat, unsat = stats(by_length[n].get(False)), stats(by_length[n].get(True))
+        for offset, color, value, err, alpha in (
+            (-width / 2, posterior_color, (sat[0], unsat[0]), ((sat[0] - sat[1], sat[2] - sat[0]), (unsat[0] - unsat[1], unsat[2] - unsat[0])), 0.45),
+            (width / 2, observed_color, (sat[3], unsat[3]), ((sat[4], sat[4]), (unsat[4], unsat[4])), 0.55),
+        ):
+            face = to_rgba(color, alpha)
+            if False in by_length[n]:
+                ax.bar(x + offset, value[0], width=width, color=face)
+                ax.errorbar(x + offset, value[0], yerr=[[err[0][0]], [err[0][1]]], fmt="none", ecolor=color, capsize=3)
+            if True in by_length[n]:
+                ax.bar(x + offset, value[1], width=width, bottom=value[0], facecolor=face, edgecolor=color,
+                       hatch="///", linewidth=0)
+                ax.errorbar(x + offset, value[0] + value[1], yerr=[[err[1][0]], [err[1][1]]], fmt="none",
+                            ecolor=color, capsize=3)
+            tops.extend([value[0], value[0] + value[1]])
+    ax.set_xticks(positions, [str(n) for n in lengths])
+    ax.set_xlim(-0.5, len(lengths) - 0.5)
+    has_unsat = any(True in species for species in by_length.values())
+    positive = np.asarray([v for v in tops if v > 0], dtype=float)
+    # Log when the short products sit orders of magnitude below the main one, except with
+    # unsaturated products: a stacked segment's length means nothing on a log axis.
+    if not has_unsat and positive.size and positive.max() / positive.min() > 20:
+        ax.set_yscale("log")
+        ax.set_ylim(bottom=positive.min() / 3)
+    handles = [Patch(color=to_rgba(posterior_color, 0.45), label="Posterior Mean"),
+               Patch(color=to_rgba(observed_color, 0.55), label="Observed")]
+    if has_unsat:
+        handles.append(Patch(facecolor="white", edgecolor="0.35", hatch="///", linewidth=0, label="Unsaturated"))
+    ax.set_title("Product Profile")
+    ax.set_xlabel("Chain Length")
+    ax.set_ylabel(_display_units("Concentration (uM)"))
+    ax.legend(handles=handles, loc="best")
+
+
+def _plot_rates_panel(ax: Any, spec: dict[str, Any], posterior_color: str, observed_color: str,
+                      table_rows_height_in: float, bar_height_in: float, species_width_in: float,
+                      data_width_in: float) -> None:
+    """Posterior and observed bars per condition, with the conditions table below. In each
+    column, the concentrations that differ from the row's usual value are bold."""
+    n_points = spec["observed_values"].size
+    positions = np.arange(n_points)
+    width = 0.38
+    draws = spec["posterior_chunk"]
+    low, high = np.nanpercentile(draws, [2.5, 97.5], axis=0)
+    mean = np.nanmean(draws, axis=0)
+    ax.bar(positions - width / 2, mean, width=width, alpha=0.45, color=posterior_color, label="Posterior Mean")
+    ax.errorbar(positions - width / 2, mean, yerr=[mean - low, high - mean], fmt="none",
+                ecolor=posterior_color, capsize=3)
+    ax.bar(positions + width / 2, spec["observed_values"], width=width, alpha=0.55, color=observed_color,
+           label="Observed")
+    ax.errorbar(positions + width / 2, spec["observed_values"], yerr=spec["observed_sigma"], fmt="none",
+                ecolor=observed_color, capsize=3)
+    ax.set_xlim(-0.5, n_points - 0.5)       # one bar group per table column
+    ax.set_xticks([])
+    ax.set_title("Initial Rates")
+    ax.set_ylabel(_display_units("Initial Rate (uM C16/min)"))
+
+    labels = [label for label, _ in spec["table_rows"]]
+    cells = [[_format_concentration(v) for v in values] for _, values in spec["table_rows"]]
+    # A row's usual value is its most common one (ties: the first column, the reference condition).
+    reference = [max(dict.fromkeys(row), key=row.count) for row in cells]
+    species_frac = species_width_in / data_width_in
+    table_top = -0.12 / bar_height_in
+    table_height = table_rows_height_in / bar_height_in
+    table = ax.table(
+        cellText=[[label, *row] for label, row in zip(labels, cells)],
+        bbox=[-species_frac, table_top - table_height, 1.0 + species_frac, table_height],
+        colWidths=[species_frac / (1.0 + species_frac)] + [1.0 / n_points / (1.0 + species_frac)] * n_points,
+        cellLoc="center",
+    )
+    table.auto_set_font_size(False)
+    table.set_fontsize(TABLE_FONT_SIZE)
+    for (row_index, col_index), cell in table.get_celld().items():
+        if col_index > 0 and cells[row_index][col_index - 1] != reference[row_index]:
+            cell.get_text().set_fontweight("bold")
+    label_top = table_top - table_height - 0.1 / bar_height_in
+    ax.text(0.5, label_top, _display_units("Initial Concentrations (uM)"),
+            ha="center", va="top", fontsize=PLOT_FONT_SIZE, transform=ax.transAxes)
+    ax.legend(loc="best")
+
+
+def _plot_predictive_tier1(series_spec: dict[str, Any] | None, profile_specs: list[dict[str, Any]],
+                           rates_spec: dict[str, Any] | None, title: str, posterior_color: str,
+                           observed_color: str) -> Any:
+    """A (time series) over B (product profile) on the left, C (initial rates and their
+    conditions table) on the right, laid out in inches so the table fits under C's bars."""
+    _apply_plot_style()
+    panel_h, left_w, gap_v = 3.6, 6.5, 1.3                  # inches
+    margin_l, margin_r, margin_b, margin_t = 1.3, 0.3, 1.4, 0.7
+    left = [kind for kind, present in (("A", series_spec is not None), ("B", bool(profile_specs))) if present]
+    left_total = len(left) * panel_h + (len(left) - 1) * gap_v if left else 0.0
+
+    if rates_spec is not None:
+        labels = [label for label, _ in rates_spec["table_rows"]]
+        cells = [[_format_concentration(v) for v in values] for _, values in rates_spec["table_rows"]]
+        species_w, data_ws = _measure_table_column_widths_in(labels, cells, TABLE_FONT_SIZE)
+        n_points = rates_spec["observed_values"].size
+        data_w = max(max(data_ws) * n_points, 4.5)
+        table_h = len(labels) * 0.3
+        below_table = 0.6                          # its axis label
+        bar_h = max(left_total - 0.12 - table_h - below_table, 3.0)
+        right_total = bar_h + 0.12 + table_h + below_table
+        if left and right_total > left_total:        # grow A/B to match the table's height
+            panel_h = (right_total - (len(left) - 1) * gap_v) / len(left)
+            left_total = right_total
+        gap_h = max(1.5, species_w + 0.4) if left else species_w + 0.2
+    else:
+        data_w = gap_h = bar_h = right_total = 0.0
+    content_h = max(left_total, right_total)
+    fig_w = margin_l + (left_w if left else 0.0) + gap_h + data_w + margin_r
+    fig_h = margin_b + content_h + margin_t
+    fig = plt.figure(figsize=(fig_w, fig_h))
+    frac = lambda x, y, w, h: [x / fig_w, y / fig_h, w / fig_w, h / fig_h]
+    top = margin_b + content_h
+
+    y = top
+    for kind in left:
+        y -= panel_h
+        ax = fig.add_axes(frac(margin_l, y, left_w, panel_h))
+        if kind == "A":
+            x_values = np.asarray(series_spec["x_values"], dtype=float)
+            if re.search(r"\(s\)", series_spec["x_label"]):
+                x_values = x_values / 60.0
+            plot_predictive_time_vs_observable(
+                posterior_samples=series_spec["posterior_chunk"], x_values=x_values,
+                observed_values=series_spec["observed_values"], observed_sigma=series_spec["observed_sigma"],
+                dataset_name=series_spec["dataset_name"], output_name=series_spec["output_name"],
+                x_label="Time (min)", y_label=_display_units(series_spec["output_name"]),
+                posterior_color=posterior_color, observed_color=observed_color, ax=ax, title="Time Series",
+            )
+            # The band is explained in the note at the foot of the figure, so no legend entry.
+            handles, labels = ax.get_legend_handles_labels()
+            keep = [(h, l) for h, l in zip(handles, labels) if l != "Posterior 95% CI"]
+            ax.legend(*zip(*keep), loc="best")
+        else:
+            _plot_profile_panel(ax, profile_specs, posterior_color, observed_color)
+        y -= gap_v
+
+    if rates_spec is not None:
+        x0 = margin_l + (left_w if left else 0.0) + gap_h
+        ax = fig.add_axes(frac(x0, top - bar_h, data_w, bar_h))
+        _plot_rates_panel(ax, rates_spec, posterior_color, observed_color, table_h, bar_h, species_w, data_w)
+
+    fig.text(margin_l / fig_w, 0.3 / fig_h,
+             "Blue: posterior predictive mean, with its 95% interval (band, error bars). "
+             "Orange: observed, ± 1σ measurement noise.",
+             ha="left", va="bottom", fontsize=PLOT_FONT_SIZE)
+    place_suptitle(fig, title)
+    return fig
 
 
 def plot_predictive(
@@ -1746,6 +2109,14 @@ def plot_predictive(
     if not panel_specs:
         return empty_result
 
+    title = _diagnostic_title("predictive", system_name)
+
+    tier1_panels = _tier1_predictive_panels(panel_specs)
+    if tier1_panels is not None:
+        fig = _plot_predictive_tier1(*tier1_panels, title=title, posterior_color=posterior_color,
+                                     observed_color=observed_color)
+        return _finish_predictive(fig, save_dir_path, show, predictive_var_name)
+
     # One combined figure, one row per chain length (observable): its
     # time-course panel next to its final-concentration/table panel.
     bar_chart_height_in = 4.0
@@ -1761,10 +2132,6 @@ def plot_predictive(
             output_order.append(key)
         slot = "endpoint" if spec["dataset_type"] == "endpoint" else "timeseries"
         groups[key][slot] = spec
-
-    system_tag = (
-        system_name.split(" - ")[0].replace("Chain ", "").strip() if system_name else None
-    ) or file_stem
 
     # Precompute each row's endpoint-table geometry; the endpoint column
     # width is shared across all rows (sized to the widest table) so the
@@ -1855,12 +2222,15 @@ def plot_predictive(
             shrink = bar_chart_height_in / row_heights_in[row_index]
             ax_ep.set_position([pos.x0, pos.y0 + pos.height * (1.0 - shrink), pos.width, pos.height * shrink])
 
-    title = f"{system_name} — Posterior Predictive Checks" if system_name else "Posterior Predictive Checks"
     fig.suptitle(title)
+    return _finish_predictive(fig, save_dir_path, show, predictive_var_name)
 
+
+def _finish_predictive(fig: Any, save_dir_path: Path | None, show: bool,
+                       predictive_var_name: str | None) -> dict[str, Any]:
     plot_file = None
     if save_dir_path is not None:
-        plot_file = save_dir_path / f"predictive_plots_{system_tag}.png"
+        plot_file = save_dir_path / DIAGNOSTIC_FILES["predictive"]
         fig.savefig(plot_file, dpi=200, bbox_inches="tight")
 
     if not show:

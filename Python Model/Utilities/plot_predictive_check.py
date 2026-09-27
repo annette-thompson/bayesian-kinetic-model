@@ -8,9 +8,11 @@ it at the saved netcdf instead of an in-memory run.
 Usage (from the "Python Model" directory):
     python Utilities/plot_predictive_check.py --solver_params_file "Results/<run>/solver_params.json"
 
-Saves a single combined PNG into the run's results_save_dir -- one row per
-chain-length observable, time-course panel next to its final-concentration/
-table panel -- named predictive_plots_<system>.png.
+Saves a single combined PNG, predictive_checks.png, into the run's
+results_save_dir. Tier-1-shaped data (a time series, a chain-length profile,
+initial rates across conditions) get the time series over the profile, with the
+rates and their conditions table beside them; anything else gets one row per
+observable, time-course panel next to its final-concentration/table panel.
 """
 from __future__ import annotations
 

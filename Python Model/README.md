@@ -81,12 +81,15 @@ A finished run's folder, `Results/<...>/<run>/`, contains:
 | `posterior_samples_pm.nc` | Posterior samples, log-likelihood and posterior predictive (NetCDF / ArviZ) |
 | `timing.json` | Posterior-sampling time in seconds |
 | `checkpoint/` | Resumable state and every draw: `draws.zarr`, `checkpoint.pkl`, `checkpoint_meta.json`, `progress_log.jsonl`, `status.json`. Not tracked by git. |
-| `trace_plot.png` | Prior vs. posterior, zoomed posterior and per-chain trace, one column per free parameter |
-| `convergence_diagnostics.png` | r-hat/ESS against cumulative draws (warm-up included) and cumulative divergences |
-| `energy_plot.png` | Per-chain BFMI and marginal/transition energy |
-| `rank_plot.png` | Per-chain rank-ECDF mixing check |
-| `loo_diagnostics.png` | Pareto-k and LOO summary. It needs enough sampling draws for the Pareto tail fit; a few hundred is not always enough. |
-| `predictive_plots_<system>.png` | Posterior-predictive check, one row per observable |
+| `convergence.png` | r-hat/ESS against cumulative draws (warm-up included) and cumulative divergences |
+| `chain_mixing.png` | Per-chain rank-ECDF mixing check |
+| `sampler_energy.png` | Per-chain BFMI and marginal/transition energy |
+| `prior_posterior_traces.png` | Prior vs. posterior, posterior density and per-chain trace, one column per free parameter |
+| `predictive_checks.png` | Posterior-predictive checks. Tier-1 data get the time series over the product profile, beside the initial rates and their conditions table; other data get one row per observable. |
+| `leave_one_out.png` | Pareto-k against arviz's good / bad / very bad grades, with elpd_loo and p_loo. It needs enough sampling draws for the Pareto tail fit; a few hundred is not always enough. |
+| `run_summary.png` | All of the above in one image, with the run name once at the top |
+
+Each figure is titled "<run> — <section>", and its file is named after the section. The Tier-1 job script (`job_files/tier1/tier1.sbatch`) draws them all once a run has finalized. Runs from before 2026-09-26 have the older names (`trace_plot.png`, `convergence_diagnostics.png`, `energy_plot.png`, `rank_plot.png`, `loo_diagnostics.png`, `predictive_plots_<system>.png`).
 
 While a run finalizes it keeps `finalize_stage.nc`, so a job killed partway through doesn't redo the finished stages. The file is removed once the posterior file is written.
 
@@ -135,12 +138,13 @@ python "Utilities/finalize_window.py" --solver_params_file ".../solver_params.js
 
 ### Plotting diagnostics
 
-Three standalone scripts redraw the figures from the saved posterior netcdf, so no notebook or cluster run is needed:
+Four standalone scripts redraw the figures from the saved posterior netcdf, so no notebook or cluster run is needed:
 
 ```bash
 python "Utilities/plot_convergence_trajectory.py" --solver_params_file ".../solver_params.json"  # r-hat/ESS, divergences, energy, rank-ECDF, LOO
 python "Utilities/plot_trace_diagnostics.py"      --solver_params_file ".../solver_params.json"  # prior vs. posterior and traces
 python "Utilities/plot_predictive_check.py"       --solver_params_file ".../solver_params.json"  # posterior-predictive checks
+python "Utilities/plot_run_summary.py"            --solver_params_file ".../solver_params.json"  # all of them in one image
 ```
 
 They are cheap enough to run locally after copying just `posterior_samples_pm.nc` down from the cluster. `Bayesian Inference/guided_bayesian_inference.ipynb` does the same interactively: set `folder_name` and `use_existing_results = True`.

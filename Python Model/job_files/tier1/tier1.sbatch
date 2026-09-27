@@ -16,7 +16,8 @@
 #       tier1/tier1.sbatch "Tier1 C8 - a1c3"
 #
 # Unlike chaintest.sbatch, the config here has early stopping ON, so the run ends when it
-# converges rather than when a budget expires; it then finalizes and writes its figures.
+# converges rather than when a budget expires; it then finalizes, and this script draws its
+# diagnostic figures (inference_runner.py does not).
 # If it hits the wall clock first it checkpoints, and resubmitting the same command resumes.
 # --a100_only is NOT passed by default: these runs are not being compared to each other on
 # timing, so any GPU is fine and a wider pool means a shorter queue.
@@ -51,3 +52,12 @@ time python -u "$BASE/Utilities/inference_runner.py" \
 # Recovery is the point of Tier 1, so report it as soon as the run has a posterior. Harmless
 # while still mid-run: the script skips runs that have not finalized yet.
 python -u "$BASE/job_files/tier1/recovery_report.py" --only "$RUN" || true
+
+# Diagnostic figures into the run folder: trace, convergence (r-hat/ESS/divergences, energy,
+# rank, LOO), posterior predictive, and all of them in one run_summary.png. Only once
+# finalized; a segment that stopped at the wall clock has no posterior yet.
+if [[ -e "$BASE/Results/Tier1/$RUN/posterior_samples_pm.nc" ]]; then
+    for plot in plot_trace_diagnostics plot_convergence_trajectory plot_predictive_check plot_run_summary; do
+        python -u "$BASE/Utilities/$plot.py" --solver_params_file "$SOLVER_PARAMS" || echo "warning: $plot failed"
+    done
+fi

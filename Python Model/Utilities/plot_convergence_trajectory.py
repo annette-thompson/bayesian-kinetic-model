@@ -1,11 +1,11 @@
 """Plot convergence + model-comparison diagnostics for a finished (or
 in-progress) resumable run, from its saved posterior netcdf:
-convergence_diagnostics.png (r-hat/ESS trajectory, cumulative divergences --
-pure "did it converge over draws", nothing per-chain), energy_plot.png
+convergence.png (r-hat/ESS trajectory, cumulative divergences --
+pure "did it converge over draws", nothing per-chain), sampler_energy.png
 (BFMI per chain plus the marginal/transition energy distributions it
-summarizes), rank_plot.png (per-chain rank ECDF, a mixing check that's more
+summarizes), chain_mixing.png (per-chain rank ECDF, a mixing check that's more
 informative than overlaid traces once there are multiple correlated
-parameters), and loo_diagnostics.png (Pareto-k + elpd_loo/p_loo; WAIC is
+parameters), and leave_one_out.png (Pareto-k + elpd_loo/p_loo; WAIC is
 omitted -- this arviz version dropped it in favor of PSIS-LOO).
 
 Usage (from the "Python Model" directory):
@@ -18,10 +18,12 @@ import argparse
 import arviz as az
 
 from inference_plotting import (
+    DIAGNOSTIC_FILES,
     ess_threshold_for,
     plot_convergence_diagnostics,
     plot_energy_diagnostics,
     plot_loo_diagnostics,
+    plot_rank_diagnostics,
 )
 from inference_runner import import_solver_params
 
@@ -63,7 +65,9 @@ def main() -> None:
         rhat_threshold=rhat_threshold,
         ess_threshold=ess_threshold,
         step=args.step,
-        save_file=str(imported.results_save_dir / "convergence_diagnostics.png"),
+        # The run's own stopping rule, as in the trace plot's marker.
+        consecutive=int(posterior_config.get("convergence_consecutive_checks", 1)),
+        save_file=str(imported.results_save_dir / DIAGNOSTIC_FILES["convergence"]),
         system_name=system_name,
         show=args.show,
     )
@@ -78,7 +82,7 @@ def main() -> None:
 
     loo_result = plot_loo_diagnostics(
         inf_data=inf_data,
-        save_file=str(imported.results_save_dir / "loo_diagnostics.png"),
+        save_file=str(imported.results_save_dir / DIAGNOSTIC_FILES["loo"]),
         system_name=system_name,
         show=args.show,
     )
@@ -90,7 +94,7 @@ def main() -> None:
 
     energy_result = plot_energy_diagnostics(
         inf_data=inf_data,
-        save_file=str(imported.results_save_dir / "energy_plot.png"),
+        save_file=str(imported.results_save_dir / DIAGNOSTIC_FILES["energy"]),
         system_name=system_name,
         show=args.show,
     )
@@ -98,42 +102,15 @@ def main() -> None:
         print(f"BFMI per chain: {energy_result['bfmi'].round(3).tolist()}")
     print(f"Saved: {energy_result['plot_file']}")
 
-    # az.plot_rank uses arviz's newer PlotCollection-based backend (not a
-    # simple matplotlib ax=), so it saves its own standalone figure rather
-    # than being composited into the figures above.
     try:
-        rank_pc = az.plot_rank(inf_data, var_names=free_params, backend="matplotlib")
-        # arviz's rank-ECDF plot leaves the y-axis unlabeled and has no
-        # legend by default; the PlotCollection exposes the real matplotlib
-        # Axes/Line2D/PolyCollection objects under viz["plot"]/["ecdf_lines"]/
-        # ["credible_interval"], so all of these are added directly before
-        # saving.
-        for var_name in free_params:
-            try:
-                ax = rank_pc.viz["plot"][var_name].item()
-                ax.set_ylabel("ECDF - uniform")
-                envelope = rank_pc.viz["credible_interval"][var_name].item()
-                envelope.set_label("95% envelope\n(expected if well-mixed)")
-                ax.legend(handles=[envelope], loc="upper right", fontsize="small")
-                ax.add_artist(ax.get_legend())
-                lines = rank_pc.viz["ecdf_lines"][var_name].values
-                ax.legend(
-                    handles=list(lines),
-                    labels=[str(i) for i in range(len(lines))],
-                    title="Chains",
-                    loc="upper center",
-                    bbox_to_anchor=(0.5, -0.25),
-                    ncol=min(len(lines), 12),
-                    handlelength=1.0,
-                    columnspacing=0.8,
-                    handletextpad=0.4,
-                    fontsize="small",
-                )
-            except (KeyError, AttributeError):
-                pass
-        rank_file = imported.results_save_dir / "rank_plot.png"
-        rank_pc.savefig(str(rank_file))
-        print(f"Saved: {rank_file}")
+        rank_result = plot_rank_diagnostics(
+            inf_data=inf_data,
+            free_params=free_params,
+            save_file=str(imported.results_save_dir / DIAGNOSTIC_FILES["rank"]),
+            system_name=system_name,
+            show=args.show,
+        )
+        print(f"Saved: {rank_result['plot_file']}")
     except Exception as exc:  # noqa: BLE001 - diagnostic only
         print(f"Rank plot skipped ({type(exc).__name__}: {exc})")
 
