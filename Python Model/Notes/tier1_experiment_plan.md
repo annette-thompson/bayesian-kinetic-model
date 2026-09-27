@@ -6,7 +6,7 @@ figure, what they cost, and in what order they run.
 
 **The rule this plan follows:** every run produces a panel of a named figure or a named SI
 item. Every results figure is drafted at Tier 1, on truncated versions of the FAS network,
-before anything is run on the full model. Section 5 covers how, once the drafts exist, we
+before anything is run on the full model. Section 6 covers how, once the drafts exist, we
 choose which figures to recreate on the full model with real data (Tier 2).
 
 ---
@@ -24,7 +24,40 @@ enzymes (outline 2.4). Two are used:
   All figures built on the main three-parameter fit come from here.
 - **Replicate system: C8** (160 reactions), for the figures that need many repeated fits
   (calibration, robustness, SI checks). If the first C8 fit (R0) does not recover both
-  parameters with shrinkage > 0.5, C12 takes its place, at ~1.6x the cost.
+  parameters with shrinkage > 0.5, C12 takes its place, at ~1.6x the cost. R0 recovered both
+  at shrinkage 0.98 (section 4), so C8 stays.
+
+**Why C8, and not C6, C10 or C12.** The reasons were not written down when C8 was chosen.
+They were reconstructed on 2026-09-26 from the reaction files, the Morris screen and the cost
+profiles. Below C14, only FabA, FabZ and TesA have chain-length-specific rate constants:
+
+| Enzyme: constant (fitted group) | Value relative to C4 | Differences appear |
+|---|---|---|
+| FabA: binding of hydroxyacyl- and enoyl-ACP (not fitted) | C6 3.8x, C8 8.5x, C10 11.8x (peak), C12 8.9x, C14 1x, C16+ 0.44x | from C6; large by C8 |
+| FabZ: binding of hydroxyacyl- and enoyl-ACP (not fitted) | C6 2.1x (peak), C8 0.63x, C10 0.79x, C12 0.43x, C14 0.12x | from C6; turns over at C8 |
+| TesA: acyl-ACP binding (`d1`, `d2`) | C6 1.6x, C8 8.9x, C10 32x, rising further from C12 | small at C6; large from C8 |
+| TesA: hydrolysis kcat (`c3`) | C6 0.90x, C8 1.8x, C10 0.28x, C12 4.5x, C14 8.1x | first real difference at C8 |
+
+From C14 on, FabH's acyl-ACP koff (`1/e`), flat up to C12, drops about 5x. FabB's and FabF's
+condensation kcat (`c2` for FabF) are flat to C14, then fall to 0.15-0.32x at C16 and 0.02x
+at C18. FabD, FabG and FabI have one value at every chain length.
+- **C6.** It has only the start of that specificity: FabA 3.8x, FabZ 2.1x, TesA binding 1.6x,
+  and TesA kcat within 10%. So on C6, `c3` ties two nearly equal constants (0.033 and 0.030),
+  leaving no internal spread for the grouping test (Fig 5). C8 is the smallest system where
+  all three enzymes differ substantially. The Morris screen agrees: on C6, `a1` ranks 4th for
+  total production (51% of the top parameter), behind `c3`, `d2` and `d1`. On C8 it ranks
+  2nd on both objectives (82% and 74% of the top). Nor is C6 cheaper: per gradient, C8 costs
+  0.94-0.99x C6 (`multiparam_tests/cost_profile.py`), because the solver's step counts are
+  the same.
+- **C10 and C12.** Neither adds anything qualitatively new; they extend the FabA, FabZ and
+  TesA patterns C8 already has. Both are slower, because the sampler takes the same number of
+  leapfrog steps per draw on every system (4.3-5.1), so cost follows ODE size. In the `a1`+`c3`
+  pilots, C10 took 1.56x and C14 2.40x C6's time per draw, and draws to converge showed no
+  trend with size (500, 600 and 300 on C6, C10 and C14). FabH's specificity first appears at
+  C14, one more reason the main system is C14+unsat.
+- **Caveat for the paper.** FabB/FabF's slowdown from C16, which is what ends elongation in
+  the full system, is in no Tier-1 system. Every truncation stops elongating at its cap
+  instead, which is why 99% of C8's product is C8.
 
 **Data (identical design on every system; outline 2.4).** All data are generated at the
 no-op scaling values, which is the ME1 solution, with per-point noise of sd = 10% of the
@@ -82,24 +115,33 @@ Tier 2.
 
 ## 2. The runs
 
-Costs are in A100-hours, from the cost model in appendix B. The anchor measurement used seven
-conditions solved to 720 s, and these runs use five, with four of them solved only to 150 s.
-So the costs are **upper bounds**, probably by ~30%. Re-anchor them on R0 and R1.
+Costs are A100-equivalent hours for the whole run (compute, finalize and figures), estimated by
+`tier1/cost_estimate.py` from the rates measured on the runs so far (appendix B). The sampler
+solves every condition to the latest save time (720 s), including the rate conditions observed
+at 150 s, and every estimate assumes that. A run that has started is estimated from its own
+progress log. One that has not uses the median of measured runs with the same system and free
+parameters. The three-parameter fits, not yet measured, are scaled from R1 by the pilot factors.
+The monitor refreshes the estimates every 30 minutes (`Results/Tier1/figures/cost_estimate.json`,
+with the history in `job_files/tier1/cost_estimate_history.jsonl`), and this table follows them.
+Last updated Sat 2026-09-26 20:45.
+
+Two-parameter runs cap compute at 24 A100-h (`max_total_hours`), a runaway guard about twice
+their estimates. The three-parameter fits (R2, R6 b and c) run with no cap (decided 2026-09-26).
 
 Run folders are `Results/Tier1/<run name>/`, written by `build_tier1_configs.py --plan`.
 
 | ID | Run | System | Free params | Fits | A100-h | Feeds |
 |---|---|---|---|---|---|---|
-| R0 | smoke test, production stopping rule | C8 | `a1`+`c3` | 1 | 2.5 | plumbing; chooses the replicate system; centre point of Fig 4 |
-| R1 | main-system duo | C14+unsat | `a1`+`c3` | 1 | 6.4 | Fig 2 fallback; Fig 5 grouped model; Fig 9 full-data cell |
-| R2 | **main fit** | C14+unsat | `a1`+`c3`+`a2` | 1 | 34 | Figs 2, 6, 6b, 7, 8 |
-| R3 | `d1`+`d2` known-answer control | C8 diagonal, C8 dense, C14+unsat diagonal | `d1`+`d2` | 3 | ~11 (cap 23) | 3.3 case; Fig 6/6b; SI mass matrix |
-| R4 | SBC replicates, truth drawn from the prior | C8 | `a1`+`c3` | 10 pilot, then 30 more | 25 + 75 | Fig 3 |
-| R5 | robustness: noise 5/20/40% (10% = R0), prior median shifted +1/+2/+3/+4 prior sd | C8 | `a1`+`c3` | 7 | 17.5 | Fig 4 |
-| R6 | `c3` split test | C14+unsat | see below | 3 | ~74 | Fig 5 |
-| R7 | data-type check, 3 cells | C14+unsat | `a1`+`c3` | 3 | 19 | Fig 9 |
-| R8 | `target_accept` 0.95; `rtol` 1e-5 | C8 | `a1`+`c3` | 2 | ~7.5 | SI |
-| | **Total** | | | **~71** | **~272** | |
+| R0 | smoke test, production stopping rule | C8 | `a1`+`c3` | 1 | 5.7 (measured) | plumbing; chooses the replicate system; centre point of Fig 4 |
+| R1 | main-system duo | C14+unsat | `a1`+`c3` | 1 | 7.2 (measured) | Fig 2 fallback; Fig 5 grouped model; Fig 9 full-data cell |
+| R2 | **main fit** | C14+unsat | `a1`+`c3`+`a2` | 1 | ~40 | Figs 2, 6, 6b, 7, 8 |
+| R3 | `d1`+`d2` known-answer control | C8 diagonal, C8 dense, C14+unsat diagonal | `d1`+`d2` | 3 | ~74 (all three at the 24 cap) | 3.3 case; Fig 6/6b; SI mass matrix |
+| R4 | SBC replicates, truth drawn from the prior | C8 | `a1`+`c3` | 10 pilot, then 30 more | ~67 + ~160 | Fig 3 |
+| R5 | robustness: noise 5/20/40% (10% = R0), prior median shifted +1/+2/+3/+4 prior sd, each shift run from the default start and from the ME1 values | C8 | `a1`+`c3` | 11 | ~48 | Fig 4 |
+| R6 | `c3` split test | C14+unsat | see below | 3 | ~87 | Fig 5 |
+| R7 | data-type check, 3 cells (R1 is the third) | C14+unsat | `a1`+`c3` | 2 new | ~16 | Fig 9 |
+| R8 | `target_accept` 0.95; `rtol` 1e-5 | C8 | `a1`+`c3` | 2 | ~12 | SI |
+| | **Total** | | | **~64 new** | **~520** | |
 
 ### Why these parameters
 
@@ -126,9 +168,10 @@ known answers for three things at once:
 The pre-flight already shows the degeneracy. At the sampler's start on C8, the gradients
 with respect to the two sampled coordinates (`12*d1` and `d2`) are identical (11.429 each).
 On C14+unsat they differ slightly (26.2 vs. 27.3). C14+unsat adds the point where separation
-begins. Ridge posteriors can hit the tree-depth ceiling, so R3 has a hard 2x compute cap;
-hitting it under diagonal but not dense is itself the SI result. *Optional:* C20+unsat (~12
-A100-h) shows clear separation. Add it only if the figure needs a third point.
+begins. Ridge posteriors can hit the tree-depth ceiling. R3 keeps the standard 24 A100-h cap,
+about 4x the C8 estimate and 2x the C14+unsat one; hitting it under diagonal but not dense is
+itself the SI result. *Optional:* C20+unsat (~20 A100-h: R1's rate scaled by reaction count)
+shows clear separation. Add it only if the figure needs a third point.
 
 **R6 (grouping, Fig 5).** `c3` ties six TesA hydrolysis constants with six distinct nominal
 values. It is split into short-chain (`c3s`: C4-C8) and long-chain (`c3l`: C10-C14 plus the
@@ -136,8 +179,8 @@ unsaturated species) halves in a script-generated variant of the C14+unsat react
 (`Reactions/EC_FAS_ME1/C14+unsat+c3split`); the reaction files are never hand-edited. The
 runs:
 - (a) grouped `a1`+`c3` on the standard data. This is R1, reused.
-- (b) split `a1`+`c3s`+`c3l` on the same data. New; three-parameter cost ≈ 34.
-- (c) data generated at `c3s` = 1, `c3l` = 3, fit with both models. New; 6.4 + 34.
+- (b) split `a1`+`c3s`+`c3l` on the same data. New; ~40 A100-h, as R2.
+- (c) data generated at `c3s` = 1, `c3l` = 3, fit with both models. New; ~8 + ~40.
 
 At `c3l` = 3 the C10-C14 species move by −15% to +144% while C4-C8 move about 6%, a pattern
 a single `c3` cannot produce. The three-parameter cost is borrowed from the main fit, but
@@ -176,6 +219,31 @@ same replicates. The R5 noise-level datasets reuse the 10% dataset's random draw
 so the noise axis carries no draw-to-draw scatter. Compare the prior-offset runs on log-scale
 shrinkage (`shrinkage_log` in `recovery_report.py`), which doesn't change when the prior
 median moves.
+
+The prior shifts run as two series (decided 2026-09-26, before either started):
+- **Main: PyMC's default start**, each shifted prior's mean (68x and 219x the truth at +3 and
+  +4 sd), jittered ±1 in log space. It asks the question Fig 4 is for: does the workflow still
+  succeed when all you know is a wrong prior, as on an uncharacterized system with no
+  published estimate to start from? At +4 sd the data give almost no gradient at the start
+  (−0.6 for `a1`, −0.5 for `c3`), so warmup must find the data's peak nearly unguided. A run
+  whose chains all stay near the prior's mean together could pass r-hat and report a confident
+  wrong answer, the one outcome the outline names as undermining the paper. This series is
+  what can show it.
+- **Paired: started at the ME1 values** (`posterior_sampling.initial_values`; tag `init1`).
+  With the start taken out of the question, it measures only how far the prior pulls the
+  posterior. That attributes a main-series failure: if the default start fails but its `init1`
+  twin recovers, the search is the problem; if both are off, the posterior itself is pulled.
+  The start cannot change a converged posterior, and no second region is being skipped: the
+  log posterior at the prior's mean is about 760 below its peak (−791 vs −26 at +3 sd, −793 vs
+  −33 at +4 sd).
+- If a default-start run fails, the follow-up tests remedies: 600 warmup steps, or more widely
+  dispersed starts.
+
+Warmup of 300 steps is established for runs that start near the answer (Appendix A; R0 reached
+the posterior bulk within 7 steps). It is not yet established for the SBC replicates with
+extreme truths (e.g. `sbc004`/`sbc005`, `a1` ≈ 8.7), whose chains start up to ~1.8 log units
+away. SBC needs identical settings for every replicate, so if the pilot shows these failing,
+the remedy (more warmup or another start) applies to all 40.
 
 ---
 
@@ -285,33 +353,141 @@ Done 2026-09-25, while R0 runs:
 - The cluster-only analysis tools under `job_files/` (`multiparam_tests`,
   `chain_system_sensitivity_analysis`, `warmup_rates.py`, job-ID records) are now in git.
 
-**Stage 1: R0 (~2.5 A100-h).** Checks plumbing: resume, stopping on r-hat + ESS, finalize,
-figures, `recovery_report.py`. It also decides the replicate system. Nothing else is queued
-until R0 has been inspected.
+**Stage 1: R0 (5.7 A100-h).** Checks plumbing: resume, stopping on
+r-hat + ESS, finalize, figures, `recovery_report.py`. It also decides the replicate system.
+Nothing else is queued until R0 has been inspected. Done 2026-09-25 and inspected 2026-09-26
+(section 4). Every check passed except resume, which one segment could not exercise; the
+first multi-segment Stage-2 run tests it. C8 stays as the replicate system.
 
-**Stage 2: everything cheap and independent, one batch (~70 A100-h).** R1, R3, R5, R8 and the
-R4 pilot, 23 runs, submitted by `tier1/submit_stage2.sh` from `job_files/` (`--dry_run`
-first). It refuses until R0 has finalized, and it skips runs that are finished or already
-queued, so rerunning it resumes the ones that stopped at the wall clock.
+**Stage 2: everything cheap and independent, one batch (~225 A100-h).** R1, R3, R5, R7, R8
+and the R4 pilot, 29 runs, submitted 2026-09-26 by `tier1/submit_stage2.sh` from `job_files/`
+(R7 and R5's ME1-start series were added the same day). It refuses until R0 has finalized, and
+it skips runs that are finished or already queued, so rerunning it resumes the ones that
+stopped at the wall clock. `tier1/tier1_status.py` shows each run's state, its A100-h used and
+estimated, and when it should finish.
 - Gate to R2: R1 converges and recovers both parameters.
 - Gate to the full R4: the pilot looks sane.
 
-**Stage 3: the main fit and its dependents (~170 A100-h).**
+**Stage 3: the main fit and its dependents (~290 A100-h).**
+- The three-parameter fits run with no compute cap (decided 2026-09-26). At R1's measured
+  rates and the pilot factors, R2 needs ~40 A100-h: ~10 h of warmup (~119 s per step) and
+  ~27 h for ~1100 draws (~88 s per draw), about four 12 h segments. R1 passed its gate on
+  2026-09-26 (section 4).
 - R2: inspect warmup with `convergence_and_warmup.py` at the first segment boundary. If
   acceptance is well below 0.8, or the first block still drifts, restart with 600 warmup
   steps and record it.
 - R6 (b), then (c) once (b)'s cost is known.
-- R7, and the remaining R4 replicates (both built and pre-flighted).
+- The remaining R4 replicates (built and pre-flighted), ~160 A100-h at the pilot's median.
 
 **Stage 4: post-processing (forward solves).** Figs 6/6b from R2 and R3. Figs 7 and 8 from
 R2's posterior (`posterior_morris.py`, `posterior_ratio_response.py`). Fig 9's grid is done
 at the truth (item 8), and R7 checks it against sampled shrinkage.
 
-**Stage 5: draft every figure, then choose what goes to Tier 2** (section 5).
+**Stage 5: draft every figure, then choose what goes to Tier 2** (section 6).
 
 ---
 
-## 4. Code status
+## 4. Results
+
+### R0: C8, `a1`+`c3` (Blanca job 28506399, 2026-09-25)
+
+One segment on an A100 (`bgpu-biokem2`), 5 h 46 min of wall time. The figures are in
+`Results/Tier1/Tier1 C8 - a1c3/`, all of them together in `run_summary.png`.
+
+**Recovery.** Both parameters recovered, truth inside the 95% interval for both:
+
+| | Truth | Posterior mean ± sd | z | Shrinkage (natural / log) |
+|---|---|---|---|---|
+| `a1` | 1.00 | 1.049 ± 0.055 | +0.90 | 0.984 / 0.956 |
+| `c3` | 1.00 | 0.981 ± 0.062 | −0.32 | 0.982 / 0.946 |
+
+The `a1`-`c3` posterior correlation is +0.45 (`identifiability_report.py`). In the
+prior-standardised eigendecomposition, the two directions keep 0.13% and 0.36% of the prior
+variance.
+
+**Convergence.** The stopping rule fired at 700 sampling draws (checked every 100), and the run
+finalized at 800. r-hat is 1.008 / 1.002 and bulk ESS 1376 / 1567. r-hat set the run's length,
+not ESS: it held at 1.013-1.018 from 100 to 500 draws, while bulk ESS passed 400 at about 300.
+Checked afterwards at 10-draw resolution, the criteria are first met at 530 sampling draws.
+- No divergences. BFMI is 1.06-1.18 and tree depth never exceeds 4.
+- About 4.3 leapfrog steps per draw. Acceptance is 0.91-0.93, above the 0.8 target.
+- The four chains agree: the spread of their means is 5-6% of the posterior sd, about what
+  Monte Carlo noise alone gives.
+
+**Fit.** LOO gives elpd_loo −15.74 ± 8.26 and p_loo 1.42, with all 18 Pareto k ≤ 0.7 (the
+largest is 0.32). The posterior predictive matches the time series and all five initial rates.
+The profile's C8 observation sits about 2 noise sd below the posterior mean. The truth and the
+posterior agree, so that is a low noise draw, not misfit.
+
+**Cost: 5.7 A100-h for the whole job**, 4.95 of it sampler compute (one A100 40GB segment).
+- Warmup: 1.73 h, 21 s per step.
+- Sampling: 3.05 h, 800 draws at 13.7 s each. It converged at 700 and finalized at 800 under
+  the stopping rule (two passing checks, then one more block).
+- Startup took about 11 min, and finalize 46 min (log-likelihood, prior samples and posterior
+  predictive).
+- Every condition, the four observed at 150 s included, is solved to 720 s. A shorter horizon
+  would save little: in `cost_profile.py`, going from 50 to 150 s adds about 7% per gradient,
+  since most solver steps fall in the early transient.
+- These are the rates behind every fixed-truth C8 estimate in section 2 until more C8 runs
+  finish.
+
+**Gate checks.**
+- Stopping on r-hat + ESS, finalize and `recovery_report.py`: all worked.
+- Figures: the pipeline did not draw them, because `inference_runner.py` never calls the
+  plotting code. They were drawn afterwards, and `tier1.sbatch` now draws them for every
+  finished run.
+- Resume: not exercised, since R0 finished in one segment.
+- Replicate system: C8 stays.
+
+---
+
+### Stage 2, first results (2026-09-26, 20:30)
+
+Fourteen runs have finished (R0 and 13 of Stage 2's 29), and every one has the truth inside the
+95% interval for every parameter. R1 passed the gate to R2.
+
+| Run | `a1` z | `c3` z | Log-scale shrinkage `a1` / `c3` | Draws | A100-h |
+|---|---|---|---|---|---|
+| R1: C14+unsat | −0.04 | −0.97 | 0.968 / 0.942 | 400 | 7.2 |
+| R7: C14+unsat, profile only | +1.06 | −1.69 | 0.946 / 0.931 | 400 | 6.4 |
+| R5: C8, noise 5% | +0.88 | −0.19 | 0.976 / 0.968 | 600 | 4.0 |
+| R0: C8, noise 10% | +0.90 | −0.32 | 0.956 / 0.947 | 800 | 5.7 |
+| R5: C8, noise 20% | +0.89 | −0.38 | 0.911 / 0.903 | 500 | 3.5 |
+| R5: C8, noise 40% | +0.87 | −0.43 | 0.823 / 0.805 | 500 | 4.4 |
+| R5: C8, prior +1 sd, default start | +0.94 | −0.23 | 0.954 / 0.946 | 500 | 3.6 |
+| R5: C8, prior +2 sd, default start | +1.06 | −0.14 | 0.956 / 0.947 | 800 | 4.7 |
+| R8: C8, target acceptance 0.95 | +0.84 | −0.38 | 0.955 / 0.947 | 500 | 5.0 |
+| R4: SBC 000, 001, 002, 004, 005 | −0.16 to +0.84 | −1.04 to +0.62 | 0.963-0.988 / 0.788-0.920 | 400-800 | 4.0-7.0 |
+
+- **R1 (gate to R2).** Converged at 300 draws (r-hat 1.0049, ESS 758), finalized at 400. No
+  divergences, BFMI 0.97-1.12, elpd_loo −22.15 ± 7.13. Correlation +0.03.
+- **Fig 9 check.** Sampled log-scale shrinkage matches the expected-information prediction to
+  within 0.01: full data 0.968 / 0.942 against 0.969 / 0.942, profile only 0.946 / 0.931
+  against 0.950 / 0.938. The rates-only cell is still sampling.
+- **Noise.** The posterior widens with the noise and the truth stays covered: `a1`'s sd is 0.029,
+  0.055, 0.114 and 0.252 at 5, 10, 20 and 40%.
+- **Prior shift, default start.** At +1 and +2 prior sd the chains, started at the shifted
+  prior's mean, found the truth, and the posterior is almost R0's (log-scale shrinkage
+  unchanged). +3 and +4 sd, and the ME1-start series, are still running.
+- **Settings.** Target acceptance 0.95 reproduces R0 (z within 0.06); `rtol` 1e-5 is still running.
+- **Warmup.** `convergence_and_warmup.py --summary` passes R1, sbc000, sbc004 and sbc005:
+  acceptance 0.777-0.780 over the last 50 warmup steps, first-block drift ≤ 0.15 sd, and
+  dropping the first block moves r-hat by ≤ 0.006. The pilot's chains reached their true values
+  within 40-55 warmup steps, the extreme truths (`a1` ≈ 8, `c3` ≈ 10) included.
+- **SBC.** Five of the 10 pilot replicates are in; the rank test needs all 10. `c3` at 9.9
+  (sbc002) is the least identified (log-scale shrinkage 0.79; natural-scale 0.15, since the
+  natural scale stretches the upper tail).
+- **R3 is slow on the ridge.** On C8, warmup steps build trees of up to 183 leapfrog steps at
+  ~3.7 s each through step 10, and steps 10-15 took 6.9 h (about 80 min each, at or near the
+  1023-step ceiling), with the GPUs busy throughout. The dense run's first segment stopped at
+  7.4 h, at step 15, because the next 5-step chunk would not fit its 11.5 h budget; it was
+  resubmitted. Both runs are identical until the dense run's first mass-matrix update at
+  warmup step 100 (then 150 and 250, BlackJAX's schedule for 300 steps), about 110 h away,
+  and both should reach the 24 A100-h cap near step 25, with no posterior. C14+unsat (~320 s
+  per step) should reach the cap during sampling. Open: run both to the cap (the default),
+  stop the diagonal run and lift the dense cap, or rethink the C8 ridge test.
+
+## 5. Code status
 
 **Exists** (all in `job_files/tier1/` unless noted):
 - `build_tier1_configs.py`: `--plan` writes every config in section 2 except R4's (`sbc.py`
@@ -339,14 +515,27 @@ at the truth (item 8), and R7 checks it against sampled shrinkage.
   config. `ranks` scores finished runs (rank histograms, a uniformity test, coverage and a draft
   figure). `selftest` checks the rank code on a known answer.
 
-- `submit_stage2.sh`: Stage 2's 23 submissions, with the R0 gate
+- `submit_stage2.sh`: Stage 2's 29 submissions, with the R0 gate
+- `tier1_status.py`: one line per run, joining Slurm on both clusters with each run's
+  checkpoint and log (state, GPU, progress and rate, last convergence check, A100-h used and
+  estimated, finish time, preemptions). It logs every queued run's estimated start.
+- `cost_estimate.py`: the A100-h estimates (appendix B), and how far Slurm's estimated starts
+  have been from the actual starts, by how far ahead each estimate was made
+- `postprocess.py`: pull, score and redraw every finished run in one command;
+  `tier1_result_figures.py` for the Fig 2 and 4 drafts and the R7 and R8 checks
+- Run figures, drawn by `tier1.sbatch` once a run finalizes (all in `Utilities/`):
+  `plot_convergence_trajectory.py` (convergence, chain mixing, sampler energy, LOO),
+  `plot_trace_diagnostics.py` (prior vs. posterior and traces), `plot_predictive_check.py`
+  (predictive checks, with a Tier-1 layout), and `plot_run_summary.py`, which combines them
+  into `run_summary.png`. Each is titled "<run> — <section>", and its file is named after
+  the section.
 
 Nothing in the plan's to-build list remains. Figs 6/6b wait on R2 and R3, Figs 7 and 8 on R2's
 posterior, and Fig 3 on the R4 fits.
 
 ---
 
-## 5. After the drafts: which figures get recreated on the full model
+## 6. After the drafts: which figures get recreated on the full model
 
 This is decided with every Tier-1 draft in hand. The default:
 
@@ -385,19 +574,46 @@ are old data and are not used (outline 2.8).
 
 ## Appendix B: cost model
 
-Anchor: C12, `a1`+`c3`, 4 chains, 300 warmup steps, seven 720 s conditions = **4.00 A100-h**
-(warmup 2.05, sampling 1.95, converged at draw 400).
+`tier1/cost_estimate.py` rebuilds every estimate from the measured runs; the monitor reruns it
+every 30 minutes (section 2). Every condition is solved to 720 s, the latest save time.
 
-- **System size:** cost per draw ∝ reactions^1.21 (fitted on C6/C10/C14). Relative to C12:
-  C8 0.62x, C14 1.20x, C14+unsat 1.61x, C20+unsat ~2.98x.
-- **Parameter count:** `a1`+`c3`+`a2` costs ~3.5x per draw and ~3.0x per warmup step
-  relative to `a1`+`c3`, and needs 2.24x the draws (pilot medians).
+**A run's cost**, in A100-equivalent hours (GPU wall time x its speed factor, H100 NVL 1.37 and
+A100 1.00, as the sampler counts its cap):
 
-| | C8 | C12 | C14 | C14+unsat |
-|---|---|---|---|---|
-| two parameters | 2.5 | 4.0 | 4.8 | 6.4 |
-| three parameters | 13 | 21 | 26 | 34 |
-| four parameters (extrapolated; nothing measured) | 62 | 100 | 121 | 161 |
+startup (0.2 h per 11.5 h segment) + 300 warmup steps x s/step + draws x s/draw + finalize and
+figures
+
+- **Rates**, most specific first:
+  - the run's own progress log;
+  - the median of measured runs with the same system and free parameters, pooling SBC
+    replicates and fixed-truth runs separately and leaving out solver variants and data subsets;
+  - the same system's `a1`+`c3` rates, times the three-parameter pilot factors for a
+    three-parameter run.
+- **s/draw before a run samples:** its warmup s/step x the sampling-to-warmup ratio of runs that
+  have done both (0.65 on R0).
+- **Draws to finish:** the median over finalized runs (800 on R0), x 2.24 for three parameters.
+- **Finalize:** 3.4 s per draw on R0 (46 min for 800), scaled to other systems by warmup cost.
+  The figures after it are a 0.1 h placeholder until a Stage-2 run measures them.
+
+**Measured so far** (Sat 2026-09-26 20:45):
+
+| | s per warmup step | s per draw | Whole run, A100-h |
+|---|---|---|---|
+| C8 `a1`+`c3`, fixed truth (R0, R5 noise and +1/+2 sd, R8 ta0.95; 7 finished) | 17-24 | 10.9-16.9 | 3.5-5.7 |
+| C8 `a1`+`c3`, SBC pilot (5 finished) | 22-42 | 11.4-13.9 | 4.0-7.0 |
+| C14+unsat `a1`+`c3` (R1, R7 profile) | 39-40 | 25-26 | 6.4-7.2 |
+| C14+unsat `d1`+`d2` (R3, in warmup) | ~320 | | 24 (cap) |
+| C8 `d1`+`d2` (R3, in warmup) | ~1600, on the ridge | | 24 (cap) |
+
+The finished two-parameter runs took 400-800 draws, median 500. Sampling costs 0.61x a warmup
+step per draw (25 runs).
+
+**Three parameters** (not yet measured): `a1`+`c3`+`a2` costs ~3.0x per warmup step and ~3.5x per
+draw relative to `a1`+`c3`, and needs 2.24x the draws (pilot medians). On C14+unsat at R1's rates
+that is ~119 s per step, ~88 s per draw and ~1100 draws: ~40 A100-h.
+
+**Systems not yet measured** (C20+unsat) are scaled from the nearest measured one by cost per
+draw ∝ reactions^1.21, fitted on the C6/C10/C14 pilots (C14+unsat to C20+unsat: 1.85x).
 
 All runs are resumable across the 12 h cluster limit; a longer run just means more segments.
 
@@ -447,3 +663,59 @@ the data, and > 10-15 means jointly unidentifiable (Brun et al.).
 - **A candidate additional design:** paired ratio conditions (FabF/FabB up while TesA down).
   These are what the ratiometric strategy predicts on, and they would resemble the ME1
   GC/MS experiments. Add them only if 3.5 or 3.6 needs them.
+
+---
+
+## References: what Tier-1 decisions rest on
+
+Only sources that a Tier-1 setting or gate actually rests on; the paper's wider reading list is
+in `paper_outline.md`. Entries marked [verify] need their details checked before citing.
+
+**External sources, and the decision each informed**
+- Vehtari A, Gelman A, Simpson D, Carpenter B, Bürkner P-C (2021). Rank-normalization, folding,
+  and localization: an improved R̂ for assessing convergence of MCMC. *Bayesian Analysis*
+  16(2):667-718. → The stopping rule: rank-normalised split r-hat ≤ 1.01 and bulk ESS ≥ 50 per
+  split chain (400 at 4 chains), held for 2 consecutive checks; 4 chains (Appendix A).
+- Hoffman MD, Gelman A (2014). The No-U-Turn Sampler: adaptively setting path lengths in
+  Hamiltonian Monte Carlo. *JMLR* 15:1593-1623. → NUTS with dual-averaging step-size
+  adaptation; `target_accept` 0.8, and 0.95 as the R8 check.
+- Talts S, Betancourt M, Simpson D, Vehtari A, Gelman A (2018). Validating Bayesian inference
+  algorithms with simulation-based calibration. arXiv:1804.06788. → R4's design: truths drawn
+  from the fit's own prior, ranks of the truth among L = 99 thinned draws, uniformity test.
+- Brun R, Reichert P, Künsch HR (2001). Practical identifiability analysis of large
+  environmental simulation models. *Water Resources Research* 37(4):1015-1030. → The
+  collinearity index and its gamma > 10-15 cutoff: `d1`/`d2` never paired in a recovery fit,
+  `a1`+`c3` chosen as the best-separated pair (Appendix C).
+- Morris MD (1991). Factorial sampling plans for preliminary computational experiments.
+  *Technometrics* 33(2):161-174; and Campolongo F, Cariboni J, Saltelli A (2007). An effective
+  screening design for sensitivity analysis of large models. *Environmental Modelling &
+  Software* 22(10):1509-1518. → The sensitivity screen (mu*, radial design) behind the
+  parameter choice (`select_testcase.py`'s influence gate), the C8-over-C6 argument (section
+  0), and Fig 7's method.
+- Vehtari A, Gelman A, Gabry J (2017). Practical Bayesian model evaluation using leave-one-out
+  cross-validation and WAIC. *Statistics and Computing* 27:1413-1432; and Vehtari A, Simpson D,
+  Gelman A, Yao Y, Gabry J (2024). Pareto smoothed importance sampling. *JMLR* 25(72):1-58. →
+  PSIS-LOO for Fig 5 (R6), and the gate that every Pareto k ≤ 0.7 before a Δelpd is trusted.
+- Betancourt M (2016). Diagnosing suboptimal cotangent disintegrations in Hamiltonian Monte
+  Carlo. arXiv:1604.00695. → The BFMI caution floor of 0.3 in the energy diagnostic.
+- Chaloner K, Verdinelli I (1995). Bayesian experimental design: a review. *Statistical
+  Science* 10(3):273-304; and Lindley DV (1956). On a measure of the information provided by
+  an experiment. *Annals of Mathematical Statistics* 27(4):986-1005. → Fig 9's
+  expected-information grid (Gaussian/Laplace approximation to the information gain), which
+  picked R7's cells.
+
+**Internal evidence** (recorded in this plan or the named file)
+- Chain count and warmup length: the chain-count study on C12 (Appendix A;
+  `tier1/convergence_and_warmup.py`, `chaintest_convergence.json`), confirmed on R0
+  (section 4).
+- Replicate system and cost: the Morris screen (`chain_system_sensitivity_analysis/`), the
+  reaction files' chain-length-specific constants, and the per-gradient cost profiles
+  (`multiparam_tests/cost_profile.py`) (section 0); R0's measured cost (section 4, Appendix B).
+- Data design: `scan_rate_multipliers.py` and `check_rate_design.py` (Appendix D).
+- Parameter sets: `collinearity.py` and `select_testcase.py` (Appendix C), and the
+  two-parameter pilots on C6, C10 and C14 (`multiparam_tests/mp_posterior.json`).
+- Sampler plumbing: stranded-chain detection and the multimodality toy (Stage 0 item 6;
+  `Notes/efficiency_logic_map.md`).
+- The R5 start point: the log posterior at the shifted prior's mean against near the truth
+  (section 2, R4/R5 notes).
+
