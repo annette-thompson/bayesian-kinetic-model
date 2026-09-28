@@ -62,8 +62,8 @@ VARIANT = re.compile(r" - (ta0\.95|rtol1e-5|dense|profile|rates)$")
 
 # Kept in step with resumable_sampler.GPU_SPEED_VS_A100; a card it does not list counts at 1.00,
 # as the sampler counts it.
-GPU_SPEED_VS_A100 = (("H100 NVL", 1.37), ("MIG 3g.40gb", 0.90), ("A100", 1.00), ("V100-SXM2", 0.67),
-                     ("V100", 0.75))
+GPU_SPEED_VS_A100 = (("H100 NVL", 1.37), ("H200", 1.23), ("MIG 3g.40gb", 0.90), ("A100", 1.00),
+                     ("V100-SXM2", 0.67), ("V100", 0.75))
 
 STAGES = [("Stage 1", lambda g, r: g == "R0"),
           ("Stage 2", lambda g, r: g in ("R1", "R3", "R5", "R7", "R8") or (g == "R4" and _sbc(r) < 10)),
@@ -120,7 +120,7 @@ def phase_rate(rows, phase, open_until=None, every=5):
     return (secs / steps if steps else None), steps
 
 
-def measure(run, running=False, now=None):
+def measure(run, running=False, now=None, job_ends=None):
     d = os.path.join(RESULTS, run)
     cfg = read_json(os.path.join(d, "solver_params.json")) or {}
     ps = cfg.get("posterior_sampling") or {}
@@ -146,9 +146,11 @@ def measure(run, running=False, now=None):
     if m["finalized"] and rows:
         nc = os.path.getmtime(os.path.join(d, "posterior_samples_pm.nc"))
         m["finalize"] = max(nc - rows[-1]["t"], 0) / 3600.0 * speed(m["gpu"])
-        png = os.path.join(d, "run_summary.png")
-        if os.path.exists(png) and 0 < os.path.getmtime(png) - nc < 3 * 3600:
-            m["after"] = (os.path.getmtime(png) - nc) / 3600.0 * speed(m["gpu"])
+        # Recovery report and figures: from the posterior file to the end of the job that wrote
+        # it (sacct), not to a figure's timestamp, which a later redraw moves.
+        end = next((e for e in (job_ends or {}).get(slug_of(run), []) if e.timestamp() >= nc), None)
+        if end is not None and end.timestamp() - nc < 3 * 3600:
+            m["after"] = (end.timestamp() - nc) / 3600.0 * speed(m["gpu"])
     return m
 
 
@@ -284,6 +286,23 @@ def stage_of(e):
     return "--"
 
 
+def job_ends(days=14):
+    """{job name: [end, ...] sorted} for this user's completed jobs on both clusters."""
+    ends = {}
+    for cl in ("blanca", "alpine"):
+        # Filtered here: sacct's -s with -S returns nothing on these clusters.
+        out = sh(["sacct", "-u", os.environ.get("USER", ""), "-S", "now-%ddays" % days, "-X", "-n", "-P",
+                  "-o", "JobName,End,State"], env=cluster_env(cl))
+        for line in out.splitlines():
+            f = line.split("|")
+            t = parse_time(f[1]) if len(f) == 3 and f[2].startswith("COMPLETED") else None
+            if t:
+                ends.setdefault(f[0], []).append(t)
+    for v in ends.values():
+        v.sort()
+    return ends
+
+
 def running_runs():
     """Runs with a copy running on either cluster, from squeue."""
     jobs = slurm_jobs()
@@ -296,7 +315,8 @@ def all_estimates(running=None, now=None):
                   and os.path.exists(os.path.join(RESULTS, d, "solver_params.json")))
     if running is None:
         running = running_runs()
-    ms = [measure(r, r in running, now) for r in runs]
+    ends = job_ends()
+    ms = [measure(r, r in running, now, ends) for r in runs]
     rates = Rates(ms)
     es = [estimate(m, rates) for m in ms]
     for e in es:

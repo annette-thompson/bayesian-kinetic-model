@@ -19,14 +19,22 @@ States: DONE (finalized), FINALIZING, RUNNING, QUEUED, RESUBMIT (stopped at the 
 wall clock with nothing queued: rerun tier1/submit_stage2.sh), CAPPED (hit its compute cap;
 final, not resubmitted), FAILED (the job ended with an error and nothing is queued), SLOW (no
 checkpoint for much longer than usual, but its GPU is busy: long trees, e.g. on a ridge),
-STALLED (the same with an idle GPU, or one that could not be checked), NOT STARTED.
+STALLED (the same with an idle GPU, or one that could not be checked), HELD (stopped at a
+segment boundary and deliberately not resubmitted: --hold), NOT STARTED.
 
 Usage (on the cluster, from /projects/anth4580/Bayesian/job_files):
     python3 tier1/tier1_status.py              # runs that have started, finished or are queued
     python3 tier1/tier1_status.py --all        # also runs never submitted
     python3 tier1/tier1_status.py R1 R4 sbc01  # filter: run groups (R0-R8) or name substrings
-    python3 tier1/tier1_status.py --check      # same table; exit 3 if anything needs action
-                                               # (RESUBMIT, FAILED, STALLED), 4 if all are done
+    python3 tier1/tier1_status.py --check      # same table; exit 3 if anything needs a look
+                                               # (FAILED, STALLED, an unexplained stop, a priority
+                                               # inversion), 5 if only clean segment ends need
+                                               # resubmitting, 4 if all are done
+
+Priority check (every call): the low-priority bulk runs (LOW_PRIORITY, the 30 SBC replicates
+submitted with --nice) must not start ahead of another run's waiting segment. Any low-priority
+job that started after a waiting run's copy was submitted, or a waiting low-priority job with
+a priority at or above that run's, is reported as an inversion.
 
 Every call appends each queued run's earliest estimated start (the "est." in WHERE) to
 tier1/start_predictions.jsonl, which tier1/start_accuracy.py checks against the actual starts;
@@ -50,6 +58,8 @@ START_LOG = os.path.join(LOGS, "start_predictions.jsonl")
 SEGMENT_H = 11.5           # tier1.sbatch's per-segment budget (MAXH)
 STALL_FLOOR_MIN = 45       # a running run with no checkpoint for this long is flagged...
 STALL_FACTOR = 8           # ...or for this many times its usual checkpoint interval, if longer
+
+LOW_PRIORITY = re.compile(r"^tier1_C8_sbc0(1\d|2\d|3\d)_a1c3$")   # R4's 30 replicates, --nice 25000
 
 GROUPS = [                 # (id, pattern on the run name), first match wins
     ("R4", r"C8_sbc\d+"),
@@ -99,12 +109,16 @@ def parse_time(s):
 
 
 def parse_elapsed(s):
-    """Slurm [d-]hh:mm:ss or mm:ss -> hours."""
+    """Slurm [d-]hh:mm:ss or mm:ss -> hours. Slurm prints INVALID for a job that is still
+    starting; that counts as 0."""
     days = 0
     if "-" in s:
         d, s = s.split("-", 1)
         days = int(d)
-    parts = [int(p) for p in s.split(":")]
+    try:
+        parts = [int(p) for p in s.split(":")]
+    except ValueError:
+        return 0.0
     while len(parts) < 3:
         parts.insert(0, 0)
     return days * 24 + parts[0] + parts[1] / 60.0 + parts[2] / 3600.0
@@ -124,6 +138,38 @@ def slurm_jobs():
                 cluster=cl, id=f[0], state=f[2], elapsed=f[3], node=f[4], gres=f[5],
                 reason=f[6], start=parse_time(f[7])))
     return jobs
+
+
+def priority_check():
+    """Inversions between the low-priority bulk jobs and this user's other waiting jobs."""
+    issues, waiting = [], []
+    for cl in ("blanca", "alpine"):
+        env = cluster_env(cl)
+        # Eligible time, not submit time: a preempted job requeues under its old submit time.
+        out = sh(["squeue", "-h", "-u", os.environ.get("USER", ""), "-t", "PD",
+                  "-O", "Name:120,EligibleTime:25,PriorityLong:20,Reason:60"], env=env)
+        rows = [l.split()[:4] for l in out.splitlines() if len(l.split()) >= 4]
+        main = [(n, parse_time(v), int(q), r) for n, v, q, r in rows if not LOW_PRIORITY.match(n) and q.isdigit()]
+        low = [int(q) for n, v, q, r in rows if LOW_PRIORITY.match(n) and q.isdigit()]
+        waiting += [(cl, n) for n, _, _, _ in main]
+        if main and low and max(low) >= min(q for _, _, q, _ in main):
+            issues.append("%s: a waiting low-priority job has priority %d >= %d" % (cl, max(low), min(q for _, _, q, _ in main)))
+        submitted = [t for _, t, _, _ in main if t]
+        if not submitted:
+            continue
+        since = min(submitted)
+        out = sh(["sacct", "-u", os.environ.get("USER", ""), "-S", since.strftime("%Y-%m-%dT%H:%M:%S"), "-X", "-n",
+                  "-P", "--duplicates", "-o", "JobName,Start"], env=env)
+        for line in out.splitlines():
+            f = line.split("|")
+            start = parse_time(f[1]) if len(f) == 2 and LOW_PRIORITY.match(f[0]) else None
+            if not start:
+                continue
+            ahead = sorted({n for n, t, _, r in main if t and start > t})
+            if ahead:
+                issues.append("%s: %s started %s while %s waited" % (cl, f[0], start.strftime("%a %H:%M"),
+                                                                     ", ".join(ahead)))
+    return issues, waiting
 
 
 def preemptions():
@@ -195,6 +241,21 @@ def winner_log(slug):
     return None, ""
 
 
+def earlier_check(slug):
+    """The latest r-hat/ESS check in any of a run's logs, newest first: a resubmitted segment
+    has none until its first check, but the draws (and the last check) carry over."""
+    for path in sorted(glob.glob(os.path.join(LOGS, "%s.*.out" % glob.escape(slug))),
+                       key=os.path.getmtime, reverse=True):
+        try:
+            with open(path, errors="replace") as fh:
+                check = log_facts(fh.read(), "").get("check")
+        except OSError:
+            continue
+        if check:
+            return check
+    return None
+
+
 def log_facts(text, run):
     facts = {}
     checks = re.findall(r"r_hat/ESS check at (\d+) sampling draws: r_hat=([\d.]+) ess_bulk=([\d.]+).*?\| "
@@ -264,6 +325,10 @@ def describe(run, jobs, preempt, now):
     pending = [j for j in mine if j["state"] == "PENDING"]
     log_path, text = winner_log(slug)
     facts = log_facts(text, run)
+    if "check" not in facts:
+        check = earlier_check(slug)
+        if check:
+            facts["check"] = check
     used = (meta.get("a100_equiv_seconds") or 0) / 3600.0
     notes = []
     if preempt.get(slug):
@@ -331,7 +396,11 @@ def describe(run, jobs, preempt, now):
     else:
         reason = status.get("stopped_reason")
         where = ""
-        if reason in ("total_time_budget", "sampling_time_budget"):
+        if reason == "total_time_budget" and (cap is None or used < cap - 0.05):
+            # Stopped at a cap that has since been lifted or raised in its config.
+            state = "RESUBMIT"
+            notes.append("stopped at its old cap; now %s" % ("uncapped" if cap is None else "%g" % cap))
+        elif reason in ("total_time_budget", "sampling_time_budget"):
             state = "CAPPED"
             notes.append("hit its compute cap (%s)" % reason)
         elif facts.get("error"):
@@ -379,8 +448,11 @@ def add_estimates(lines, now):
         if r["state"] in ("RUNNING", "SLOW", "STALLED") and r["seg_left"] is not None:
             wall = left / r["speed_now"]
             if wall <= r["seg_left"]:
-                done = now + dt.timedelta(hours=wall + e["finalize"] / r["speed_now"])
-                r["eta"] = "done ~%s" % done.strftime("%a %H:%M")
+                if e.get("capped"):
+                    r["eta"] = "reaches its cap ~%s" % (now + dt.timedelta(hours=wall)).strftime("%a %H:%M")
+                else:
+                    done = now + dt.timedelta(hours=wall + e["finalize"] / r["speed_now"])
+                    r["eta"] = "done ~%s" % done.strftime("%a %H:%M")
             else:
                 more = int(-(-(wall - r["seg_left"]) // SEGMENT_H))
                 seg_end = now + dt.timedelta(hours=r["seg_left"])
@@ -413,6 +485,8 @@ def main():
     ap.add_argument("--check", action="store_true", help="exit 3 if anything needs action, 4 if all done")
     ap.add_argument("--logs", action="store_true", help="also print each run's log path")
     ap.add_argument("--no_log", action="store_true", help="do not log the estimated starts")
+    ap.add_argument("--hold", action="append", default=[], metavar="SUBSTR",
+                    help="a stopped run whose name contains SUBSTR is HELD, not RESUBMIT (repeatable)")
     a = ap.parse_args()
 
     now = dt.datetime.now()
@@ -425,6 +499,9 @@ def main():
         if a.filters and not any(f == group_of(run) or f in run for f in a.filters):
             continue
         r = describe(run, jobs, preempt, now)
+        if r["state"] == "RESUBMIT" and any(h == run[len("Tier1 "):] or h == run for h in a.hold):
+            r["state"] = "HELD"
+            r["note"] = "held, not resubmitted; " + r["note"]
         if r["state"] == "NOT STARTED" and not a.all:
             continue
         lines.append(r)
@@ -456,10 +533,21 @@ def main():
         print("Needs action: " + ", ".join("%s (%s)" % (r["run"], r["state"]) for r in act))
         if any(r["state"] == "RESUBMIT" for r in act):
             print("  resubmit: cd %s/job_files && tier1/submit_stage2.sh" % BASE)
+    issues, waiting = priority_check()
+    if issues:
+        print("PRIORITY INVERSION: " + "; ".join(issues))
+    else:
+        print("Priority check: OK (%d other copies waiting; no low-priority job started ahead of one)" % len(waiting))
     if a.check:
-        if act:
+        # A clean segment end (time budget, or a cap since raised) can be resubmitted without a
+        # look; anything else, or an inversion, needs one.
+        clean = all(r["state"] == "RESUBMIT" and ("stopped (time_budget)" in r["note"] or "old cap" in r["note"])
+                    for r in act)
+        if issues or (act and not clean):
             sys.exit(3)
-        if lines and all(r["state"] in ("DONE", "CAPPED") for r in lines):
+        if act:
+            sys.exit(5)
+        if lines and all(r["state"] in ("DONE", "CAPPED", "HELD") for r in lines):
             sys.exit(4)
 
 

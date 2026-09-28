@@ -1,8 +1,9 @@
 #!/bin/bash -l
 # Stage 2 of Notes/tier1_experiment_plan.md section 3 -- R1, R3, R5, R8 and the R4 pilot, 23
-# runs -- plus R7's two runs (added 2026-09-26; no gate holds them), each one tier1.sbatch job
-# queued on Blanca and Alpine through gpu_submit.sh. The default order puts the runs the
-# figures most need first: R1, the R4 pilot, R5, R3, R8, R7.
+# runs -- plus R7's two runs (added 2026-09-26; no gate holds them), and R2 and R6 (b) once R1
+# passed and R6 (c) (all approved 2026-09-27), each one tier1.sbatch job queued on Blanca and
+# Alpine through gpu_submit.sh. The default order puts the runs the figures most need first:
+# R1, the R4 pilot, R5, R3, R8, R7, then R2 and R6.
 #
 #   tier1/submit_stage2.sh --dry_run          # what would be submitted, and why anything is skipped
 #   tier1/submit_stage2.sh                    # submit all of it
@@ -21,14 +22,29 @@ R0_RUN="Tier1 C8 - a1c3"
 
 declare -A GROUP
 GROUP[R1]="Tier1 C14+unsat - a1c3"
-GROUP[R3]="Tier1 C8 - d1d2|Tier1 C8 - d1d2 - dense|Tier1 C14+unsat - d1d2"
+# R3's C8 pair (Tier1 C8 - d1d2, and its dense twin) was stopped at warmup step 20 on 2026-09-27
+# and resumed with max_steps 1000 (dense 05:07, diagonal 14:30). C18 (added 2026-09-27) is the
+# clearly identified end of Figs 6/6b. The dense twins of C14+unsat and C18 were added 2026-09-27.
+GROUP[R3]="Tier1 C14+unsat - d1d2|Tier1 C18 - d1d2|Tier1 C8 - d1d2|Tier1 C8 - d1d2 - dense"
+GROUP[R3]+="|Tier1 C14+unsat - d1d2 - dense|Tier1 C18 - d1d2 - dense"
 GROUP[R5]="Tier1 C8_noise5 - a1c3|Tier1 C8_noise20 - a1c3|Tier1 C8_noise40 - a1c3|Tier1 C8 - a1c3 - prior+1sd|Tier1 C8 - a1c3 - prior+2sd|Tier1 C8 - a1c3 - prior+3sd|Tier1 C8 - a1c3 - prior+4sd"
 # R5's paired series: the same prior shifts, with the chains started at the ME1 values.
 GROUP[R5]+="|Tier1 C8 - a1c3 - prior+1sd - init1|Tier1 C8 - a1c3 - prior+2sd - init1|Tier1 C8 - a1c3 - prior+3sd - init1|Tier1 C8 - a1c3 - prior+4sd - init1"
 GROUP[R8]="Tier1 C8 - a1c3 - ta0.95|Tier1 C8 - a1c3 - rtol1e-5"
+GROUP[R8]+="|Tier1 C8 - a1c3 - prior+4sd - cap1000"
 GROUP[R4]="$(for i in $(seq 0 9); do printf 'Tier1 C8_sbc%03d - a1c3|' "$i"; done)"
+# R4's other 30 replicates (approved 2026-09-27), at lower priority: nice above the age
+# factor's weight (20160) so a resubmitted segment of any other run starts ahead of them
+# however long they have waited.
+GROUP[R4b]="$(for i in $(seq 10 39); do printf 'Tier1 C8_sbc%03d - a1c3|' "$i"; done)"
+declare -A NICE_OF
+NICE_OF[R4b]=25000
 GROUP[R7]="Tier1 C14+unsat - a1c3 - profile|Tier1 C14+unsat - a1c3 - rates"
-ORDER="R1 R4 R5 R3 R8 R7"
+GROUP[R2]="Tier1 C14+unsat - a1c3a2"
+GROUP[R6]="Tier1 C14+unsat - a1c3sc3l"
+# R6 (c): the 1:3 off-grouping data, fit with the grouped and the split model.
+GROUP[R6]+="|Tier1 C14+unsat+c3split_c3l3 - a1c3|Tier1 C14+unsat+c3split_c3l3 - a1c3sc3l"
+ORDER="R1 R4 R5 R3 R8 R7 R2 R6 R4b"
 
 DRY=0; FORCE=0; ONLY=""
 while [[ $# -gt 0 ]]; do
@@ -82,11 +98,13 @@ for g in $ORDER; do
     if grep -qxF "$slug" <<< "$QUEUED"; then
       echo "skip  $g  $run  (a job named $slug is already queued or running)"; n_skip=$((n_skip + 1)); continue
     fi
+    nice=()
+    [[ -n "${NICE_OF[$g]:-}" ]] && nice=(--nice "${NICE_OF[$g]}")
     if (( DRY )); then
-      echo "would $g  $run  -> ./gpu_submit.sh --time 12:15:00 --name $slug -- tier1/tier1.sbatch \"$run\""
+      echo "would $g  $run  -> ./gpu_submit.sh --time 12:15:00 --name $slug ${nice[*]} -- tier1/tier1.sbatch \"$run\""
     else
       echo "==>   $g  $run"
-      ./gpu_submit.sh --time 12:15:00 --name "$slug" -- tier1/tier1.sbatch "$run" || { echo "submission failed: $run" >&2; exit 1; }
+      ./gpu_submit.sh --time 12:15:00 --name "$slug" "${nice[@]}" -- tier1/tier1.sbatch "$run" || { echo "submission failed: $run" >&2; exit 1; }
       sleep 1
     fi
     n_sub=$((n_sub + 1))

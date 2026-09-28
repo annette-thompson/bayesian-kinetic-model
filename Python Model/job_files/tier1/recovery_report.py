@@ -16,17 +16,21 @@ their actual truth. Configs without the block fall back to the no-op values. A p
 data's parameterisation does not contain (the grouped model's `c3` fit to split data) has no
 truth, and is scored for fit only.
 
-Per parameter it reports:
-
+Per parameter it reports, following Schad, Betancourt & Vasishth (2021, eqs. 4-5), on the scale
+the prior is Normal on: log(x) for the LogNormal groups, x itself for the d-type groups.
   z            (posterior mean - truth) / posterior sd. How far off the recovered value is,
-               in units of its own stated uncertainty. |z| > 2 with tight shrinkage is the
+               in units of its own stated uncertainty. |z| > 2 with high contraction is the
                dangerous case -- confidently wrong -- and is flagged.
-  shrinkage    1 - posterior sd / prior sd. How much the data actually taught us. The
-               outline's 3.3 cutoff for "weakly identified" is < 0.5.
-  shrinkage_log  (LogNormal parameters) the same on log(x), which does not depend on where
-               the prior median sits -- use it to compare runs whose priors differ.
+  contraction  posterior contraction, 1 - posterior variance / prior variance: how much of
+               the prior's uncertainty the data removed (1 = pinned down, 0 = learned
+               nothing). The outline's 3.3 cutoff for "weakly identified" is < 0.5. On log(x)
+               it does not depend on where the prior median sits or where the truth lies,
+               which the natural-scale number does (a LogNormal's natural-scale variance is
+               dominated by its upper tail).
+  z_natural, contraction_natural   the same on the natural scale, for reference.
   covered      whether truth falls inside the 50 / 90 / 95% central credible intervals.
   quantile     the posterior quantile at which truth sits (0.5 = dead centre).
+The z and contraction columns of the table are the log-scale ones where the prior is LogNormal.
 
 One caveat this script will not paper over: the quantile column is NOT an SBC rank
 statistic. A proper SBC uniformity test (Talts et al. 2018) needs the true value drawn from
@@ -51,7 +55,7 @@ _CLUSTER = Path("/projects/anth4580/Bayesian")
 ROOT = _CLUSTER if _CLUSTER.is_dir() else Path(__file__).resolve().parent.parent.parent
 RESULTS = ROOT / "Results" / "Tier1"
 Z975 = 1.959963984540054          # norm.ppf(0.975), for the 95% mass the priors are built on
-SHRINKAGE_WEAK = 0.5              # outline 3.3's "weakly identified" cutoff
+CONTRACTION_WEAK = 0.5            # outline 3.3's "weakly identified" cutoff
 
 
 def truth_and_prior_sd(spec, truths=None):
@@ -73,6 +77,11 @@ def truth_and_prior_sd(spec, truths=None):
     z = Z975 if float(pr.get("mass", 0.95)) == 0.95 else _z(float(pr["mass"]))
     if truths is not None:
         truth = truths.get(name)
+        if truth is None and name[:-1] in truths:              # c3s / c3l from a whole c3
+            truth = truths[name[:-1]]
+        children = {v for t, v in truths.items() if t[:-1] == name}
+        if truth is None and len(children) == 1:               # whole c3 from equal halves
+            truth = next(iter(children))
     else:
         truth = 0.0 if dist == "Normal" else 1.0
     if dist == "LogNormal":
@@ -90,25 +99,42 @@ def _z(mass):
     return float(norm.ppf(0.5 + mass / 2))
 
 
-def score(draws, truth, prior_sd):
+def _zc(x, truth, prior_sd):
+    """(z, contraction) of draws x against a truth and prior sd on the same scale."""
+    mean, sd = float(x.mean()), float(x.std(ddof=1))
+    z = (mean - truth) / sd if (truth is not None and sd > 0) else None
+    contraction = 1.0 - (sd / prior_sd) ** 2 if prior_sd > 0 else float("nan")
+    return z, contraction
+
+
+def score(draws, truth, prior_sd, log_prior_sd=None):
+    """Recovery scores for one parameter. With log_prior_sd (a LogNormal prior), z and
+    contraction are on log(x); otherwise on x itself."""
     flat = np.asarray(draws, float).ravel()
     mean, sd = float(flat.mean()), float(flat.std(ddof=1))
+    out = {"mean": mean, "sd": sd, "median": float(np.median(flat)), "truth": truth, "prior_sd": prior_sd}
+    z_nat, c_nat = _zc(flat, truth, prior_sd)
+    out["contraction_natural"] = c_nat
+    if log_prior_sd is not None:
+        logx = np.log(flat)
+        z, c = _zc(logx, math.log(truth) if truth is not None and truth > 0 else None, log_prior_sd)
+        out.update(scale="log", log_mean=float(logx.mean()), log_sd=float(logx.std(ddof=1)),
+                   log_prior_sd=log_prior_sd)
+    else:
+        z, c = z_nat, c_nat
+        out["scale"] = "natural"
+    out["contraction"] = c
+    out["ci95"] = [float(v) for v in np.percentile(flat, [2.5, 97.5])]
     if truth is None:
-        return {"mean": mean, "sd": sd, "median": float(np.median(flat)), "truth": None,
-                "prior_sd": prior_sd, "shrinkage": 1.0 - sd / prior_sd if prior_sd > 0 else float("nan"),
-                "ci95": [float(v) for v in np.percentile(flat, [2.5, 97.5])], "confidently_wrong": False}
-    out = {"mean": mean, "sd": sd, "median": float(np.median(flat)),
-           "truth": truth, "prior_sd": prior_sd,
-           "z": (mean - truth) / sd if sd > 0 else float("nan"),
-           "shrinkage": 1.0 - sd / prior_sd if prior_sd > 0 else float("nan"),
-           "quantile_of_truth": float((flat < truth).mean())}
+        out["confidently_wrong"] = False
+        return out
+    out["z"], out["z_natural"] = z, z_nat
+    out["quantile_of_truth"] = float((flat < truth).mean())
     for lvl, lo, hi in ((50, 25.0, 75.0), (90, 5.0, 95.0), (95, 2.5, 97.5)):
         a, b = np.percentile(flat, [lo, hi])
         out[f"covered_{lvl}"] = bool(a <= truth <= b)
-        if lvl == 95:
-            out["ci95"] = [float(a), float(b)]
     # The failure mode that would undermine the paper: a tight posterior in the wrong place.
-    out["confidently_wrong"] = bool(abs(out["z"]) > 2 and out["shrinkage"] > SHRINKAGE_WEAK)
+    out["confidently_wrong"] = bool(abs(out["z"]) > 2 and out["contraction"] > CONTRACTION_WEAK)
     return out
 
 
@@ -131,15 +157,13 @@ def analyse(run_dir):
             rec["params"][name] = {"error": f"not in posterior (have {sorted(have)})"}
             continue
         truth, prior_sd = truth_and_prior_sd(spec, cfg.get("tier1_truth"))
-        s = score(inf.posterior[name].values, truth, prior_sd)
         pr = spec["prior_dist_params"]
+        log_prior_sd = None
         if pr.get("distribution") == "LogNormal":
-            # Shrinkage of log(x): independent of where the prior median sits, which the
-            # natural-scale number is not (its prior sd grows with the median). Use this one
-            # when comparing runs whose priors differ, e.g. the prior-offset robustness runs.
+            # log(x) has a Normal prior whose sd does not depend on the median (the prior-shift
+            # runs move only the median), so contraction on log(x) compares across runs.
             log_prior_sd = math.log(float(pr["upper"]) / float(pr["lower"])) / (2 * Z975)
-            log_sd = float(np.log(np.asarray(inf.posterior[name].values, float)).std(ddof=1))
-            s["shrinkage_log"] = 1.0 - log_sd / log_prior_sd
+        s = score(inf.posterior[name].values, truth, prior_sd, log_prior_sd)
         try:
             s["rhat"] = float(az.rhat(inf, var_names=[name], method="rank")[name].values)
             s["ess_bulk"] = float(az.ess(inf, var_names=[name], method="bulk")[name].values)
@@ -168,7 +192,8 @@ def main():
         raise SystemExit("no matching Tier-1 runs")
 
     out = []
-    hdr = f"{'run':<26}{'param':<8}{'truth':>7}{'mean':>10}{'sd':>9}{'z':>7}{'shrink':>8}{'95%':>6}{'rhat':>8}"
+    W = max(len(r.name) for r in runs) + 2
+    hdr = f"{'run':<{W}}{'param':<8}{'truth':>7}{'mean':>10}{'sd':>9}{'z':>7}{'contr':>8}{'95%':>6}{'rhat':>8}"
     print(hdr); print("-" * len(hdr))
     for r in runs:
         try:
@@ -177,23 +202,23 @@ def main():
             rec = {"run": r.name, "error": f"{type(e).__name__}: {e}"}
         out.append(rec)
         if "skipped" in rec:
-            print(f"{r.name[:26]:<26}(skipped: {rec['skipped']})")
+            print(f"{r.name:<{W}}(skipped: {rec['skipped']})")
             continue
         if "error" in rec:
-            print(f"{r.name[:26]:<26}ERROR {rec['error'][:60]}")
+            print(f"{r.name:<{W}}ERROR {rec['error'][:60]}")
             continue
         for name, p in rec["params"].items():
             if "error" in p:
-                print(f"{rec['run'][:26]:<26}{name:<8}{p['error'][:50]}")
+                print(f"{rec['run']:<{W}}{name:<8}{p['error'][:50]}")
                 continue
             if p["truth"] is None:
-                print(f"{rec['run'][:26]:<26}{name:<8}{'n/a':>7}{p['mean']:>10.4f}"
-                      f"{p['sd']:>9.4f}{'':>7}{p['shrinkage']:>8.3f}{'':>6}"
+                print(f"{rec['run']:<{W}}{name:<8}{'n/a':>7}{p['mean']:>10.4f}"
+                      f"{p['sd']:>9.4f}{'':>7}{p['contraction']:>8.3f}{'':>6}"
                       f"{p.get('rhat', float('nan')):>8.4f}  (no truth in this parameterisation)")
                 continue
             flag = "  <-- CONFIDENTLY WRONG" if p["confidently_wrong"] else ""
-            print(f"{rec['run'][:26]:<26}{name:<8}{p['truth']:>7.2f}{p['mean']:>10.4f}"
-                  f"{p['sd']:>9.4f}{p['z']:>7.2f}{p['shrinkage']:>8.3f}"
+            print(f"{rec['run']:<{W}}{name:<8}{p['truth']:>7.2f}{p['mean']:>10.4f}"
+                  f"{p['sd']:>9.4f}{p['z']:>7.2f}{p['contraction']:>8.3f}"
                   f"{'yes' if p['covered_95'] else 'NO':>6}{p.get('rhat', float('nan')):>8.4f}{flag}")
 
     scored = [r for r in out if "params" in r]
@@ -204,11 +229,13 @@ def main():
         print(f"  truth inside the 95% interval for every parameter: "
               f"{len(scored) - len(miss)}/{len(scored)}" + (f"  (missed: {miss})" if miss else ""))
         if bad:
-            print(f"  CONFIDENTLY WRONG (|z| > 2 with shrinkage > {SHRINKAGE_WEAK}): {bad}")
+            print(f"  CONFIDENTLY WRONG (|z| > 2 with contraction > {CONTRACTION_WEAK}): {bad}")
         weak = [(r["run"], n) for r in scored for n, p in r["params"].items()
-                if "shrinkage" in p and p["shrinkage"] < SHRINKAGE_WEAK]
+                if "contraction" in p and p["contraction"] < CONTRACTION_WEAK]
         if weak:
-            print(f"  weakly identified (shrinkage < {SHRINKAGE_WEAK}): {weak}")
+            print(f"  weakly identified (contraction < {CONTRACTION_WEAK}): {weak}")
+        print("  z and contraction on log(x) for LogNormal parameters; contraction = 1 - posterior "
+              "variance / prior variance")
     if a.json:
         Path(a.json).write_text(json.dumps(out, indent=1) + "\n")
         print(f"\nwrote {a.json}")

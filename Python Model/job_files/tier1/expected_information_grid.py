@@ -16,10 +16,11 @@ log(parameter) and W the inverse noise variances, the Fisher information is F = 
 prior on each log-parameter is Normal with sd 1.1748 (95% of the LogNormal in [0.1, 10]), so
 the posterior covariance is (F + I / 1.1748^2)^-1. Reported per cell:
 
-  shrinkage_log   1 - posterior sd / prior sd per parameter, on the log scale (recovery_report's
-                  shrinkage_log, so directly comparable with a sampled run)
+  contraction     posterior contraction per parameter on the log scale, 1 - posterior
+                  variance / prior variance (recovery_report's contraction, so directly
+                  comparable with a sampled run)
   info_nats       expected information gain, 0.5 * log(det prior cov / det posterior cov)
-  per_point       info_nats and mean shrinkage divided by the number of data points: the
+  per_point       info_nats and mean contraction divided by the number of data points: the
                   figure's ranking, value per unit of collection cost
 
 The actual Tier-1 design (time series, baseline profile, five initial rates) is scored the same
@@ -101,13 +102,13 @@ def cell_points(fm, base, J, names, times):
 
 
 def summarize(params, post_sd, info, n):
-    shrink = 1.0 - post_sd / PRIOR_SD_LOG
+    contraction = 1.0 - (post_sd / PRIOR_SD_LOG) ** 2
     return {"n_points": int(n),
-            "shrinkage_log": {p: round(float(s), 5) for p, s in zip(params, shrink)},
-            "mean_shrinkage_log": round(float(shrink.mean()), 5),
+            "contraction": {p: round(float(c), 6) for p, c in zip(params, contraction)},
+            "mean_contraction": round(float(contraction.mean()), 6),
             "info_nats": round(float(info), 4),
             "info_nats_per_point": round(float(info / n), 5),
-            "mean_shrinkage_per_point": round(float(shrink.mean() / n), 6)}
+            "mean_contraction_per_point": round(float(contraction.mean() / n), 7)}
 
 
 def main():
@@ -174,11 +175,11 @@ def main():
     Path(a.out).write_text(json.dumps(out, indent=1) + "\n")
 
     print(f"{a.system}, params {params}; finite-difference check (h vs 3h): max relative difference {fd_agreement:.1e}")
-    print(f"{'cell':52s} {'points':>6s} {'info (nats)':>11s} {'per point':>9s}  shrinkage_log " + " ".join(f"{p:>6s}" for p in params))
+    print(f"{'cell':52s} {'points':>6s} {'info (nats)':>11s} {'per point':>9s}  contraction   " + " ".join(f"{p:>6s}" for p in params))
     rows = list(grid.items()) + [(f"Tier-1 design: {k}", v) for k, v in tier1_parts.items()]
     for k, v in rows:
         print(f"{k:52s} {v['n_points']:6d} {v['info_nats']:11.3f} {v['info_nats_per_point']:9.4f}  "
-              f"{'':13s} " + " ".join(f"{v['shrinkage_log'][p]:6.3f}" for p in params))
+              f"{'':13s} " + " ".join(f"{v['contraction'][p]:6.4f}" for p in params))
     print(f"best cell per data point: {best}")
     print(f"wrote {a.out} ({out['seconds']} s)")
 

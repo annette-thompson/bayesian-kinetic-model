@@ -114,7 +114,8 @@ def datasets_for(data_name):
 
 def build(system, params, reactions=None, data_name=None, tag=None, dense=False,
           target_accept=0.8, rtol=None, prior_shift_sd=0.0, chains=4, tune=300,
-          draws=5000, seed=42, max_total_hours=24.0, datasets=None, init_nominal=False):
+          draws=5000, seed=42, max_total_hours=24.0, datasets=None, init_nominal=False,
+          max_steps=None):
     reactions = reactions or system
     data_name = data_name or f"Chain_{reactions}"
     cfg = base_config(system)
@@ -137,6 +138,8 @@ def build(system, params, reactions=None, data_name=None, tag=None, dense=False,
 
     if rtol is not None:
         cfg["ODE_stepsize_controller"] = dict(cfg["ODE_stepsize_controller"], rtol=rtol)
+    if max_steps is not None:
+        cfg["ODE_solver"] = dict(cfg["ODE_solver"], max_steps=max_steps)
     cfg["calculation_module"] = "Calculation Files/Full_FAS/FA_conc.py"
     cfg["free_kinetic_params"] = [
         {"rxn_name": None, "param_name": p, "prior_dist_params": prior_for(p, prior_shift_sd)}
@@ -191,9 +194,27 @@ def plan_runs():
         # The three-parameter fits run without a compute cap: estimated at ~60 A100-h at R1's
         # rate, past the 24 h runaway guard the rest keep (decided 2026-09-26).
         ("R2", dict(system="C14+unsat", params=["a1", "c3", "a2"], max_total_hours=None)),
-        ("R3", dict(system="C8", params=["d1", "d2"])),
-        ("R3", dict(system="C8", params=["d1", "d2"], dense=True, tag="dense")),
-        ("R3", dict(system="C14+unsat", params=["d1", "d2"])),
+        # The C8 pair resumed with max_steps 1000 (dense 2026-09-27 05:07, diagonal 14:30): a
+        # runaway solve fails fast and is rejected instead of stalling the lockstep chains.
+        ("R3", dict(system="C8", params=["d1", "d2"], max_steps=1000)),
+        ("R3", dict(system="C8", params=["d1", "d2"], dense=True, tag="dense", max_steps=1000)),
+        # C14+unsat d1+d2 runs uncapped too (~55 A100-h, past the guard): its ridge is bounded
+        # and it is Figs 6/6b's weakly identified example. The C8 pair above was stopped at
+        # warmup step 20 on 2026-09-27: leapfrog steps off its exact ridge land in a stiff band
+        # (up to the 20000-step solver limit at +15 prior sd), and the lockstep chains all wait.
+        ("R3", dict(system="C14+unsat", params=["d1", "d2"], max_total_hours=None)),
+        # The clearly identified end of Figs 6/6b's range (added 2026-09-27): predicted to remove
+        # 93% of the prior variance along the loose direction, against 33% on C14+unsat, and no
+        # stiff band off the ridge (C8 and C12 have one).
+        ("R3", dict(system="C18", params=["d1", "d2"], max_total_hours=None)),
+        # Dense-metric twins (added 2026-09-27): on C8 the first dense metric update lengthened
+        # the step ~20x, and these ridges are strongly correlated (predicted -0.996, -0.980),
+        # which a diagonal metric cannot follow. Same seed, start and data as the diagonal runs;
+        # max_steps 1000 is a guard only (healthy solves need <= 172 steps out to 20 prior sd).
+        ("R3", dict(system="C14+unsat", params=["d1", "d2"], dense=True, tag="dense",
+                    max_total_hours=None, max_steps=1000)),
+        ("R3", dict(system="C18", params=["d1", "d2"], dense=True, tag="dense",
+                    max_total_hours=None, max_steps=1000)),
         # R6: split model on standard data; both models on off-grouping data. The grouped
         # model on standard data is R1.
         ("R6", dict(system="C14+unsat", reactions="C14+unsat+c3split", params=["a1", "c3s", "c3l"],
@@ -207,6 +228,11 @@ def plan_runs():
         ("R7", dict(system="C14+unsat", params=["a1", "c3"], datasets=["rates"], tag="rates")),
         ("R8", dict(system="C8", params=["a1", "c3"], target_accept=0.95, tag="ta0.95")),
         ("R8", dict(system="C8", params=["a1", "c3"], rtol=1e-5, tag="rtol1e-5")),
+        # The one fit whose accepted warmup states needed > 1000 solver steps (6 of 1040, up to 3087),
+        # rerun with the 1000-step cap: same seed and start, so it matches the original until a
+        # proposal needs more than 1000 steps (added 2026-09-27).
+        ("R8", dict(system="C8", params=["a1", "c3"], prior_shift_sd=4, tag="prior+4sd - cap1000",
+                    max_steps=1000)),
     ]
     for pct in (5, 20, 40):
         runs.append(("R5", dict(system="C8", params=["a1", "c3"], data_name=f"Chain_C8_noise{pct}")))
@@ -232,6 +258,7 @@ def main():
     ap.add_argument("--dense", action="store_true", help="dense mass matrix")
     ap.add_argument("--target_accept", type=float, default=0.8)
     ap.add_argument("--rtol", type=float, default=None, help="override the system's ODE rtol")
+    ap.add_argument("--max_steps", type=int, default=None, help="override the ODE solver's max_steps")
     ap.add_argument("--prior_shift_sd", type=float, default=0.0)
     ap.add_argument("--init_nominal", action="store_true",
                     help="start the chains at the ME1 (nominal) values instead of each prior's mean")
@@ -258,7 +285,7 @@ def main():
                      a.tag, a.dense, a.target_accept, a.rtol, a.prior_shift_sd, a.chains, a.tune,
                      a.draws, a.seed, a.max_total_hours,
                      [d.strip() for d in a.datasets.split(",")] if a.datasets else None,
-                     a.init_nominal)
+                     a.init_nominal, a.max_steps)
     write(run, cfg, a.dry_run)
 
 

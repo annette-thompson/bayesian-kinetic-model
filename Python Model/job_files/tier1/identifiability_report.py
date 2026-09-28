@@ -1,14 +1,16 @@
 """Identifiability from a finished run's posterior, for Figs 6 and 6b (outline 3.3).
 
-  Fig 6   prior-to-posterior shrinkage per parameter (1 - posterior sd / prior sd), on the
-          scale the sampler walks (log for LogNormal groups, natural for the d-type Normals).
-          Below 0.5 is flagged as weakly identified.
+  Fig 6   posterior contraction per parameter (1 - posterior variance / prior variance,
+          Schad, Betancourt & Vasishth 2021), on the scale the sampler walks (log for
+          LogNormal groups, natural for the d-type Normals). Below 0.5 is flagged as weakly
+          identified.
   Fig 6b  the posterior correlation matrix, and an eigendecomposition of the posterior
           covariance with every coordinate standardised by its prior sd. The prior's
           covariance is then the identity, so each eigenvalue is the fraction of prior
-          variance left along its direction: a small one is a combination the data pin down
-          even when the individual parameters are not, one near 1 is a direction the data do
-          not touch. Reported as eigenvalues and directions, not only a picture.
+          variance left along its direction, and 1 minus it is the contraction along that
+          direction: a small one is a combination the data pin down even when the individual
+          parameters are not, one near 1 is a direction the data do not touch. Reported as
+          eigenvalues and directions, not only a picture.
 
 Known answer (R3): on C8 every d-scaled TesA step shares coefficient 12, so only 12*d1 + d2 is
 identifiable. With d1's prior sd a twelfth of d2's, that combination is the (1, 1) direction in
@@ -51,7 +53,7 @@ def analyse(draws, prior):
     X = np.column_stack([np.log(draws[p]) if prior[p][2] else np.asarray(draws[p]) for p in names])
     sd_prior = np.array([prior[p][1] for p in names])
     sd_post = X.std(axis=0, ddof=1)
-    shrink = 1.0 - sd_post / sd_prior
+    contraction = 1.0 - (sd_post / sd_prior) ** 2
     corr = np.corrcoef(X, rowvar=False)
     Z = (X - X.mean(axis=0)) / sd_prior
     lam, vec = np.linalg.eigh(np.cov(Z, rowvar=False))       # ascending: tightest first
@@ -59,27 +61,27 @@ def analyse(draws, prior):
     return {
         "params": names,
         "scale": {p: ("log" if prior[p][2] else "natural") for p in names},
-        "shrinkage": {p: float(s) for p, s in zip(names, shrink)},
-        "weakly_identified": [p for p, s in zip(names, shrink) if s < WEAK],
+        "contraction": {p: float(c) for p, c in zip(names, contraction)},
+        "weakly_identified": [p for p, c in zip(names, contraction) if c < WEAK],
         "posterior_sd": {p: float(s) for p, s in zip(names, sd_post)},
         "prior_sd": {p: float(s) for p, s in zip(names, sd_prior)},
         "correlation": [[float(v) for v in row] for row in corr],
-        "eigen": [{"variance_left": float(l), "shrinkage_along": float(1 - np.sqrt(max(l, 0.0))),
+        "eigen": [{"variance_left": float(l), "contraction_along": float(1 - l),
                    "direction": {p: float(v) for p, v in zip(names, vec[:, i])}}
                   for i, l in enumerate(lam)],
     }
 
 
 def report(res):
-    print("shrinkage (sampling scale): " + ", ".join(
-        f"{p} {res['shrinkage'][p]:.3f} ({res['scale'][p]})" for p in res["params"]))
+    print("contraction (sampling scale): " + ", ".join(
+        f"{p} {res['contraction'][p]:.4f} ({res['scale'][p]})" for p in res["params"]))
     print(f"weakly identified (< {WEAK}): {res['weakly_identified'] or 'none'}")
     print("correlation:")
     for p, row in zip(res["params"], res["correlation"]):
         print(f"  {p:5s} " + " ".join(f"{v:+.3f}" for v in row))
     print("eigen (prior-standardised; variance left, direction):")
     for e in res["eigen"]:
-        print(f"  {e['variance_left']:.3g}  shrinkage {e['shrinkage_along']:.3f}  " +
+        print(f"  {e['variance_left']:.3g}  contraction {e['contraction_along']:.4f}  " +
               ", ".join(f"{p} {v:+.3f}" for p, v in e["direction"].items()))
 
 
