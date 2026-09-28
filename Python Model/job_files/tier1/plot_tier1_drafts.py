@@ -66,17 +66,17 @@ def fig6(path):
     ax = axes[0]
     style(ax)
     y = np.arange(len(names))[::-1]
-    shrink = [d["shrinkage"][p] for p in names]
-    ax.barh(y, shrink, height=0.5, color=POSTERIOR)
-    for yi, v in zip(y, shrink):
+    contraction = [d["contraction"][p] for p in names]
+    ax.barh(y, contraction, height=0.5, color=POSTERIOR)
+    for yi, v in zip(y, contraction):
         ax.text(max(v, 0) + 0.02, yi, f"{v:.2f}", va="center", fontsize=8, color=INK)
     ax.axvline(0.5, color=INK_2, lw=1, ls="--")
     ax.set_ylim(-0.85, y[0] + 0.4)
     ax.text(0.48, -0.62, "weak below 0.5", ha="right", va="center", fontsize=7, color=INK_2)
     ax.set_yticks(y, [f"{p} ({d['scale'][p]})" for p in names], fontsize=8, color=INK_2)
-    ax.set_xlim(min(0, min(shrink)) - 0.02, 1.12)
-    ax.set_xlabel("1 - posterior sd / prior sd", fontsize=8, color=INK_2)
-    ax.set_title("A  Shrinkage per parameter", fontsize=9, color=INK, loc="left")
+    ax.set_xlim(min(0, min(contraction)) - 0.02, 1.12)
+    ax.set_xlabel("1 - posterior variance / prior variance", fontsize=8, color=INK_2)
+    ax.set_title("A  Posterior contraction per parameter", fontsize=9, color=INK, loc="left")
     ax.grid(axis="x", color=GRID, lw=0.6)
     ax.set_axisbelow(True)
     heatmap(axes[1], np.array(d["correlation"]), names, names, "{:+.2f}", "B  Posterior correlation",
@@ -106,12 +106,12 @@ def fig9(path):
                                  for t in cols] for r in rows], dtype=float)
     fig, axes = plt.subplots(1, 2, figsize=(10.5, 3.4), dpi=150, facecolor=SURFACE)
     heatmap(axes[0], get("info_nats_per_point"), rows, cols, "{:.3f}", "A  Expected information per data point (nats)")
-    heatmap(axes[1], get("mean_shrinkage_log"), rows, cols, "{:.3f}",
-            f"B  Mean shrinkage, log scale ({', '.join(d['params'])})")
+    heatmap(axes[1], get("mean_contraction"), rows, cols, "{:.4f}",
+            f"B  Mean posterior contraction, log scale ({', '.join(d['params'])})")
     t1 = d["tier1_design"]
     fig.text(0.01, 0.01, f"{d['system']}, five Tier-1 conditions. Tier-1 design for reference: "
-             f"{t1['info_nats_per_point']:.3f} nats per point over {t1['n_points']} points, mean shrinkage "
-             f"{t1['mean_shrinkage_log']:.3f}.", fontsize=8, color=INK_2)
+             f"{t1['info_nats_per_point']:.3f} nats per point over {t1['n_points']} points, mean contraction "
+             f"{t1['mean_contraction']:.4f}.", fontsize=8, color=INK_2)
     fig.tight_layout(rect=(0, 0.05, 1, 1))
     out = Path(path).with_suffix(".png")
     fig.savefig(out, facecolor=SURFACE)

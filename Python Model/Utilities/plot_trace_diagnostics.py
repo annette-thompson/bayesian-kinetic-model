@@ -1,4 +1,5 @@
-"""Plot prior vs. posterior and the chain traces, prior_posterior_traces.png, for a finished
+"""Plot prior vs. posterior and the chain traces (prior_posterior_traces.png), and the joint
+posterior (joint_posterior.png), for a finished
 (or in-progress) resumable run from its saved posterior netcdf: the same figure the notebook
 workflow draws, without opening the notebook. (trace_plot_hist.pdf is intentionally not
 produced here -- the prior/posterior panels already cover that.)
@@ -16,6 +17,7 @@ from inference_plotting import (
     DIAGNOSTIC_FILES,
     compute_convergence_criteria_met_at,
     ess_threshold_for,
+    plot_joint_posterior,
     plot_posterior_trace_diagnostics,
 )
 from inference_runner import import_solver_params
@@ -83,6 +85,17 @@ def main() -> None:
         use_log_param_axis=not args.linear_param_axis,
     )
 
+    # The joint posterior, drawn here since it reads the same posterior. The truth is the
+    # config's tier1_truth block where there is one (synthetic data); real data have none.
+    joint_result = plot_joint_posterior(
+        inf_data=inf_data,
+        free_params=free_params,
+        save_file=str(imported.results_save_dir / DIAGNOSTIC_FILES["joint"]),
+        system_name=system_name,
+        show=args.show,
+        truth=imported.solver_params.get("tier1_truth"),
+    )
+
     print(f"Run: {imported.results_save_dir}")
     print(f"Free params: {free_params}")
     if sampling_only_at is not None:
@@ -91,6 +104,7 @@ def main() -> None:
     else:
         print("Criteria never met within the saved sampling draws")
     print(f"Saved: {trace_result['plot_file']}")
+    print(f"Saved: {joint_result['plot_file']}")
 
 
 if __name__ == "__main__":

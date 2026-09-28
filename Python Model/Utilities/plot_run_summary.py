@@ -2,10 +2,10 @@
 
 The figures are the ones plot_trace_diagnostics.py, plot_convergence_trajectory.py and
 plot_predictive_check.py save separately, drawn the same way, but each titled by its section
-instead of the run; the run name appears once, at the top. Three rows, in the order a run is
-checked: the sampler (convergence, beside chain mixing over sampler energy), the posterior
-(priors, posteriors and traces, stretched to the page width), then the fit to the data
-(posterior predictive checks beside LOO).
+instead of the run; the run name appears once, at the top. In the order a run is checked: the
+sampler (convergence, beside chain mixing over sampler energy), the posterior (priors,
+posteriors and traces, stretched to the page width, then the joint posterior), and the fit to
+the data (posterior predictive checks beside LOO).
 
 Usage (from the "Python Model" directory):
     python Utilities/plot_run_summary.py --solver_params_file "Results/<run>/solver_params.json"
@@ -29,6 +29,7 @@ from inference_plotting import (
     place_suptitle,
     plot_convergence_diagnostics,
     plot_energy_diagnostics,
+    plot_joint_posterior,
     plot_loo_diagnostics,
     plot_posterior_trace_diagnostics,
     plot_predictive,
@@ -144,8 +145,10 @@ def main() -> None:
     trace.set_size_inches(page_in + 0.2, trace.get_size_inches()[1])
     trace.tight_layout(rect=(0.0, 0.05, 1.0, 0.97))
     images["trace"] = _render(trace, "trace")
+    images["joint"] = _render(plot_joint_posterior(
+        inf_data=inf_data, free_params=free_params, truth=imported.solver_params.get("tier1_truth"))["figure"], "joint")
 
-    page = _stack([_title(run_name), sampler_row, images["trace"], fit_row], False, gap)
+    page = _stack([_title(run_name), sampler_row, images["trace"], images["joint"], fit_row], False, gap)
     margin = gap
     framed = Image.new("RGB", (page.width + 2 * margin, page.height + 2 * margin), "white")
     framed.paste(page, (margin, margin))

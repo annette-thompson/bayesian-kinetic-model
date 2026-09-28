@@ -839,6 +839,97 @@ def plot_rank_diagnostics(
     return {"figure": fig, "plot_file": plot_file}
 
 
+def plot_joint_posterior(
+    inf_data: az.InferenceData,
+    free_params: list[str],
+    save_file: str | None = None,
+    show: bool = False,
+    system_name: str | None = None,
+    truth: dict[str, float] | None = None,
+    max_points: int = 2000,
+) -> dict[str, Any]:
+    """Pairwise joint posterior (a corner plot): each parameter's marginal on the diagonal and
+    the draws of every pair below it, on log axes, with the posterior mean, the truth where it
+    is known, and each pair's correlation on log scale. Shows the skew, curvature and
+    correlation that per-parameter marginals hide."""
+    _apply_plot_style()
+    from matplotlib.lines import Line2D
+
+    n = len(free_params)
+    post = inf_data.posterior
+    draws = {p: np.asarray(post[p].values, dtype=float).ravel() for p in free_params}
+    total = len(draws[free_params[0]])
+    idx = np.random.default_rng(0).choice(total, size=min(max_points, total), replace=False)
+    means = {p: float(np.mean(draws[p])) for p in free_params}
+    truth = {p: float(truth[p]) for p in free_params if truth and p in truth and truth[p] > 0}
+    limits = {}
+    for p in free_params:
+        lo, hi = np.log10(np.quantile(draws[p], [0.001, 0.999]))
+        if p in truth:
+            lo, hi = min(lo, np.log10(truth[p])), max(hi, np.log10(truth[p]))
+        pad = 0.08 * (hi - lo) if hi > lo else 0.05
+        limits[p] = (10 ** (lo - pad), 10 ** (hi + pad))
+
+    panel = 5.0 if n <= 2 else 4.2
+    fig, axes = plt.subplots(n, n, figsize=(panel * n, panel * n), squeeze=False)
+    for i, pi in enumerate(free_params):
+        for j, pj in enumerate(free_params):
+            ax = axes[i, j]
+            if j > i:
+                ax.set_visible(False)
+                continue
+            ax.set_xscale("log")
+            ax.set_xlim(*limits[pj])
+            if i == j:
+                x, dens = _kde_curve(draws[pi], log_x=True)
+                ax.fill_between(x, dens / dens.max(), color="tab:blue", alpha=0.55)
+                ax.plot(x, dens / dens.max(), color="tab:blue", linewidth=1.5)
+                ax.axvline(means[pi], color="black", linestyle="--", linewidth=1.5)
+                if pi in truth:
+                    ax.axvline(truth[pi], color="firebrick", linestyle=":", linewidth=2.0)
+                ax.set_ylim(0, 1.05)
+                ax.set_ylabel("Normalized Density", fontsize=PLOT_FONT_SIZE)
+                ax.set_title(pi, fontsize=PLOT_FONT_SIZE)
+            else:
+                ax.set_yscale("log")
+                ax.set_ylim(*limits[pi])
+                ax.scatter(draws[pj][idx], draws[pi][idx], s=8, alpha=0.3, color="tab:blue", linewidths=0,
+                           rasterized=True)
+                ax.plot(means[pj], means[pi], marker="o", markersize=9, color="black", linestyle="none")
+                if pj in truth and pi in truth:
+                    ax.plot(truth[pj], truth[pi], marker="*", markersize=18, color="firebrick",
+                            markeredgecolor="white", linestyle="none")
+                r = float(np.corrcoef(np.log(draws[pj]), np.log(draws[pi]))[0, 1])
+                ax.text(0.04, 0.96, f"r = {r:+.2f}", transform=ax.transAxes, ha="left", va="top",
+                        fontsize=PLOT_FONT_SIZE, bbox={"facecolor": "white", "alpha": 0.85, "edgecolor": "none"})
+                if j == 0:
+                    ax.set_ylabel(pi, fontsize=PLOT_FONT_SIZE)
+                _plain_ticks_if_narrow_log(ax, "y")
+            if i == n - 1:
+                ax.set_xlabel(pj, fontsize=PLOT_FONT_SIZE)
+            _plain_ticks_if_narrow_log(ax, "x")
+            ax.tick_params(labelsize=PLOT_FONT_SIZE)
+
+    handles = [
+        Line2D([], [], marker="o", markersize=7, color="tab:blue", alpha=0.6, linestyle="none", label="Posterior Draws"),
+        Line2D([], [], marker="o", markersize=9, color="black", linestyle="--", label="Posterior Mean"),
+    ]
+    if truth:
+        handles.append(Line2D([], [], marker="*", markersize=16, color="firebrick", markeredgecolor="white",
+                              linestyle=":", linewidth=2.0, label="Truth"))
+    fig.tight_layout(rect=(0.0, 0.06, 1.0, 1.0))
+    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, 0.05), ncol=len(handles),
+               fontsize=PLOT_FONT_SIZE, frameon=True)
+    note = "Correlation r on log scale."
+    fig.text(0.5, 0.0, note, ha="center", va="top", fontsize=PLOT_FONT_SIZE - 2, color="0.35")
+    place_suptitle(fig, _diagnostic_title("joint", system_name))
+
+    plot_file = _save_figure(fig, save_file)
+    if not show:
+        plt.close(fig)
+    return {"figure": fig, "plot_file": plot_file}
+
+
 def plot_loo_diagnostics(
     inf_data: az.InferenceData,
     save_file: str | None = None,
@@ -1475,6 +1566,7 @@ DIAGNOSTIC_TITLES = {
     "loo": "Leave-One-Out Cross-Validation (PSIS-LOO)",
     "rank": "Chain Mixing: Rank ECDF vs 95% Envelope",
     "predictive": "Posterior Predictive Checks",
+    "joint": "Joint Posterior: Pairwise Draws and Correlation",
 }
 
 
@@ -1486,6 +1578,7 @@ DIAGNOSTIC_FILES = {
     "loo": "leave_one_out.png",
     "rank": "chain_mixing.png",
     "predictive": "predictive_checks.png",
+    "joint": "joint_posterior.png",
 }
 
 
