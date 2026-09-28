@@ -85,6 +85,7 @@ A finished run's folder, `Results/<...>/<run>/`, contains:
 | `chain_mixing.png` | Per-chain rank-ECDF mixing check |
 | `sampler_energy.png` | Per-chain BFMI and marginal/transition energy |
 | `prior_posterior_traces.png` | Prior vs. posterior, posterior density and per-chain trace, one column per free parameter |
+| `joint_posterior.png` | Joint posterior: each parameter's marginal, the draws of every pair (log axes), the posterior mean, the truth where known, and each pair's log-scale correlation |
 | `predictive_checks.png` | Posterior-predictive checks. Tier-1 data get the time series over the product profile, beside the initial rates and their conditions table; other data get one row per observable. |
 | `leave_one_out.png` | Pareto-k against arviz's good / bad / very bad grades, with elpd_loo and p_loo. It needs enough sampling draws for the Pareto tail fit; a few hundred is not always enough. |
 | `run_summary.png` | All of the above in one image, with the run name once at the top |

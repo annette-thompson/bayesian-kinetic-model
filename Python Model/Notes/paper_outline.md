@@ -68,12 +68,12 @@ behind it.
 | Section | What it answers | Status |
 |---|---|---|
 | 2. Methods | How the model is solved and fit | Solver settings, negative-concentration handling, sampler settings, Tier-1 data design and Tier-1 systems all settled |
-| 3.1 Recovery + calibration | Does it work? | **Single-parameter recovery complete on all 14 truncated systems** (truth recovered everywhere; shrinkage 0.94 to >0.9999). Two-parameter pilots done. R0, the first Tier-1 fit (C8, `a1`+`c3`), recovered both parameters (z +0.90 and −0.32, shrinkage 0.98) and converged cleanly in 5.7 A100-h. Stage 2 (29 runs, ~225 A100-h) has run since 2026-09-26: as of that evening 13 had finished, every one with the truth inside the 95% interval for every parameter, including R1 on the main system (z −0.04 and −0.97) and 5 of the 10 SBC pilot replicates. All 40 SBC replicates for Fig 3 are built |
+| 3.1 Recovery + calibration | Does it work? | **Single-parameter recovery complete on all 14 truncated systems** (truth recovered everywhere; shrinkage 0.94 to >0.9999 in the older 1 − sd-ratio measure, to be recomputed as posterior contraction). Two-parameter pilots done. R0, the first Tier-1 fit (C8, `a1`+`c3`), recovered both parameters (z +0.89 and −0.34, posterior contraction 0.998 and 0.997) and converged cleanly in 5.7 A100-h. Stage 2 (29 runs, ~227 A100-h) has run since 2026-09-26: by 2026-09-27 26 had finished, every one with the truth inside the 95% interval for every parameter, including R1 on the main system (z −0.04 and −0.97). The 10-replicate SBC pilot covered every truth at 90% and 95%, but its intervals look too wide (z sd 0.52, p = 0.02); the posteriors have the width the likelihood implies, so chance is the likeliest reading, and the other 30 replicates (built) settle it |
 | 3.2 Parameter grouping | Were the groupings justified? | Designed (split-group test on `c3`); not run |
 | 3.3 Identifiability | What does the data constrain? | Parameter-level sensitivity screen complete across all 14 systems and 3 objectives. Figs 6/6b module built and tested on a pilot posterior (`identifiability_report.py`); waits on R2 and R3 |
 | 3.4 Sensitivity vs. Morris | Same enzyme targets as before? | Module built and tested on a pilot posterior (`posterior_morris.py`); waits on R2 |
 | 3.5 Ratiometric strategy | Is the enzyme-ratio heuristic robust? | Module built and tested on a pilot posterior (`posterior_ratio_response.py`); waits on R2 |
-| 3.6 Experimental design | What should we measure next? | Expected-information grid computed at the truth, including the ACP intermediates (`FA_acylACP_conc.py`). Sampled shrinkage matches its predictions to within 0.01 on the full data (R1) and the profile-only cell (R7); the rates-only cell is running |
+| 3.6 Experimental design | What should we measure next? | Expected-information grid computed at the truth, including the ACP intermediates (`FA_acylACP_conc.py`). Sampled posterior contraction matches its predictions to within 0.001 on the full data (R1) and the profile-only cell (R7). On the rates-only cell `a1` matches, but `c3`'s skewed posterior is wider than the linear prediction (0.931 against 0.971) |
 | 4. Conclusion | Synthesis | Waits on 3.2-3.5 |
 | SI | Methodological-validity checks | Chain-count and stranded-chain items done; the rest are planned alongside Tier 1 |
 
@@ -353,7 +353,8 @@ Calibration is tested on the noisy Tier-1 data (Fig 3).
   resume exactly across cluster job limits. The model and log-density come from PyMC; the
   forward model is the JAX ODE solve.
 - **Convergence diagnostics:** rank-normalised r-hat and bulk ESS (Vehtari et al. 2021), with
-  automated early stopping once both criteria are met on two consecutive checks. A
+  automated early stopping once both criteria are met on three consecutive checks, 100 draws
+  apart. A
   rank-normalised ECDF mixing check, computed against a simulation-calibrated simultaneous
   confidence band.
 - **Stranded chains:** a chain whose mean log-posterior sits far below its siblings' is
@@ -371,7 +372,7 @@ Calibration is tested on the noisy Tier-1 data (Fig 3).
 | chains | 4 | 8 |
 | warmup | 300 | 1000 |
 | convergence rule | r-hat ≤ 1.01 AND bulk ESS ≥ 100 × chains | r-hat ≤ 1.01 AND bulk ESS ≥ 400 |
-| checked every | 100 draws, two consecutive passes | 100 draws, two consecutive passes, plus one extra 100-draw block |
+| checked every | 100 draws; three consecutive passes (two, then a 100-draw confirmation block that must also pass) | 100 draws, two consecutive passes, plus one extra 100-draw block |
 | minimum chains after stranded-chain exclusion | 3 | — |
 | `target_accept` | 0.8 | 0.8 |
 
@@ -488,13 +489,15 @@ range differs so much between systems that no single prior covers the ladder.
 | Posterior median | 0.911 | 0.9995 | 0.9995 |
 | Central 95% | [0.422, 1.296] | [0.967, 1.031] | [0.979, 1.021] |
 | True value 1.0 recovered | yes | yes | yes |
-| Prior-to-posterior shrinkage | 0.937 | 0.9998 | 0.9999 |
+| Prior-to-posterior shrinkage (older measure) | 0.937 | 0.9998 | 0.9999 |
 | Sampling draws to converge | 700 | 300 | 300 |
 | Precision gain vs. previous row | | **18.3x** | 1.53x |
 | What sqrt(n) alone would predict | | 1.41x | 1.22x |
 
 Across all 14 systems, every posterior mean lies within half a posterior SD of the truth, and
-shrinkage rises from 0.94 at C4_NoFB to >0.9999 from C6 onward. The data removed nearly all of
+shrinkage rises from 0.94 at C4_NoFB to >0.9999 from C6 onward. (These ladder numbers predate
+the switch to posterior contraction and should be recomputed with it; C4's 0.937 matches
+1 − posterior sd / prior sd on the natural scale.) The data removed nearly all of
 the prior's variance, which is stronger evidence that the answer wasn't presupposed than any
 argument about the prior's width. (These datasets carry no injected noise; see Section 2.4.)
 
@@ -518,7 +521,9 @@ evidence for the SI mass-matrix item; `c2` is kept out of the main Tier-1 fits.
 **Figures (Tier 1; runs in `tier1_experiment_plan.md`):**
 - **Figure 2:** posteriors for the main three-parameter fit, `a1`+`c3`+`a2` on C14+unsat,
   with truth overlaid. It reports the z-score (posterior mean minus truth, in posterior SDs),
-  shrinkage and 50/90/95% coverage per parameter, with r-hat/ESS as an inset. The choice of
+  posterior contraction (1 − posterior variance / prior variance) and 50/90/95% coverage per
+  parameter, with r-hat/ESS as an inset. z and contraction follow Schad, Betancourt & Vasishth
+  (2021) and are computed on log(θ), where the LogNormal priors are Normal. The choice of
   parameters: `a1` leads total production, `a2` leads chain length and unsaturated fraction,
   and `c3` is the TesA handle; the three are well separated in the data. A two-parameter fit
   (`a1`+`c3`) on the same system is the fallback panel.
@@ -526,7 +531,7 @@ evidence for the SI mass-matrix item; `c2` is kept out of the main Tier-1 fits.
   first, then 40 replicates in total, each with a truth drawn from the prior and a fresh
   noisy dataset (`a1`+`c3`, C8). It shows the SBC rank histogram with a uniformity test and
   nominal-vs-observed coverage from the same replicates.
-- **Figure 4:** robustness on the same model. Shrinkage, z-score and coverage are plotted
+- **Figure 4:** robustness on the same model. Contraction, z-score and coverage are plotted
   against (i) the truth's distance from the prior centre (four offsets) and (ii) noise level
   (5/10/20/40%).
 - **Expected results, both directions:** clean recovery with honest calibration at realistic
@@ -596,9 +601,9 @@ and Pareto-k passes). Then the same test is run on the real data for a prioritis
   the prior (essentially unconstrained)?
 - **Which parameters are correlated with each other:** a parameter can look poorly
   identified individually *because* it trades off against another, which per-parameter
-  shrinkage alone won't show.
-- **Figure 6:** prior-to-posterior shrinkage per parameter, flagging shrinkage < 0.5 as
-  weakly identified.
+  contraction alone won't show.
+- **Figure 6:** posterior contraction per parameter, flagging contraction < 0.5 as weakly
+  identified.
 - **Figure 6b:** the pairwise posterior correlation matrix, plus an eigendecomposition of the
   posterior covariance. The eigendecomposition reveals identifiable *combinations* (e.g. only
   a sum or ratio pinned down) even when individual parameters are not, reported as
@@ -650,13 +655,13 @@ and Pareto-k passes). Then the same test is run on the real data for a prioritis
 - **Expected results, both directions:** a handful of tightly constrained parameters against a
   majority near the prior is itself the expected, informative result. The analysis identifies
   *why* the unconstrained ones are unconstrained (correlated with something else, or genuinely
-  diffuse), which feeds Section 3.6. Uniformly tight shrinkage would suggest the datasets are
+  diffuse), which feeds Section 3.6. Uniformly high contraction would suggest the datasets are
   more informative than previously appreciated.
 
 **Tier 1:**
 - Figs 6 and 6b are computed from the main three-parameter fit (Fig 2), with no extra fits.
 - **Known-answer control:** `d1`+`d2` fit on C8, where they are provably inseparable, and on
-  C14+unsat, where separation begins. The shrinkage diagnostic must flag both parameters
+  C14+unsat, where separation begins. The contraction diagnostic must flag both parameters
   individually on C8. The eigen-analysis must find one tight combination (`12*d1 + d2`) and
   one flat direction. If either fails, the diagnostic isn't trustworthy for real-data claims.
   The same C8 data, fit with a diagonal and a dense mass matrix, supplies the SI's
@@ -735,7 +740,7 @@ attenuated version of the shift. This is a cheap check that the direction is vis
   - **What is measured:** total fatty acid only vs. individual fatty-acid species vs.
     individual species plus acyl-ACP pathway intermediates.
 - **Figure 9:** posterior contraction across the timing × measurement-type grid, ranked by
-  shrinkage gained *per data point* rather than raw shrinkage, so the ranking reflects value
+  information gained *per data point* rather than raw contraction, so the ranking reflects value
   for collection cost.
 - **Expected results, both directions:** if intermediates or initial rates give
   disproportionate gains relative to their (presumably higher) cost, that is the paper's most
@@ -749,7 +754,7 @@ attenuated version of the shift. This is a cheap check that the direction is vis
 - The expected information (Fisher-based posterior contraction) is computed for every cell of
   the grid on the Fig 2 model, with no sampling. This draws the full figure.
 - Three cells are then sampled (`a1`+`c3`) to confirm that the information ranking matches
-  real posterior shrinkage: the cheapest data type, the best cell per data point, and the
+  sampled posterior contraction: the cheapest data type, the best cell per data point, and the
   full dataset.
 - The initial-rate observable already exists. The intermediates cells need an acyl-ACP
   observable module (zero extra solve cost, since the full state trajectory is already
@@ -757,7 +762,7 @@ attenuated version of the shift. This is a cheap check that the direction is vis
 
 **Tier 2:** only the cells the real data allow (it has initial rates, profiles and one time
 course, but no intermediates). If Tier 1 shows that the information analysis predicts
-sampled shrinkage, Tier 2 uses the information analysis alone.
+sampled contraction, Tier 2 uses the information analysis alone.
 
 ## 4. Conclusion **[not yet started]**
 - On a system where the answers are largely known, Bayesian inference recovers the previous
@@ -816,7 +821,7 @@ never as speed claims.
   known-answer pair (3.3) fit both ways. The preliminary evidence is the `a1`+`c2` pilot
   (3.1), which the diagonal matrix can't sample and a dense one doesn't rescue in 12 h.
 - **Prior width and form:** the prior is wide enough not to presuppose the answer. The
-  evidence is the ladder's shrinkage (3.1) and the prior-misspecification curve (Fig 4).
+  evidence is the ladder's contraction (3.1) and the prior-misspecification curve (Fig 4).
 
 ---
 
@@ -850,6 +855,9 @@ settings actually rest on are also listed, with the decision each informed, in
   Computing* 32:32. (Rank-ECDF plots and simultaneous envelopes; the SI's mixing-check point.)
 
 **Calibration (Fig 3)**
+- Schad DJ, Betancourt M, Vasishth S (2021). Toward a principled Bayesian workflow in cognitive
+  science. Psychological Methods 26(1):103-126. arXiv:1904.12765. Defines the posterior z-score
+  and posterior contraction (eqs. 4-5) used throughout Tier 1.
 - Talts S, Betancourt M, Simpson D, Vehtari A, Gelman A (2018). Validating Bayesian inference
   algorithms with simulation-based calibration. arXiv:1804.06788.
 - Modrák M, et al. (2023). Simulation-based calibration checking for Bayesian computation: the
