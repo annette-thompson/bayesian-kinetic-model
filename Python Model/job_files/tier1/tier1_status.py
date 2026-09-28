@@ -31,7 +31,7 @@ Usage (on the cluster, from /projects/anth4580/Bayesian/job_files):
                                                # inversion), 5 if only clean segment ends need
                                                # resubmitting, 4 if all are done
 
-Priority check (every call): the low-priority bulk runs (LOW_PRIORITY, the 30 SBC replicates
+Priority check (every call): the low-priority bulk runs (LOW_PRIORITY, SBC replicates 10-99
 submitted with --nice) must not start ahead of another run's waiting segment. Any low-priority
 job that started after a waiting run's copy was submitted, or a waiting low-priority job with
 a priority at or above that run's, is reported as an inversion.
@@ -59,16 +59,16 @@ SEGMENT_H = 11.5           # tier1.sbatch's per-segment budget (MAXH)
 STALL_FLOOR_MIN = 45       # a running run with no checkpoint for this long is flagged...
 STALL_FACTOR = 8           # ...or for this many times its usual checkpoint interval, if longer
 
-LOW_PRIORITY = re.compile(r"^tier1_C8_sbc0(1\d|2\d|3\d)_a1c3$")   # R4's 30 replicates, --nice 25000
+LOW_PRIORITY = re.compile(r"^tier1_C8_sbc0[1-9]\d_a1c3$")   # R4's replicates 10-99 (R4b, R4c), --nice 25000
 
 GROUPS = [                 # (id, pattern on the run name), first match wins
     ("R4", r"C8_sbc\d+"),
     ("R5", r"C8_noise\d+|prior\+\d+sd"),
-    ("R8", r"ta0\.95|rtol1e-5"),
+    ("R8", r"ta0\.95|rtol1e-5|cap1000|numpyro"),
     ("R3", r"d1d2"),
     ("R7", r"a1c3 - (profile|rates)$"),
     ("R6", r"c3split|a1c3sc3l"),
-    ("R2", r"C14\+unsat - a1c3a2$"),
+    ("R2", r"C14\+unsat - a1c3a2( - dense)?$"),
     ("R1", r"C14\+unsat - a1c3$"),
     ("R0", r"^Tier1 C8 - a1c3$"),
 ]

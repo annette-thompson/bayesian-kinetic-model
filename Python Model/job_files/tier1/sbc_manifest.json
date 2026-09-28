@@ -399,6 +399,606 @@
    "run": "Tier1 C8_sbc039 - a1c3",
    "data_seed": 39,
    "status": "ready"
+  },
+  "40": {
+   "truth": {
+    "a1": 6.513045723891529,
+    "c3": 3.2879785671909345
+   },
+   "data_name": "Chain_C8_sbc040",
+   "run": "Tier1 C8_sbc040 - a1c3",
+   "data_seed": 40,
+   "status": "ready"
+  },
+  "41": {
+   "truth": {
+    "a1": 0.2366197954969803,
+    "c3": 0.4408976327226216
+   },
+   "data_name": "Chain_C8_sbc041",
+   "run": "Tier1 C8_sbc041 - a1c3",
+   "data_seed": 41,
+   "status": "ready"
+  },
+  "42": {
+   "truth": {
+    "a1": 1.2266411683574983,
+    "c3": 0.18424812600135268
+   },
+   "data_name": "Chain_C8_sbc042",
+   "run": "Tier1 C8_sbc042 - a1c3",
+   "data_seed": 42,
+   "status": "ready"
+  },
+  "43": {
+   "truth": {
+    "a1": 2.416344758653527,
+    "c3": 0.21710090876623958
+   },
+   "data_name": "Chain_C8_sbc043",
+   "run": "Tier1 C8_sbc043 - a1c3",
+   "data_seed": 43,
+   "status": "ready"
+  },
+  "44": {
+   "truth": {
+    "a1": 1.945070553144785,
+    "c3": 1.6323367487616232
+   },
+   "data_name": "Chain_C8_sbc044",
+   "run": "Tier1 C8_sbc044 - a1c3",
+   "data_seed": 44,
+   "status": "ready"
+  },
+  "45": {
+   "truth": {
+    "a1": 0.7657814632467368,
+    "c3": 0.7687435255577306
+   },
+   "data_name": "Chain_C8_sbc045",
+   "run": "Tier1 C8_sbc045 - a1c3",
+   "data_seed": 45,
+   "status": "ready"
+  },
+  "46": {
+   "truth": {
+    "a1": 0.3235955441144295,
+    "c3": 0.18127075796054842
+   },
+   "data_name": "Chain_C8_sbc046",
+   "run": "Tier1 C8_sbc046 - a1c3",
+   "data_seed": 46,
+   "status": "ready"
+  },
+  "47": {
+   "truth": {
+    "a1": 0.5070772265860279,
+    "c3": 0.8804908136846007
+   },
+   "data_name": "Chain_C8_sbc047",
+   "run": "Tier1 C8_sbc047 - a1c3",
+   "data_seed": 47,
+   "status": "ready"
+  },
+  "48": {
+   "truth": {
+    "a1": 0.10176975752282863,
+    "c3": 0.3663477739676502
+   },
+   "data_name": "Chain_C8_sbc048",
+   "run": "Tier1 C8_sbc048 - a1c3",
+   "data_seed": 48,
+   "status": "ready"
+  },
+  "49": {
+   "truth": {
+    "a1": 1.1743754106621005,
+    "c3": 0.505525286094825
+   },
+   "data_name": "Chain_C8_sbc049",
+   "run": "Tier1 C8_sbc049 - a1c3",
+   "data_seed": 49,
+   "status": "ready"
+  },
+  "50": {
+   "truth": {
+    "a1": 1.9316483416554977,
+    "c3": 1.550569818629282
+   },
+   "data_name": "Chain_C8_sbc050",
+   "run": "Tier1 C8_sbc050 - a1c3",
+   "data_seed": 50,
+   "status": "ready"
+  },
+  "51": {
+   "truth": {
+    "a1": 2.582942937279824,
+    "c3": 0.32964642632797503
+   },
+   "data_name": "Chain_C8_sbc051",
+   "run": "Tier1 C8_sbc051 - a1c3",
+   "data_seed": 51,
+   "status": "ready"
+  },
+  "52": {
+   "truth": {
+    "a1": 1.0551644218327125,
+    "c3": 0.5462026652342451
+   },
+   "data_name": "Chain_C8_sbc052",
+   "run": "Tier1 C8_sbc052 - a1c3",
+   "data_seed": 52,
+   "status": "ready"
+  },
+  "53": {
+   "truth": {
+    "a1": 0.408074089111161,
+    "c3": 0.9200160010034565
+   },
+   "data_name": "Chain_C8_sbc053",
+   "run": "Tier1 C8_sbc053 - a1c3",
+   "data_seed": 53,
+   "status": "ready"
+  },
+  "54": {
+   "truth": {
+    "a1": 2.1745935766723914,
+    "c3": 2.5457620568153994
+   },
+   "data_name": "Chain_C8_sbc054",
+   "run": "Tier1 C8_sbc054 - a1c3",
+   "data_seed": 54,
+   "status": "ready"
+  },
+  "55": {
+   "truth": {
+    "a1": 0.722476957404479,
+    "c3": 0.8330507796845931
+   },
+   "data_name": "Chain_C8_sbc055",
+   "run": "Tier1 C8_sbc055 - a1c3",
+   "data_seed": 55,
+   "status": "ready"
+  },
+  "56": {
+   "truth": {
+    "a1": 0.7529362407232059,
+    "c3": 0.1574549794421125
+   },
+   "data_name": "Chain_C8_sbc056",
+   "run": "Tier1 C8_sbc056 - a1c3",
+   "data_seed": 56,
+   "status": "ready"
+  },
+  "57": {
+   "truth": {
+    "a1": 1.2591109197054462,
+    "c3": 1.6505674187662804
+   },
+   "data_name": "Chain_C8_sbc057",
+   "run": "Tier1 C8_sbc057 - a1c3",
+   "data_seed": 57,
+   "status": "ready"
+  },
+  "58": {
+   "truth": {
+    "a1": 2.1101745542124304,
+    "c3": 0.5315920460217896
+   },
+   "data_name": "Chain_C8_sbc058",
+   "run": "Tier1 C8_sbc058 - a1c3",
+   "data_seed": 58,
+   "status": "ready"
+  },
+  "59": {
+   "truth": {
+    "a1": 2.212514997896841,
+    "c3": 2.2019783146528353
+   },
+   "data_name": "Chain_C8_sbc059",
+   "run": "Tier1 C8_sbc059 - a1c3",
+   "data_seed": 59,
+   "status": "ready"
+  },
+  "60": {
+   "truth": {
+    "a1": 0.7655180317840728,
+    "c3": 1.564519209622241
+   },
+   "data_name": "Chain_C8_sbc060",
+   "run": "Tier1 C8_sbc060 - a1c3",
+   "data_seed": 60,
+   "status": "ready"
+  },
+  "61": {
+   "truth": {
+    "a1": 13.810247419867235,
+    "c3": 0.46722713449645903
+   },
+   "data_name": "Chain_C8_sbc061",
+   "run": "Tier1 C8_sbc061 - a1c3",
+   "data_seed": 61,
+   "status": "ready"
+  },
+  "62": {
+   "truth": {
+    "a1": 2.1349221481122305,
+    "c3": 6.720668133717093
+   },
+   "data_name": "Chain_C8_sbc062",
+   "run": "Tier1 C8_sbc062 - a1c3",
+   "data_seed": 62,
+   "status": "ready"
+  },
+  "63": {
+   "truth": {
+    "a1": 0.2032522342298471,
+    "c3": 10.519014269957914
+   },
+   "data_name": "Chain_C8_sbc063",
+   "run": "Tier1 C8_sbc063 - a1c3",
+   "data_seed": 63,
+   "status": "ready"
+  },
+  "64": {
+   "truth": {
+    "a1": 0.6913127384428436,
+    "c3": 0.2552880013179057
+   },
+   "data_name": "Chain_C8_sbc064",
+   "run": "Tier1 C8_sbc064 - a1c3",
+   "data_seed": 64,
+   "status": "ready"
+  },
+  "65": {
+   "truth": {
+    "a1": 0.06368738220582437,
+    "c3": 2.9814495073747027
+   },
+   "data_name": "Chain_C8_sbc065",
+   "run": "Tier1 C8_sbc065 - a1c3",
+   "data_seed": 65,
+   "status": "ready"
+  },
+  "66": {
+   "truth": {
+    "a1": 0.5827294548996816,
+    "c3": 0.18527816937630914
+   },
+   "data_name": "Chain_C8_sbc066",
+   "run": "Tier1 C8_sbc066 - a1c3",
+   "data_seed": 66,
+   "status": "ready"
+  },
+  "67": {
+   "truth": {
+    "a1": 2.04004633885697,
+    "c3": 0.2823503041320294
+   },
+   "data_name": "Chain_C8_sbc067",
+   "run": "Tier1 C8_sbc067 - a1c3",
+   "data_seed": 67,
+   "status": "ready"
+  },
+  "68": {
+   "truth": {
+    "a1": 2.881195668045505,
+    "c3": 1.6358924842978244
+   },
+   "data_name": "Chain_C8_sbc068",
+   "run": "Tier1 C8_sbc068 - a1c3",
+   "data_seed": 68,
+   "status": "ready"
+  },
+  "69": {
+   "truth": {
+    "a1": 0.17058736570393065,
+    "c3": 0.7987455569182308
+   },
+   "data_name": "Chain_C8_sbc069",
+   "run": "Tier1 C8_sbc069 - a1c3",
+   "data_seed": 69,
+   "status": "ready"
+  },
+  "70": {
+   "truth": {
+    "a1": 0.7755139961520704,
+    "c3": 0.5613776906108159
+   },
+   "data_name": "Chain_C8_sbc070",
+   "run": "Tier1 C8_sbc070 - a1c3",
+   "data_seed": 70,
+   "status": "ready"
+  },
+  "71": {
+   "truth": {
+    "a1": 0.7517506377844563,
+    "c3": 1.0911680349340847
+   },
+   "data_name": "Chain_C8_sbc071",
+   "run": "Tier1 C8_sbc071 - a1c3",
+   "data_seed": 71,
+   "status": "ready"
+  },
+  "72": {
+   "truth": {
+    "a1": 0.3033900846534122,
+    "c3": 1.4363978075690238
+   },
+   "data_name": "Chain_C8_sbc072",
+   "run": "Tier1 C8_sbc072 - a1c3",
+   "data_seed": 72,
+   "status": "ready"
+  },
+  "73": {
+   "truth": {
+    "a1": 0.8947215409255975,
+    "c3": 0.6078985808091941
+   },
+   "data_name": "Chain_C8_sbc073",
+   "run": "Tier1 C8_sbc073 - a1c3",
+   "data_seed": 73,
+   "status": "ready"
+  },
+  "74": {
+   "truth": {
+    "a1": 0.7388732495294335,
+    "c3": 7.127865673403027
+   },
+   "data_name": "Chain_C8_sbc074",
+   "run": "Tier1 C8_sbc074 - a1c3",
+   "data_seed": 74,
+   "status": "ready"
+  },
+  "75": {
+   "truth": {
+    "a1": 14.222780946911646,
+    "c3": 1.259670096841282
+   },
+   "data_name": "Chain_C8_sbc075",
+   "run": "Tier1 C8_sbc075 - a1c3",
+   "data_seed": 75,
+   "status": "ready"
+  },
+  "76": {
+   "truth": {
+    "a1": 1.6233998733000863,
+    "c3": 0.14495221803732022
+   },
+   "data_name": "Chain_C8_sbc076",
+   "run": "Tier1 C8_sbc076 - a1c3",
+   "data_seed": 76,
+   "status": "ready"
+  },
+  "77": {
+   "truth": {
+    "a1": 1.0041326163592152,
+    "c3": 11.002295736823143
+   },
+   "data_name": "Chain_C8_sbc077",
+   "run": "Tier1 C8_sbc077 - a1c3",
+   "data_seed": 77,
+   "status": "ready"
+  },
+  "78": {
+   "truth": {
+    "a1": 7.884248392788775,
+    "c3": 0.10656412267591613
+   },
+   "data_name": "Chain_C8_sbc078",
+   "run": "Tier1 C8_sbc078 - a1c3",
+   "data_seed": 78,
+   "status": "ready"
+  },
+  "79": {
+   "truth": {
+    "a1": 1.5078672489241138,
+    "c3": 0.6825256217081846
+   },
+   "data_name": "Chain_C8_sbc079",
+   "run": "Tier1 C8_sbc079 - a1c3",
+   "data_seed": 79,
+   "status": "ready"
+  },
+  "80": {
+   "truth": {
+    "a1": 0.818758932967156,
+    "c3": 1.6783951812067588
+   },
+   "data_name": "Chain_C8_sbc080",
+   "run": "Tier1 C8_sbc080 - a1c3",
+   "data_seed": 80,
+   "status": "ready"
+  },
+  "81": {
+   "truth": {
+    "a1": 3.310332791285462,
+    "c3": 0.33926929772108383
+   },
+   "data_name": "Chain_C8_sbc081",
+   "run": "Tier1 C8_sbc081 - a1c3",
+   "data_seed": 81,
+   "status": "ready"
+  },
+  "82": {
+   "truth": {
+    "a1": 0.42002380868251515,
+    "c3": 0.6410708966496307
+   },
+   "data_name": "Chain_C8_sbc082",
+   "run": "Tier1 C8_sbc082 - a1c3",
+   "data_seed": 82,
+   "status": "ready"
+  },
+  "83": {
+   "truth": {
+    "a1": 0.6705077890384163,
+    "c3": 0.9168489644312207
+   },
+   "data_name": "Chain_C8_sbc083",
+   "run": "Tier1 C8_sbc083 - a1c3",
+   "data_seed": 83,
+   "status": "ready"
+  },
+  "84": {
+   "truth": {
+    "a1": 0.681310209864145,
+    "c3": 1.3285613963060379
+   },
+   "data_name": "Chain_C8_sbc084",
+   "run": "Tier1 C8_sbc084 - a1c3",
+   "data_seed": 84,
+   "status": "ready"
+  },
+  "85": {
+   "truth": {
+    "a1": 0.6917766545914712,
+    "c3": 0.13115641979252088
+   },
+   "data_name": "Chain_C8_sbc085",
+   "run": "Tier1 C8_sbc085 - a1c3",
+   "data_seed": 85,
+   "status": "ready"
+  },
+  "86": {
+   "truth": {
+    "a1": 0.190591932134035,
+    "c3": 5.327515727999661
+   },
+   "data_name": "Chain_C8_sbc086",
+   "run": "Tier1 C8_sbc086 - a1c3",
+   "data_seed": 86,
+   "status": "ready"
+  },
+  "87": {
+   "truth": {
+    "a1": 5.782511725765872,
+    "c3": 0.1937720645343526
+   },
+   "data_name": "Chain_C8_sbc087",
+   "run": "Tier1 C8_sbc087 - a1c3",
+   "data_seed": 87,
+   "status": "ready"
+  },
+  "88": {
+   "truth": {
+    "a1": 0.5380910055202278,
+    "c3": 4.471950450877357
+   },
+   "data_name": "Chain_C8_sbc088",
+   "run": "Tier1 C8_sbc088 - a1c3",
+   "data_seed": 88,
+   "status": "ready"
+  },
+  "89": {
+   "truth": {
+    "a1": 3.349725159516274,
+    "c3": 0.5630068235400318
+   },
+   "data_name": "Chain_C8_sbc089",
+   "run": "Tier1 C8_sbc089 - a1c3",
+   "data_seed": 89,
+   "status": "ready"
+  },
+  "90": {
+   "truth": {
+    "a1": 2.808074095405171,
+    "c3": 1.0943289928138704
+   },
+   "data_name": "Chain_C8_sbc090",
+   "run": "Tier1 C8_sbc090 - a1c3",
+   "data_seed": 90,
+   "status": "ready"
+  },
+  "91": {
+   "truth": {
+    "a1": 0.8550239001599579,
+    "c3": 2.659497691967542
+   },
+   "data_name": "Chain_C8_sbc091",
+   "run": "Tier1 C8_sbc091 - a1c3",
+   "data_seed": 91,
+   "status": "ready"
+  },
+  "92": {
+   "truth": {
+    "a1": 0.15579385143543514,
+    "c3": 2.653658881088157
+   },
+   "data_name": "Chain_C8_sbc092",
+   "run": "Tier1 C8_sbc092 - a1c3",
+   "data_seed": 92,
+   "status": "ready"
+  },
+  "93": {
+   "truth": {
+    "a1": 4.2441722496707674,
+    "c3": 0.6966870701108596
+   },
+   "data_name": "Chain_C8_sbc093",
+   "run": "Tier1 C8_sbc093 - a1c3",
+   "data_seed": 93,
+   "status": "ready"
+  },
+  "94": {
+   "truth": {
+    "a1": 0.23172951261633365,
+    "c3": 1.0646505497859604
+   },
+   "data_name": "Chain_C8_sbc094",
+   "run": "Tier1 C8_sbc094 - a1c3",
+   "data_seed": 94,
+   "status": "ready"
+  },
+  "95": {
+   "truth": {
+    "a1": 0.6615367750949814,
+    "c3": 0.9454640316736984
+   },
+   "data_name": "Chain_C8_sbc095",
+   "run": "Tier1 C8_sbc095 - a1c3",
+   "data_seed": 95,
+   "status": "ready"
+  },
+  "96": {
+   "truth": {
+    "a1": 5.546939173845913,
+    "c3": 0.44397201440983564
+   },
+   "data_name": "Chain_C8_sbc096",
+   "run": "Tier1 C8_sbc096 - a1c3",
+   "data_seed": 96,
+   "status": "ready"
+  },
+  "97": {
+   "truth": {
+    "a1": 1.6768658687806177,
+    "c3": 2.52520161159675
+   },
+   "data_name": "Chain_C8_sbc097",
+   "run": "Tier1 C8_sbc097 - a1c3",
+   "data_seed": 97,
+   "status": "ready"
+  },
+  "98": {
+   "truth": {
+    "a1": 1.4567435584942563,
+    "c3": 0.9965133860525014
+   },
+   "data_name": "Chain_C8_sbc098",
+   "run": "Tier1 C8_sbc098 - a1c3",
+   "data_seed": 98,
+   "status": "ready"
+  },
+  "99": {
+   "truth": {
+    "a1": 0.4205985437993714,
+    "c3": 2.187089367339585
+   },
+   "data_name": "Chain_C8_sbc099",
+   "run": "Tier1 C8_sbc099 - a1c3",
+   "data_seed": 99,
+   "status": "ready"
   }
  },
  "system": "C8",

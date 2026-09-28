@@ -869,6 +869,14 @@ and the day's notes are in section 3; this is the summary.
   0.9957. In posterior sd that is 1.00x, 1.08x and 1.05x the prediction: `a1` matches, `c3`
   and `a2` are 8% and 5% wider. So the zero-cost prediction holds to about 10% in sd on the model
   Fig 9 is drawn on. Its three-parameter rates-only cell is still unsampled.
+- **SBC to 100 replicates, and a second-engine check (added 2026-09-28).** Replicates 40-99
+  (`sbc.py generate --start 40 --n 60`; truths from the same seeded scheme, data seed = index) run
+  as group R4c at nice 25000, like R4b: ~426 A100-h at the first 40's measured mean of 7.1 (median
+  6.1). `engine_check.py` refits R0's exact model with NumPyro's NUTS through PyMC's own JAX path
+  (same model, data, priors and jittered starts; R0's chains, warmup, draws, target acceptance and
+  seed) and reports each parameter's mean difference in Monte Carlo error units and the sd ratio.
+  NumPyro cannot resume, so it runs as one Alpine job (`engine_check.sbatch`). For the SI: the
+  answer should not depend on the sampler implementation.
 - **R2 dense twin (added 2026-09-28).** The main fit rerun with a dense mass matrix and nothing
   else changed (`Tier1 C14+unsat - a1c3a2 - dense`: same seed, data, tolerances, stopping rule
   and uncapped compute; `build_tier1_configs.py` plan_runs, group R2 in `submit_stage2.sh`), to
