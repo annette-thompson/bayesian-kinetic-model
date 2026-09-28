@@ -5,3 +5,4 @@ Utilities32/
 # Resumable-sampler checkpoints (zarr draw stores plus resume state). They belong with
 # the run that wrote them, and one run's store is hundreds of chunk files.
 Results/**/checkpoint/
+Results/Tier1/figures/.cache/

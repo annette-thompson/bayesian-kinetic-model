@@ -1,6 +1,6 @@
 # Tier 1 run plan: the fits that draft every figure in the paper
 
-Current as of 2026-09-24. This is the companion to `Notes/paper_outline.md`. The outline says
+Current as of 2026-09-27 22:00. This is the companion to `Notes/paper_outline.md`. The outline says
 what each figure argues; this document says which synthetic-data (Tier 1) fits produce each
 figure, what they cost, and in what order they run.
 
@@ -24,8 +24,8 @@ enzymes (outline 2.4). Two are used:
   All figures built on the main three-parameter fit come from here.
 - **Replicate system: C8** (160 reactions), for the figures that need many repeated fits
   (calibration, robustness, SI checks). If the first C8 fit (R0) does not recover both
-  parameters with shrinkage > 0.5, C12 takes its place, at ~1.6x the cost. R0 recovered both
-  at shrinkage 0.98 (section 4), so C8 stays.
+  parameters with posterior contraction > 0.5, C12 takes its place, at ~1.6x the cost. R0
+  recovered both at contraction 0.997-0.998 (log scale; section 4), so C8 stays.
 
 **Why C8, and not C6, C10 or C12.** The reasons were not written down when C8 was chosen.
 They were reconstructed on 2026-09-26 from the reaction files, the Morris screen and the cost
@@ -73,7 +73,18 @@ That is five unique initial conditions, so five ODE solves per gradient evaluati
 
 **Sampler settings (outline 2.6).**
 - 4 chains, 300 warmup steps.
-- Stop at r-hat ≤ 1.01 and bulk ESS ≥ 400, holding on two consecutive checks.
+- Stop at r-hat ≤ 1.01 and bulk ESS ≥ 400, holding on three consecutive checks 100 draws apart:
+  two, then a 100-draw confirmation block whose check must pass too. Until 2026-09-27 a failed
+  confirmation was logged and ignored; it happened in 3 of 54 finished runs (R8 target_accept
+  0.95, c3 r-hat 1.0116; R5 noise 20%, 1.0107; sbc029, 1.0110). Those three were reopened from
+  their checkpoints under the new rule (`tier1.sbatch "<run>" 11.5 1000`: the third argument is
+  the extra-draw ceiling; an environment variable does not reach the job, which runs with
+  --export=NONE, and the first attempt was a no-op for that reason), so every run finishes
+  under the same rule. R2 is a fourth case, not yet reopened: its last segment started at
+  ~14:30 on the older code, and its confirmation check at 700 draws failed (`a1` r-hat 1.0102)
+  and was ignored (section 3). The rule lives in resumable_sampler.py (a failed confirmation
+  revokes the stop); the configs are unchanged, since their stopping keys are in the resume
+  signature.
 - At least 3 chains must remain after stranded-chain exclusion.
 - `target_accept` 0.8.
 - LogNormal [0.1, 10] priors with the median at 1; matched Normal priors for `d`-type
@@ -90,22 +101,22 @@ That is five unique initial conditions, so five ODE solves per gradient evaluati
 |---|---|---|---|
 | 3.1 ladder table, observable-count result | `a1` recovery on 14 systems | **completed** single-parameter ladder | 0 |
 | 3.1 two-parameter pilots | `a1`+`c3` converges; `a1`+`c2` does not | **completed** pilots | 0 |
-| **Fig 2** | posteriors vs. truth; z, shrinkage, 50/90/95% coverage; r-hat/ESS inset | R2 (R1 as fallback panel) | R1, R2 |
+| **Fig 2** | posteriors vs. truth; z, posterior contraction, 50/90/95% coverage; r-hat/ESS inset | R2 (R1 as fallback panel) | R1, R2 |
 | **Fig 3** | SBC rank histogram + nominal-vs-observed coverage | R4 | R4 |
-| **Fig 4** | shrinkage / z / coverage vs. noise and vs. prior offset | R5 | R5 |
+| **Fig 4** | posterior interval, contraction and z vs. noise and vs. prior offset, from the default start (`robustness.png`; the ME1-start comparison is an SI panel, `robustness_start_comparison.png`) | R5 | R5 |
 | 3.1 multimodality | symmetric toy (known answer) + ladder's stranded-chain cases | toy model, CPU only | 0 A100 |
 | **Fig 5** | grouped vs. split `c3`; Δelpd ± SE; negative control | R1 + R6 | R6 |
-| **Fig 6 / 6b** | shrinkage per parameter; correlation matrix + covariance eigenvalues | R2, with R3 as the known-answer case | 0 beyond R2/R3 |
+| **Fig 6 / 6b** | contraction per parameter; correlation matrix + covariance eigenvalues | R2, with R3 as the known-answer case | 0 beyond R2/R3 |
 | 3.3 `d1`/`d2` case | only `12*d1+d2` identifiable at ≤ C12 | R3 | R3 |
 | **Fig 7** | posterior-integrated enzyme sensitivity vs. Morris at the point estimate | forward solves over R2 draws | 0 |
 | **Fig 8** | chain-length response to FabF/FabB:TesA ratio across draws | forward solves over R2 draws | 0 |
-| **Fig 9** | shrinkage per data point across the data-type grid | expected information for every cell; R7 samples 3 cells | R7 |
+| **Fig 9** | contraction per data point across the data-type grid | expected information for every cell; R7 samples 3 cells | R7 |
 | SI convergence / divergences | per-run tables | every run | 0 |
 | SI stranded-chain detection | lp-gap mechanism | **completed** (ladder) | 0 |
 | SI chain-count diagnostic power | diagnostic spread vs. chain count | **completed** chain-count test | 0 |
 | SI mass matrix | diagonal vs. dense on a known-answer pair | R3 | inside R3 |
 | SI `target_accept`, ODE tolerance | posterior unchanged at 0.95 / tighter `rtol` | R8 | R8 |
-| SI prior width | shrinkage + misspecification curve | ladder + R5 | 0 |
+| SI prior width | contraction + misspecification curve | ladder + R5 | 0 |
 
 Tier 1 needs no held-out-data refits. Where the outline uses a held-out check to decide
 between two answers (3.4, 3.5), the known truth decides at Tier 1. Held-out refits belong to
@@ -120,13 +131,16 @@ Costs are A100-equivalent hours for the whole run (compute, finalize and figures
 solves every condition to the latest save time (720 s), including the rate conditions observed
 at 150 s, and every estimate assumes that. A run that has started is estimated from its own
 progress log. One that has not uses the median of measured runs with the same system and free
-parameters. The three-parameter fits, not yet measured, are scaled from R1 by the pilot factors.
+parameters. The three-parameter fits were scaled from R1 by the pilot factors until R2 and R6
+measured them; both came in far under (appendix B).
 The monitor refreshes the estimates every 30 minutes (`Results/Tier1/figures/cost_estimate.json`,
 with the history in `job_files/tier1/cost_estimate_history.jsonl`), and this table follows them.
-Last updated Sat 2026-09-26 20:45.
+Last updated Sun 2026-09-27 22:00 (`tier1_status.py`). Every run has finished except R3's five
+ridge runs.
 
 Two-parameter runs cap compute at 24 A100-h (`max_total_hours`), a runaway guard about twice
-their estimates. The three-parameter fits (R2, R6 b and c) run with no cap (decided 2026-09-26).
+their estimates. The three-parameter fits (R2, R6 b and c) run with no cap (decided 2026-09-26),
+and so do R3's C14+unsat and C18 runs, diagonal and dense (2026-09-27).
 
 Run folders are `Results/Tier1/<run name>/`, written by `build_tier1_configs.py --plan`.
 
@@ -134,14 +148,14 @@ Run folders are `Results/Tier1/<run name>/`, written by `build_tier1_configs.py 
 |---|---|---|---|---|---|---|
 | R0 | smoke test, production stopping rule | C8 | `a1`+`c3` | 1 | 5.7 (measured) | plumbing; chooses the replicate system; centre point of Fig 4 |
 | R1 | main-system duo | C14+unsat | `a1`+`c3` | 1 | 7.2 (measured) | Fig 2 fallback; Fig 5 grouped model; Fig 9 full-data cell |
-| R2 | **main fit** | C14+unsat | `a1`+`c3`+`a2` | 1 | ~40 | Figs 2, 6, 6b, 7, 8 |
-| R3 | `d1`+`d2` known-answer control | C8 diagonal, C8 dense, C14+unsat diagonal | `d1`+`d2` | 3 | ~74 (all three at the 24 cap) | 3.3 case; Fig 6/6b; SI mass matrix |
-| R4 | SBC replicates, truth drawn from the prior | C8 | `a1`+`c3` | 10 pilot, then 30 more | ~67 + ~160 | Fig 3 |
-| R5 | robustness: noise 5/20/40% (10% = R0), prior median shifted +1/+2/+3/+4 prior sd, each shift run from the default start and from the ME1 values | C8 | `a1`+`c3` | 11 | ~48 | Fig 4 |
-| R6 | `c3` split test | C14+unsat | see below | 3 | ~87 | Fig 5 |
-| R7 | data-type check, 3 cells (R1 is the third) | C14+unsat | `a1`+`c3` | 2 new | ~16 | Fig 9 |
-| R8 | `target_accept` 0.95; `rtol` 1e-5 | C8 | `a1`+`c3` | 2 | ~12 | SI |
-| | **Total** | | | **~64 new** | **~520** | |
+| R2 | **main fit** | C14+unsat | `a1`+`c3`+`a2` | 1 | 16.7 (measured; estimated ~40) | Figs 2, 6, 6b, 7, 8 |
+| R3 | `d1`+`d2` known-answer control | C8, C14+unsat and C18, each diagonal and dense | `d1`+`d2` | 6 | ~256: C8 dense 19.3 (measured), C8 diagonal 24.6 (cap), C14+unsat ~63 + ~38, C18 ~60 + ~52 (uncapped; running) | 3.3 case; Fig 6/6b; SI mass matrix |
+| R4 | SBC replicates, truth drawn from the prior | C8 | `a1`+`c3` | 10 pilot, then 30 more | 284 (measured: pilot 69, the other 30 215) | Fig 3 |
+| R5 | robustness: noise 5/20/40% (10% = R0), prior median shifted +1/+2/+3/+4 prior sd, each shift run from the default start and from the ME1 values | C8 | `a1`+`c3` | 11 | 51 (measured) | Fig 4 |
+| R6 | `c3` split test | C14+unsat | see below | 3 | 21.4 (measured; estimated ~87) | Fig 5 |
+| R7 | data-type check, 3 cells (R1 is the third) | C14+unsat | `a1`+`c3` | 2 new | 16 (measured) | Fig 9 |
+| R8 | `target_accept` 0.95; `rtol` 1e-5; the prior +4 sd fit at `max_steps` 1000 | C8 | `a1`+`c3` | 3 | 19.0 (measured) | SI |
+| | **Total** | | | **68 new** | **~680** | |
 
 ### Why these parameters
 
@@ -159,7 +173,7 @@ Run folders are `Results/Tier1/<run name>/`, written by `build_tier1_configs.py 
 
 **R3 (`d1`+`d2`).** On C8 every TesA binding step shares coefficient 12, so only
 `12*d1 + d2` is identifiable and the posterior is a ridge bounded by the prior. That gives
-known answers for three things at once:
+known answers for three things at once (as planned; see the 2026-09-27 decision below):
 - Fig 6 must flag both parameters individually as weakly identified.
 - Fig 6b's eigen-analysis must find one tight combination and one flat direction.
 - Fitting the same data with a diagonal and a dense mass matrix answers the SI's mass-matrix
@@ -168,10 +182,26 @@ known answers for three things at once:
 The pre-flight already shows the degeneracy. At the sampler's start on C8, the gradients
 with respect to the two sampled coordinates (`12*d1` and `d2`) are identical (11.429 each).
 On C14+unsat they differ slightly (26.2 vs. 27.3). C14+unsat adds the point where separation
-begins. Ridge posteriors can hit the tree-depth ceiling. R3 keeps the standard 24 A100-h cap,
-about 4x the C8 estimate and 2x the C14+unsat one; hitting it under diagonal but not dense is
-itself the SI result. *Optional:* C20+unsat (~20 A100-h: R1's rate scaled by reaction count)
-shows clear separation. Add it only if the figure needs a third point.
+begins. Ridge posteriors can hit the tree-depth ceiling. R3's C8 runs keep the standard
+24 A100-h cap, about 4x the C8 estimate (the C14+unsat and C18 runs have none, from
+2026-09-27); hitting it under diagonal but not dense is itself the SI result. *Optional:* `d1`+`d2` on C20+unsat, the full model, shows clear
+separation. Add it only if the figure needs a third point. It would cost more like ~100 A100-h
+than the ~20 first estimated: that figure scaled R1's `a1`+`c3` rate, while `d1`+`d2` on
+C14+unsat is running at ~63 A100-h (diagonal, estimate at 22:00) against R1's 7.
+
+*Decision, 2026-09-27: the C8 pair is stopped.* On the exact ridge, warmup steps took 2-82 min,
+so both C8 runs were at warmup step 20 of 300 after 9-10 h
+and would have reached the 24 A100-h cap long before the dense run's first mass-matrix update
+(step 100), with no posterior. They were cancelled at warmup step 20 (15 A100-h spent;
+checkpoints kept). Figs 6/6b take their weakly identified example from C14+unsat, which now
+runs uncapped (~55 A100-h). The exact C8 answer is covered without sampling by
+`identifiability_report.py --selftest`, which recovers a synthetic `12*d1 + d2` ridge. The SI
+mass-matrix comparison is dropped, unless a dense C14+unsat run is added (~55 A100-h).
+
+*Reversed the same day.* With `max_steps` 1000 both C8 runs resumed from their step-20
+checkpoints (section 4). C8 dense finished (400 draws, 19.3 A100-h), and the diagonal run
+continues under its cap. Dense twins of the C14+unsat and C18 runs, submitted 14:20, give the SI
+mass-matrix comparison on all three systems.
 
 **R6 (grouping, Fig 5).** `c3` ties six TesA hydrolysis constants with six distinct nominal
 values. It is split into short-chain (`c3s`: C4-C8) and long-chain (`c3l`: C10-C14 plus the
@@ -179,12 +209,21 @@ unsaturated species) halves in a script-generated variant of the C14+unsat react
 (`Reactions/EC_FAS_ME1/C14+unsat+c3split`); the reaction files are never hand-edited. The
 runs:
 - (a) grouped `a1`+`c3` on the standard data. This is R1, reused.
-- (b) split `a1`+`c3s`+`c3l` on the same data. New; ~40 A100-h, as R2.
-- (c) data generated at `c3s` = 1, `c3l` = 3, fit with both models. New; ~8 + ~40.
+- (b) split `a1`+`c3s`+`c3l` on the same data. New; ~40 A100-h, as R2 (measured 6.5).
+- (c) data generated at `c3s` = 1, `c3l` = 3, fit with both models. New; ~8 + ~40 (measured
+  6.6 + 8.3).
 
 At `c3l` = 3 the C10-C14 species move by −15% to +144% while C4-C8 move about 6%, a pattern
-a single `c3` cannot produce. The three-parameter cost is borrowed from the main fit, but
-`c3s`/`c3l` may be more correlated than that. Measure (b) before running (c). Gate every
+a single `c3` cannot produce.
+
+What each part answers. (b), on the standard data, where the six constants really do share
+their fitted ratios: the split fit should recover `c3s` ≈ `c3l` ≈ 1, the grouping's 1:1, and gain
+nothing on LOO over the grouped fit, so the grouping is supported. (c) is the negative control
+from outline 3.2: with a true 1:3 ratio the grouping is wrong, so the split fit should recover
+`c3s` ≈ 1 and `c3l` ≈ 3 and LOO should prefer it over the grouped fit. Together they show that
+LOO can tell a justified grouping from an unjustified one. The three-parameter cost is borrowed from the main fit, but
+`c3s`/`c3l` may be more correlated than that. Measure (b) before running (c). (They were not:
+correlation -0.04 in (b).) Gate every
 Δelpd on Pareto-k ≤ 0.7. `a1` is included so the posterior has enough spread for LOO to
 work.
 
@@ -195,19 +234,20 @@ model, at zero sampling cost, and that draws the figure. Three cells are then sa
 - the best cell per data point
 - the full dataset (R1, reused)
 
-This checks that the information ranking matches real posterior shrinkage.
+This checks that the information ranking matches sampled posterior contraction.
 
 Built 2026-09-25 as `Tier1 C14+unsat - a1c3 - profile` and `Tier1 C14+unsat - a1c3 - rates`,
 each a subset of the standard data. The rates dataset is the best-per-point cell. The five
 initial rates carry exactly the information of total fatty acid at 150 s (4.27 nats either
 way). For a like-for-like prediction the grid was re-run on the `a1`+`c3` model
-(`expected_information_grid_a1c3.json`). Predicted log-scale shrinkage for `a1` / `c3`:
+(`expected_information_grid_a1c3.json`). Predicted log-scale posterior contraction for `a1` /
+`c3`:
 
 | Cell | Points | Information (nats) | `a1` | `c3` |
 |---|---|---|---|---|
-| full data (R1) | 23 | 6.34 | 0.969 | 0.942 |
-| profile only | 8 | 5.77 | 0.950 | 0.938 |
-| rates only | 5 | 4.27 | 0.915 | 0.828 |
+| full data (R1) | 23 | 6.34 | 0.9991 | 0.9967 |
+| profile only | 8 | 5.77 | 0.9975 | 0.9962 |
+| rates only | 5 | 4.27 | 0.9928 | 0.9705 |
 
 So the sampled order to check is full > profile > rates, with `c3` separating the cells most.
 Per point, the ranking reverses (rates 0.85 nats, profile 0.72, full 0.28).
@@ -217,7 +257,7 @@ doesn't depend on network size. R4 starts with a 10-replicate pilot and continue
 if the pilot's coverage and rank histogram look sane. SBC ranks and coverage come from the
 same replicates. The R5 noise-level datasets reuse the 10% dataset's random draws, rescaled,
 so the noise axis carries no draw-to-draw scatter. Compare the prior-offset runs on log-scale
-shrinkage (`shrinkage_log` in `recovery_report.py`), which doesn't change when the prior
+contraction (`contraction` in `recovery_report.py`), which doesn't change when the prior
 median moves.
 
 The prior shifts run as two series (decided 2026-09-26, before either started):
@@ -240,10 +280,12 @@ The prior shifts run as two series (decided 2026-09-26, before either started):
   dispersed starts.
 
 Warmup of 300 steps is established for runs that start near the answer (Appendix A; R0 reached
-the posterior bulk within 7 steps). It is not yet established for the SBC replicates with
+the posterior bulk within 7 steps). It was not yet established for the SBC replicates with
 extreme truths (e.g. `sbc004`/`sbc005`, `a1` ≈ 8.7), whose chains start up to ~1.8 log units
 away. SBC needs identical settings for every replicate, so if the pilot shows these failing,
-the remedy (more warmup or another start) applies to all 40.
+the remedy (more warmup or another start) applies to all 40. The pilot passed: its chains,
+the extreme truths included, reached their true values within 40-55 warmup steps (section 4),
+so all 40 ran with 300.
 
 ---
 
@@ -301,11 +343,11 @@ in appendix D):
 8. Fig 9's information grid, computed at the truth on R2's model (`expected_information_grid.py`,
    `expected_information_grid.json` and `.png`), under the five Tier-1 conditions and the
    Tier-1 noise model. Per data point, total fatty acid at 150 s is the most informative cell
-   (1.09 nats per point). Individual species buy most of the attainable shrinkage (0.95-0.97
-   mean, log scale). The ACP intermediates (ketoacyl-, hydroxyacyl-, enoyl- and acyl-ACP) add
+   (1.09 nats per point). Individual species buy most of the attainable contraction (mean
+   0.997-0.999, log scale). The ACP intermediates (ketoacyl-, hydroxyacyl-, enoyl- and acyl-ACP) add
    little beyond that at their concentrations under the 0.01 µM floor (0.03-0.06 nats per
-   point). The Tier-1 design scores 0.39 nats per point over 23 points (shrinkage 0.96 / 0.90
-   / 0.93 for `a1` / `c3` / `a2`). So R7's "best cell per data point" is total fatty acid at
+   point). The Tier-1 design scores 0.39 nats per point over 23 points (contraction 0.9986 /
+   0.9902 / 0.9957 for `a1` / `c3` / `a2`). So R7's "best cell per data point" is total fatty acid at
    150 s, and "cheapest data type" is the endpoint profile.
 9. R4's pilot built (`sbc.py generate`): 10 replicates on C8, each truth drawn from the fit's
    own prior, with its data in `Data/Tier1_rates/Chain_C8_sbc<i>/` and its config in
@@ -359,29 +401,147 @@ Nothing else is queued until R0 has been inspected. Done 2026-09-25 and inspecte
 (section 4). Every check passed except resume, which one segment could not exercise; the
 first multi-segment Stage-2 run tests it. C8 stays as the replicate system.
 
-**Stage 2: everything cheap and independent, one batch (~225 A100-h).** R1, R3, R5, R7, R8
+**Stage 2: everything cheap and independent, one batch (planned ~225 A100-h; 252 used of ~418
+estimated at 22:00 on 2026-09-27, the excess almost all R3's ridge runs).** R1, R3, R5, R7, R8
 and the R4 pilot, 29 runs, submitted 2026-09-26 by `tier1/submit_stage2.sh` from `job_files/`
 (R7 and R5's ME1-start series were added the same day). It refuses until R0 has finalized, and
 it skips runs that are finished or already queued, so rerunning it resumes the ones that
 stopped at the wall clock. `tier1/tier1_status.py` shows each run's state, its A100-h used and
-estimated, and when it should finish.
-- Gate to R2: R1 converges and recovers both parameters.
-- Gate to the full R4: the pilot looks sane.
+estimated, and when it should finish. Four runs were added on 2026-09-27: C18 `d1`+`d2`, the
+C14+unsat and C18 dense twins, and the `max_steps` 1000 twin of the prior +4 sd fit, so 33 in all.
+- Gate to R2: R1 converges and recovers both parameters. Passed 2026-09-26 (section 4).
+- Gate to the full R4: the pilot looks sane. Passed; the other 30 were submitted 2026-09-27.
+- Status at 22:00: 28 of 33 finished. R3's C8 diagonal, C14+unsat diagonal and dense, and C18
+  diagonal and dense runs are still going (section 4).
 
-**Stage 3: the main fit and its dependents (~290 A100-h).**
+**Stage 3: the main fit and its dependents (planned ~290 A100-h; took 254).** All 34 runs have
+finished: R2 (~19:50 on 2026-09-27), R6's three fits and R4's other 30 replicates (section 4).
+- R2 and R6 (b) submitted 2026-09-27 03:00; both started at once on H200s.
+- R6 (c)'s two fits (grouped and split, on the 1:3 data) submitted 2026-09-27, once (b) was
+  running at a normal rate.
+- Results, 2026-09-27 10:50:
+  - R6 (b), the split model on standard data (true `c3s` = `c3l` = 1): `c3s` 0.835
+    [0.652, 1.031], z -1.58; `c3l` 1.011 [0.847, 1.194], z +0.09; `a1` 0.998, z -0.06.
+    Contraction 0.990 / 0.995 / 0.999. Both halves are identified, and the data show no
+    difference between them, as they should. 400 draws, r-hat ≤ 1.003; warmup check OK
+    (first-block drift ≤ 0.08 sd). 6.5 A100-h.
+  - R6 (c), the grouped model on the 1:3 data (`c3s` 1, `c3l` 3): `c3` 1.277 [1.09, 1.48],
+    a compromise weighted toward the short chains; `a1` 0.996 is unaffected. The posterior
+    predictive check shows the misfit: C10 is +4.6 noise sd off (3.47 observed against 1.79),
+    C8 -3.2 sd (2.3 of it the shared noise draw), the TesA 0.5 µM rate +3.0 sd; 3 of 23 points
+    fall outside the 95% predictive interval and p_loo is 7.3 for 2 parameters. (An earlier note
+    here had C8 and C10 both over 4 sd; corrected 2026-09-27.) 6.6 A100-h.
+  - R2 at 105 sampling draws: too early for the drift test; acceptance over the last 50
+    warmup steps 0.777.
+  - R2 finished 2026-09-27 (~19:50): converged at 600 draws (checks at 500 and 600 passed),
+    finalized at 700, no divergences, 16.7 A100-h by `cost_estimate.py` (plan estimate ~40). Its
+    confirmation check at 700 failed (`a1` r-hat 1.0102 against 1.01, 18:32). Its last segment
+    started at ~14:30 on the older code, so the failure was logged and ignored, as in the three
+    runs reopened earlier (section 0). It has not been reopened, so it has not yet finished under
+    the three-pass rule. Truth inside every 95% interval: `a1` 1.036 (log z +0.77), `c3` 1.098 (+0.66), `a2` 0.890 (-1.47);
+    contraction 0.9986 / 0.9881 / 0.9951. Correlations: `c3`-`a2` -0.82, `a1`-`a2` -0.61, `a1`-`c3`
+    +0.52, so `a2` trades off against both. Unblocks Figs 2, 6/6b, 7 and 8. Fig 9 comparison in
+    section 4.
+  - R6 (c), the split model on the 1:3 data (13:45): `c3s` 0.835 (truth 1, z -1.61), `c3l`
+    2.95 (truth 3, z -0.19), `a1` 0.999; contraction 0.990 / 0.986 / 0.999; 8.3 A100-h. It
+    recovers the 1:3 split. `c3s` matches R6 (b)'s 0.835 because both data sets share one
+    noise draw.
+  - Fig 5 drafted (`tier1_result_figures.py fig5`, `grouping_test.png`). PSIS-LOO, grouped minus
+    split: standard data +0.2 ± 1.4 elpd (no preference; the grouping holds), 1:3 data -23.8 ±
+    11.8 (2.0 SE, the split predicts better). The 1:3 comparison fails the Pareto-k gate at one
+    point (the split fit's C10, k 0.90, carrying 10.9 of the 23.8); setting C10's difference to 0
+    still leaves 12.9 ± 6.2 (2.1 SE). ArviZ 1.x `az.compare` rounds its table to 2 significant
+    figures by default (it showed -20 ± 12): use `round_to='none'` or the pointwise `elpd_i`.
 - The three-parameter fits run with no compute cap (decided 2026-09-26). At R1's measured
-  rates and the pilot factors, R2 needs ~40 A100-h: ~10 h of warmup (~119 s per step) and
-  ~27 h for ~1100 draws (~88 s per draw), about four 12 h segments. R1 passed its gate on
+  rates and the pilot factors, R2 was estimated at ~40 A100-h: ~10 h of warmup (~119 s per
+  step) and ~27 h for ~1100 draws (~88 s per draw), about four 12 h segments. It measured 16.7:
+  66.6 s per warmup step, 51.3 s per draw and 700 draws (appendix B). R1 passed its gate on
   2026-09-26 (section 4).
 - R2: inspect warmup with `convergence_and_warmup.py` at the first segment boundary. If
   acceptance is well below 0.8, or the first block still drifts, restart with 600 warmup
-  steps and record it.
-- R6 (b), then (c) once (b)'s cost is known.
+  steps and record it. Acceptance was 0.777 (10:50 above); R2 was not restarted and finished
+  on its 300 warmup steps.
+- R6 (b), then (c) once (b)'s cost is known. Done: (b) 6.5 A100-h, then (c) 6.6 and 8.3.
 - The remaining R4 replicates (built and pre-flighted), ~160 A100-h at the pilot's median.
+  Submitted 2026-09-27 as `submit_stage2.sh`'s group R4b with `--nice 25000`: above the age
+  factor's weight (20160), so any other run's waiting segment outranks them however long they
+  have waited (they sit at priority 1 while waiting). `tier1_status.py` checks each call that no
+  replicate starts while another run waits, and the monitor resubmits clean segment ends
+  itself every 10 min, so a finished segment's GPU goes back to its run. All 30 had finished by
+  22:00 on 2026-09-27, at 215 A100-h.
+  - sbc018 (truth `a1` 0.34, `c3` 0.38) took 71 min for warmup steps 6-10: 59 leapfrog steps
+    at 72 s each, against 2 s before and after, with short trees (1-15 steps) and one
+    divergence. So the cost was the ODE solves, not tree length. Its chains started far from
+    the mode (log density -940 to -2535) and the first three steps diverged at step sizes 2.3
+    and 0.23. C8's solver needs 71-188 steps for `a1` and `c3` anywhere in e^-10 to e^10 except
+    a band at log `a1` ≈ 7 (`a1` ≈ 1100, ~6 prior sd out): 5389 steps to the full 20000 with
+    failed solves. Proposals inside trees reaching that band are the likely cost. It recovered
+    by itself (steps 11-20 in 5 min) just before it was cancelled on 2026-09-27 to resume with
+    `max_steps` 1000; the cancel lost ~1.5 min, it resumes from step 20, and its nice was set
+    to 16000 on Alpine and 4000 on Blanca so it goes ahead of the other replicates but below
+    every main run. The band has negligible posterior mass, so the sampled posterior is
+    unchanged.
+  - Accepted states, every Tier-1 run (`accepted_solver_steps.py`, GPU job 28519196, 2026-09-27;
+    `Results/Tier1/figures/accepted_solver_steps.json`): all 67 runs' warmup and sampling states,
+    ~170k unique positions, solved at each run's own tolerances with a 20000-step limit. No
+    sampling draw in any run needed more than 131 solver steps; warmup states stay at or under
+    189 (R8's rtol 1e-5 run, C18 184) except in one run: the C8 prior +4 sd run from the default
+    start, whose 6 of 1040 warmup states needed 1000-3087 steps (none failed), the worst at
+    warmup step 44, a1 ≈ 350, c3 ≈ 314, a chain drifting toward the misplaced prior (median 110)
+    before the data pulled it back. So `max_steps` 1000 would never have cut off a posterior draw;
+    only those six warmup excursions, and the rejected proposals inside trees (not stored) that
+    it is meant to cut short.
+  - R2's space (C14+unsat, `a1` + `c3` + `a2`, rtol 1e-3; 9^3 grid over e^-10 to e^10, 2026-09-27):
+    median 90 steps, and at most 163 within ±3 in log (±2.6 prior sd). A band at log `a1` ≈ +6
+    (`a1` ≈ 400, ~5 prior sd out) needs 598-7679 steps (5 of 729 points above 1000, none failed),
+    like C8's band at log `a1` ≈ 7. R2's slow warmup chunks (a 22-min chunk at steps 175-180, an
+    hour without a checkpoint at 185) fit rejected proposals reaching it; its accepted states
+    needed at most 97. A 1000 cap suits any rerun of R2 or the full-model fits.
+  - Direct check, submitted 2026-09-27: `Tier1 C8 - a1c3 - prior+4sd - cap1000` (R8), the +4 sd
+    fit rerun with `max_steps` 1000, same seed and start. The two chains match until a proposal
+    needs more than 1000 steps, then take different but equally valid paths, so the test is
+    agreement within Monte Carlo error (as in the settings check), not identical draws. It goes
+    in the SI settings check as a third variant. Proposed Methods wording: max_steps 20000 (1000
+    for the ridge runs); no posterior draw in any fit needed more than 131 steps, and a rerun of
+    the one fit whose warmup exceeded 1000 matched within Monte Carlo error.
+    Result (2026-09-27 ~21:00): `a1` 1.0656 ± 0.054 against the original's 1.0636 ± 0.055, `c3`
+    1.0005 ± 0.062 against 0.9991 ± 0.063: differences of 0.04 and 0.02 posterior sd, within Monte
+    Carlo error. The cap does not change the answer.
+  - SBC at 18 replicates (2026-09-27 10:50): `a1` z sd 0.66 (one-sided p = 0.021 against 1),
+    `c3` 0.82 (p = 0.16); 50% coverage 0.67 and 0.78; rank quantiles uniform by KS (p = 0.36,
+    0.76). The eight newest replicates alone give `a1` z sd ~0.78. The data are not the cause:
+    (noisy - clean) / sigma pooled over all 40 replicates' 720 points has mean +0.03 and sd
+    1.009, and the replicates' noise draws are independent (correlation sd 0.242 against 0.236
+    expected). The finished set is not yet a random sample (the slow replicates are still
+    running), so the verdict waits for all 40.
+    At 22 replicates (13:45): `a1` z sd 0.62 (p = 0.005), `c3` 0.92 (p = 0.33); binned ranks
+    `a1` p = 0.010, `c3` p = 0.37; KS on quantiles p = 0.24 and 0.69. Sampled / Laplace sd
+    median 1.02 and 1.00 (sbc018's `a1` 0.49: four chains agree, no divergences, r-hat 1.00;
+    low `a1` is where the Laplace approximation at the truth is poorest). Mahalanobis² sum
+    31.95 on 44 df, P(lower) 0.088. Noise within each replicate is independent too
+    (correlations sd 0.160 against 0.158 expected, time-series lag-1 within ±0.28).
+  - At 38 replicates (2026-09-27 18:58; sbc022 and sbc039 still running) the over-coverage is
+    gone: z sd 0.93 (`a1`, p = 0.29) and 1.05 (`c3`, p = 0.68); coverage 0.61 / 0.89 / 0.95 (`a1`)
+    and 0.63 / 0.84 / 0.92 (`c3`) at 50 / 90 / 95%; KS on the rank quantiles p = 0.33 and 0.87. The
+    binned chi-square for `a1` is still marginal (p = 0.032). So the earlier z sd of 0.62 came from
+    which replicates finished first: the slower ones had the larger errors. sbc029 was reopened
+    under the three-pass rule and finalized at 700 draws (c3 z -1.61).
+  - At 39 replicates (21:40), sbc022 looked confidently wrong: truth `a1` 0.48 / `c3` 0.75, posterior
+    0.197 ± 0.070 (log z -3.66) and 0.652 ± 0.034 (-2.82). Four chains agree, no divergences, but
+    it mixed slowly (converged at 1600 draws). Coverage falls to 0.90 / 0.90 at 95%.
+    Checked by 22:30 with a fine grid posterior: the posterior has two peaks, the main one at
+    `a1` 0.17 / `c3` 0.66 and a minor one at `a1` 0.41 / `c3` 0.73, next to the truth. The grid
+    puts 5.3% of the mass in the minor peak and the chains put 7.2% of their draws there, so
+    the sampler visited it in about the right proportion. The truth is at quantile 0.992 of the
+    grid posterior (0.984 of the draws): a tail draw, not a sampler failure. sbc022 stays in.
+  - The fixed-truth data sets (C8, C12, C14+unsat, C18, the noise levels) share one noise
+    draw, rescaled by the noise level: common random numbers across systems. Their fits are
+    one realisation, so e.g. every C8 fit's `a1` z of ~+0.9 is the same offset, and coverage
+    across them is not an independent test; SBC is.
 
 **Stage 4: post-processing (forward solves).** Figs 6/6b from R2 and R3. Figs 7 and 8 from
 R2's posterior (`posterior_morris.py`, `posterior_ratio_response.py`). Fig 9's grid is done
-at the truth (item 8), and R7 checks it against sampled shrinkage.
+at the truth (item 8), and R7 checks it against sampled contraction.
 
 **Stage 5: draft every figure, then choose what goes to Tier 2** (section 6).
 
@@ -396,10 +556,10 @@ One segment on an A100 (`bgpu-biokem2`), 5 h 46 min of wall time. The figures ar
 
 **Recovery.** Both parameters recovered, truth inside the 95% interval for both:
 
-| | Truth | Posterior mean ± sd | z | Shrinkage (natural / log) |
+| | Truth | Posterior mean ± sd | z (log scale) | Contraction (log scale) |
 |---|---|---|---|---|
-| `a1` | 1.00 | 1.049 ± 0.055 | +0.90 | 0.984 / 0.956 |
-| `c3` | 1.00 | 0.981 ± 0.062 | −0.32 | 0.982 / 0.946 |
+| `a1` | 1.00 | 1.049 ± 0.055 | +0.89 | 0.9980 |
+| `c3` | 1.00 | 0.981 ± 0.062 | −0.34 | 0.9971 |
 
 The `a1`-`c3` posterior correlation is +0.45 (`identifiability_report.py`). In the
 prior-standardised eigendecomposition, the two directions keep 0.13% and 0.36% of the prior
@@ -441,51 +601,291 @@ posterior agree, so that is a low noise draw, not misfit.
 
 ---
 
-### Stage 2, first results (2026-09-26, 20:30)
+### Stage 2 (2026-09-26 to 27): 28 of 33 finished (22:00)
 
-Fourteen runs have finished (R0 and 13 of Stage 2's 29), and every one has the truth inside the
-95% interval for every parameter. R1 passed the gate to R2.
+All 29 finished runs (R0 and 28 of Stage 2's 33) have the truth inside the 95% interval for
+every parameter.
 
-| Run | `a1` z | `c3` z | Log-scale shrinkage `a1` / `c3` | Draws | A100-h |
+*Scores (changed 2026-09-27).* z and posterior contraction follow Schad, Betancourt & Vasishth
+(2021, eqs. 4-5): z = (posterior mean − truth) / posterior sd, and contraction = 1 − posterior
+variance / prior variance. For the LogNormal groups both are computed on log(x), where the
+prior is Normal with sd ln(10)/1.96 wherever its median sits; on the natural scale a LogNormal's
+variance is dominated by its upper tail, so contraction there tracks where the posterior sits
+as much as what the data taught (sbc002's `c3`, at 9.9, reads 0.28 natural against 0.955 log).
+Earlier versions of this plan quoted 1 − posterior sd / prior sd; the rankings are unchanged. R1 passed the gate to R2. Only R3's five ridge runs are still going (status at
+22:00 below).
+
+| Run | `a1` z | `c3` z | Contraction `a1` / `c3` | Draws | A100-h |
 |---|---|---|---|---|---|
-| R1: C14+unsat | −0.04 | −0.97 | 0.968 / 0.942 | 400 | 7.2 |
-| R7: C14+unsat, profile only | +1.06 | −1.69 | 0.946 / 0.931 | 400 | 6.4 |
-| R5: C8, noise 5% | +0.88 | −0.19 | 0.976 / 0.968 | 600 | 4.0 |
-| R0: C8, noise 10% | +0.90 | −0.32 | 0.956 / 0.947 | 800 | 5.7 |
-| R5: C8, noise 20% | +0.89 | −0.38 | 0.911 / 0.903 | 500 | 3.5 |
-| R5: C8, noise 40% | +0.87 | −0.43 | 0.823 / 0.805 | 500 | 4.4 |
-| R5: C8, prior +1 sd, default start | +0.94 | −0.23 | 0.954 / 0.946 | 500 | 3.6 |
-| R5: C8, prior +2 sd, default start | +1.06 | −0.14 | 0.956 / 0.947 | 800 | 4.7 |
-| R8: C8, target acceptance 0.95 | +0.84 | −0.38 | 0.955 / 0.947 | 500 | 5.0 |
-| R4: SBC 000, 001, 002, 004, 005 | −0.16 to +0.84 | −1.04 to +0.62 | 0.963-0.988 / 0.788-0.920 | 400-800 | 4.0-7.0 |
+| R1: C14+unsat | −0.05 | −0.97 | 0.9990 / 0.9966 | 400 | 7.2 |
+| R7: C14+unsat, profile only | +1.07 | −1.61 | 0.9971 / 0.9952 | 400 | 6.5 |
+| R7: C14+unsat, rates only | −0.82 | +1.01 | 0.9930 / 0.9314 | 600 | 9.8 |
+| R5: C8, noise 5% | +0.88 | −0.21 | 0.9994 / 0.9990 | 600 | 4.1 |
+| R0: C8, noise 10% | +0.89 | −0.34 | 0.9980 / 0.9971 | 800 | 5.7 |
+| R5: C8, noise 20% (reopened 2026-09-27) | +0.91 | −0.43 | 0.9925 / 0.9909 | 800 | 5.4 |
+| R5: C8, noise 40% | +0.85 | −0.52 | 0.9686 / 0.9621 | 500 | 4.4 |
+| R5: C8, prior +1/+2/+3/+4 sd, default start | +0.93 / +1.06 / +1.10 / +1.16 | −0.26 / −0.17 / −0.09 / −0.05 | 0.9979-0.9980 / 0.9971-0.9972 | 500-800 | 3.7-6.5 |
+| R5: C8, prior +1/+2/+3/+4 sd, ME1 start | +0.97 / +1.03 / +1.09 / +1.18 | −0.25 / −0.20 / −0.12 / −0.06 | 0.9980 / 0.9971-0.9973 | 400-800 | 3.5-4.9 |
+| R8: C8, target acceptance 0.95 (reopened 2026-09-27) | +0.88 | −0.37 | 0.9980 / 0.9972 | 800 | 6.5 |
+| R8: C8, `rtol` 1e-5 | +0.91 | −0.32 | 0.9980 / 0.9972 | 500 | 7.6 |
+| R8: C8, prior +4 sd, `max_steps` 1000 | +1.22 | −0.02 | 0.9981 / 0.9973 | 500 | 4.9 |
+| R4: SBC pilot, 10 replicates | −1.31 to +0.84 | −1.06 to +0.58 | 0.9914-0.9999 / 0.9552-0.9980 | 400-1100 | 4.0-10.7 |
+| R3: C8 `d1`+`d2`, dense (columns are `d1` / `d2`) | +0.05 | +0.02 | 0.510 / 0.509 | 400 | 19.3 |
+
+z and contraction are on log scale here (see the note on scores above the table), except R3's
+`d1` and `d2`, whose priors are Normal and which are scored on the natural scale.
 
 - **R1 (gate to R2).** Converged at 300 draws (r-hat 1.0049, ESS 758), finalized at 400. No
   divergences, BFMI 0.97-1.12, elpd_loo −22.15 ± 7.13. Correlation +0.03.
-- **Fig 9 check.** Sampled log-scale shrinkage matches the expected-information prediction to
-  within 0.01: full data 0.968 / 0.942 against 0.969 / 0.942, profile only 0.946 / 0.931
-  against 0.950 / 0.938. The rates-only cell is still sampling.
+- **Fig 9 check.** Sampled log-scale contraction matches the expected-information prediction to
+  within 0.001 on the full data (0.9990 / 0.9966 against 0.9991 / 0.9967) and the profile
+  alone (0.9971 / 0.9952 against 0.9975 / 0.9962). With rates alone, `a1` matches (0.9930
+  against 0.9928) but `c3` is wider than predicted (0.931 against 0.971). Its posterior is
+  skewed (mean 1.45, sd 0.85, log-scale z +1.01, correlation +0.32), where the local, linear
+  prediction does not reach. Fig 9 should say that its predictions hold where the posterior is
+  close to Gaussian. The skew comes from saturation. Almost all the rates' `c3` information is
+  in the TesA 0.5 µM condition, whose rate goes 1.16, 2.10, 3.33, 4.15, 4.50 µM C16/min at
+  `c3` = 0.25, 0.5, 1, 2, 4, with sensitivity d log(rate) / d log(`c3`) 0.91, 0.79, 0.50,
+  0.18, 0.07. Below the truth the rate falls steeply; above it, TesA stops limiting and the
+  rate flattens (2 to 4 moves it 8%, under the 10% noise), so large `c3` fits almost as well.
+  With the full data, the chain-length profile, which TesA also shapes, closes the tail.
+  `joint_posterior.png` shows it.
 - **Noise.** The posterior widens with the noise and the truth stays covered: `a1`'s sd is 0.029,
-  0.055, 0.114 and 0.252 at 5, 10, 20 and 40%.
-- **Prior shift, default start.** At +1 and +2 prior sd the chains, started at the shifted
-  prior's mean, found the truth, and the posterior is almost R0's (log-scale shrinkage
-  unchanged). +3 and +4 sd, and the ME1-start series, are still running.
-- **Settings.** Target acceptance 0.95 reproduces R0 (z within 0.06); `rtol` 1e-5 is still running.
+  0.055, 0.112 and 0.252 at 5, 10, 20 and 40%. The z-scores barely move (+0.85 to +0.91),
+  since every noise level reuses the 10% dataset's standardized draws.
+- **Prior shift.** From the default start (the shifted prior's mean) the chains found the truth
+  at every shift, with posteriors matching the ME1-start series (z within 0.04). The start does
+  not matter here. The prior pulls both parameters up slightly as it moves (`a1` z +0.89 at no
+  shift, +1.16 at +4 sd; `c3` −0.34 to −0.05), with contraction unchanged. That is about +0.07
+  z per prior sd, a real, small prior pull, as the correlation-aware Gaussian formula predicts
+  (0.068 / 0.073).
+- **Settings.** Target acceptance 0.95 and `rtol` 1e-5 both reproduce R0 (z within 0.03).
+  The 0.95 run was reopened under the three-pass rule and finalized at 800 draws: `a1` 1.0493,
+  `c3` 0.9793, against R0's 1.0492 / 0.9806. `rtol` 1e-5 moves the log-likelihood by ~1e-4 nats.
+  They cost 1.1x (lockstep leapfrog steps) and 1.85x per draw. The `max_steps` 1000 twin of the
+  +4 sd fit matches it within 0.04 posterior sd (section 3).
 - **Warmup.** `convergence_and_warmup.py --summary` passes R1, sbc000, sbc004 and sbc005:
   acceptance 0.777-0.780 over the last 50 warmup steps, first-block drift ≤ 0.15 sd, and
   dropping the first block moves r-hat by ≤ 0.006. The pilot's chains reached their true values
   within 40-55 warmup steps, the extreme truths (`a1` ≈ 8, `c3` ≈ 10) included.
-- **SBC.** Five of the 10 pilot replicates are in; the rank test needs all 10. `c3` at 9.9
-  (sbc002) is the least identified (log-scale shrinkage 0.79; natural-scale 0.15, since the
-  natural scale stretches the upper tail).
-- **R3 is slow on the ridge.** On C8, warmup steps build trees of up to 183 leapfrog steps at
-  ~3.7 s each through step 10, and steps 10-15 took 6.9 h (about 80 min each, at or near the
-  1023-step ceiling), with the GPUs busy throughout. The dense run's first segment stopped at
-  7.4 h, at step 15, because the next 5-step chunk would not fit its 11.5 h budget; it was
-  resubmitted. Both runs are identical until the dense run's first mass-matrix update at
-  warmup step 100 (then 150 and 250, BlackJAX's schedule for 300 steps), about 110 h away,
-  and both should reach the 24 A100-h cap near step 25, with no posterior. C14+unsat (~320 s
-  per step) should reach the cap during sampling. Open: run both to the cap (the default),
-  stop the diagonal run and lift the dense cap, or rethink the C8 ridge test.
+- **SBC pilot: every truth covered, intervals look too wide.** All 10 replicates cover the
+  truth at 90% and 95% (50%: 8/10 and 9/10). But the log-scale z-scores have sd 0.52 against 1,
+  and the sum of Mahalanobis² is 9.33 on 20 df (lower-tail p = 0.02). The rank chi-square
+  (p = 0.009 / 0.018) is fragile at one replicate per bin. `sbc_width_check.py` rules out the
+  two obvious causes:
+  - The realized noise matches the stated σ: z sd 1.02 over 180 points, with seeds 0-9 and
+    uncorrelated noise vectors.
+  - Each sampled posterior sd matches the Laplace (Fisher) sd at its truth: ratios 0.93-1.15,
+    median 1.02.
+
+  So the fit gives the width the likelihood implies, and the small errors are most likely
+  chance. The other 30 replicates settle it. (With all 40 finished the z sd is 1.07 (`a1`) and
+  1.11 (`c3`); Stage 3 below.)
+  sbc000 uses data seed 0, R0's seed, so it reuses
+  R0's standardized noise at a different truth (its z, +0.84 / −0.39, echoes R0's +0.89 / −0.34). That is
+  harmless for SBC, since the noise is drawn independently of the truth.
+- **R3 on the ridge** (`Results/Tier1/figures/r3_step_size_and_cost.png`). On C8, warmup steps
+  took 2 to 82 min each. Trees stayed modest (depth at most 8; 240-350 leapfrog steps per
+  5-step chunk on the slowest chain), and step sizes followed almost the same history as on
+  C14+unsat (same seed and starts; 0.01-0.3, dual averaging swinging on the ridge's thin
+  direction). What changed was the cost of each gradient: about 2 s in steps 6-10, about 65 s
+  in steps 11-15 and 15 s in steps 16-20, against a steady 3.3-5.4 s on C14+unsat. The cause,
+  from solver-step counts at the runs' own settings: an overshooting leapfrog step lands far
+  off the ridge, and C8 has a stiff band there that C14+unsat lacks. Both systems take ~95-100
+  solver steps along the ridge and out to ±5 prior sd across it; at +10 prior sd across
+  (12·`d1` + `d2` ≈ +17, TesA binding ~10⁷-fold slower) C8 takes 2860, C14+unsat 100. With
+  the chains in lockstep, one such solve stalls all four; the proposal is rejected, but its
+  cost is paid. Beyond about +5 both systems sequester all their ACP as acyl-ACP of the
+  longest chain (free ACP 0, fatty-acid output ~0), so sequestration marks the region but does
+  not by itself explain why only C8's solver crawls there. After 9-10 h both C8 runs were at
+  warmup step 20 of 300.
+  - A cheap guard for future fits: scan solver steps on a coarse grid well away from the
+    posterior before submitting (a few CPU minutes), and consider a lower `max_steps` (it is
+    20000; healthy solves take ~100), so a runaway solve fails fast and is rejected instead of
+    stalling the chains.
+  - Test, 2026-09-27: the C8 dense run resumed from its step-20 checkpoint with `max_steps`
+    1000 (solver settings are outside the resume check; the posterior region needs 95-180
+    steps, so only far-off proposals are affected). If its cost per leapfrog step stays near
+    2 s, the diagonal run can resume the same way for the SI mass-matrix comparison; that waits
+    on the Monday discussion.
+  - Result, 2026-09-27 07:30 (warmup steps 20-35 on an A100 40GB): 4-5 s per leapfrog step on
+    steps 25-35 (~11 s on steps 20-25, including the segment's start), against 13-103 s at
+    20000 and 2 s where solves are healthy. Divergences are unchanged (3 in 60 transitions,
+    2 in 20 before), acceptance is on target (0.77-0.79) and the chains are still spread along
+    the ridge. Steps 35-55 (to 10:50) cost 5-14 s per leapfrog as the chains spread further
+    along the ridge (to ±1.6 prior sd), ~10 min per warmup step, so it reaches its 24.5 A100-h
+    cap near warmup step 120: past the first dense metric update at 100, not the one at 150.
+    `max_steps` stayed 1000 from step 20 on (one job, config unchanged). Two separate changes
+    followed, and only the second is the metric's:
+    - Steps 60-100, still with the identity metric (the dense and diagonal runs are the same
+      algorithm until step 100): cost per leapfrog fell back to 2.4-2.6 s, ~1.8 min per warmup
+      step. Not the cap alone (it was in place for steps 20-55 too, at 4-14 s), so most likely
+      the chains' positions stopped sending proposals into the band.
+    - Step 100, the first dense metric update: step size 0.02-0.15 -> 0.26-3.3, and 4-8x fewer
+      leapfrog steps per warmup step (200-260 per 5 steps -> 30-60), so ~0.4 min per warmup
+      step at the same 2.2 s per leapfrog. Warmup ended by 13:45 at 17.2 A100-h; sampling at
+      15 s per draw. Divergences only in bursts right after the metric updates at 150 (4 of 20)
+      and 250 (5), when the step size restarts. The chains still spread ±1.4 prior sd along the
+      ridge.
+    So the cap (and whatever changed at step 60) made C8 affordable, and the dense metric made
+    each warmup step ~4x cheaper on top by lengthening the step, not by avoiding the band. At
+    steps 60-100's rate, a diagonal run with the cap might also finish warmup (~6 A100-h for 200
+    steps) if a diagonal metric cannot align with the ridge and keeps the step small; that is
+    the untested half of the SI comparison, and the held diagonal run with `max_steps` 1000
+    would test it. The step-length effect is what matters for the diagonal R3 runs on
+    C14+unsat (sampling at 240 s per draw, step sizes 0.02-0.06) and C18 (warmup, 225 s per
+    step): neither has a stiff band, and their ridges are strongly correlated (predicted
+    -0.996 and -0.980), which a diagonal metric cannot follow.
+  - Submitted 2026-09-27 14:20: the diagonal C8 run resumed from its step-20 checkpoint with
+    `max_steps` 1000 (same 24 A100-h cap as the dense run, 6.1 used), and dense twins of
+    C14+unsat and C18 `d1`+`d2` (`- dense`: same seed, start, data and tolerance as the
+    diagonal runs, uncapped, `max_steps` 1000 as a guard). The diagonal C14+unsat and C18 runs
+    continue, so each system has both halves of the mass-matrix comparison.
+  - C8 dense converged at 400 draws (r-hat 1.0039, ESS 1210), ~19.3 A100-h. The diagonal twin
+    resumed from nearly the same step-20 state with the same seed and cap. Checked at step 30:
+    identical tree sizes at every step, positions within 0.008, but not bit-identical. One chain
+    first differs at step 14 (the two runs' first segments ran on different GPU models), two more
+    at steps 25-29, so floating-point differences will separate the paths before step 100. Still
+    a fair comparison: same start, seed, algorithm and cap, differing at the noise level until the
+    first metric update, then in the metric. (An earlier note here said they would retrace
+    exactly; corrected 2026-09-27.)
+  - Status at 22:00, 2026-09-27 (`tier1_status.py`):
+    - C8 dense: finished, 400 draws, 19.3 A100-h. Per-parameter contraction 0.51 / 0.51 against
+      0.50 / 0.50 predicted for an exact ridge; z +0.05 / +0.02.
+    - C8 diagonal: warmup 100 of 300, its first diagonal metric update; 13.2 of its 24.6 A100-h
+      cap. It tracks the dense twin closely, but not bit for bit (floating point, different GPUs).
+    - C14+unsat diagonal: sampling, 225 draws; r-hat 1.064 and ESS 98 at 200 draws; ~3 min per
+      draw; 37 of ~63 A100-h.
+    - C14+unsat dense: warmup 190 of 300 at ~38 s per step (314 s before its first dense update);
+      warmup ends ~23:10.
+    - C18 diagonal: warmup 240 of 300 at ~225 s per step; warmup ends ~01:45 Monday.
+    - C18 dense: warmup 100 of 300, at its first dense update; ~263 s per step before it.
+  - Preemption: Blanca's PreemptMode is REQUEUE, so a preempted copy goes back on the Blanca
+    queue only (same job id and submit time, claim kept, resumes from its checkpoint); its
+    Alpine twins were cancelled when it first started. Only a clean segment end is resubmitted
+    to all four queues (by the monitor). sbc036-039 were preempted at 14:51 on 2026-09-27.
+- **Where the chains went** (`Results/Tier1/figures/r3_warmup_ridge.png`: top, the two
+  parameters against each other in prior-sd units, with the prior's 95% circle and the
+  predicted posterior; below, each parameter's trace per chain). On both systems the four
+  chains move from the prior's centre straight onto the ridge and spread along it, each in a
+  different place: 12·`d1` + `d2` sits within ±0.1 prior sd of the truth from about warmup
+  step 7, while the other direction ranges over ±2 prior sd. None stuck, none bunched, and
+  they swap places along the ridge (they mix).
+  - How to read it: an identifiable pair is a compact cloud around the truth, much smaller
+    than the prior circle in every direction, with narrow overlapping traces (R1's `a1`/`c3`).
+    A non-identifiable pair is a ridge, thin across (the combination the data fix) and as long
+    as the prior allows along it, with wide wandering traces that mirror each other, since
+    moving along the ridge trades one parameter against the other (correlation −0.997). C8's
+    predicted ridge runs from one side of the prior circle to the other; C14+unsat's ends
+    inside it, a third of the prior variance removed along it: weakly identified.
+  - On C14+unsat the chains sit off-centre along the ridge (12·`d1` ≈ −0.5, `d2` ≈ +0.6 prior
+    sd), with the truth still inside: along the direction the data barely see, noise and the
+    prior set where the mass sits. One chain ran past the predicted end in warmup; the sampled
+    posterior will show whether the ridge is longer than the linear prediction.
+- **Predicted before sampling** (`predict_identifiability.py`, the Fig 9 calculation for the
+  sampler's own coordinates; `identifiability_predicted.json` in each run folder):
+
+  | | Contraction `d1` / `d2` | Correlation | Along 12·`d1` + `d2` | Along the other direction |
+  |---|---|---|---|---|
+  | C8 | 0.499 / 0.499 | −0.997 | 0.998 | 0.000 (all prior variance left) |
+  | C14+unsat | 0.665 / 0.659 | −0.997 | 0.999 | 0.325 (0.675 left) |
+
+  C8 reproduces the known answer. On C14+unsat the per-parameter cutoff of 0.5 would not flag
+  either parameter, and only the eigen-analysis shows a direction keeping two thirds of the prior
+  variance: the case Fig 6b exists for, if the sampled posterior agrees.
+- **Which system separates `d1` and `d2`, and which is clean to sample** (2026-09-27). The pair
+  enters TesA's binding constants as 1/exp(k·`d1` + `d2`), with k = 12 for C4-C12 and
+  2·chain − 12 above (16 at C14, 20 at C16, 24 at C18, 28 at C20), so C8-C12 are exact ridges
+  and each longer system adds a step that breaks the tie. Predicted with
+  `predict_identifiability.py --system`, and solver steps scanned out to ±20 prior sd across
+  the ridge at the runs' own settings:
+
+  | System | Contraction along the loose direction | Per parameter `d1` / `d2` | Stiff band off the ridge |
+  |---|---|---|---|
+  | C8, C12 | 0.00 (exact ridge) | 0.50 / 0.50 | yes: C8 5733 steps at +7.5, 2860 at +10, 539 at +12.5, the full 20000 and a failed solve at +15; C12 4199 at +10 |
+  | C14, C14+unsat | 0.32-0.33 | 0.66 / 0.65 | no (C14+unsat ≤ 172) |
+  | C16 | 0.76 | 0.88 / 0.87 | not scanned |
+  | C18 | 0.93 | 0.97 / 0.96 | no (≤ 138) |
+  | C20 | 0.93 | 0.97 / 0.96 | not scanned |
+  | C20+unsat | 0.97 | 0.99 / 0.98 | not scanned |
+
+  For Figs 6/6b's range: C14+unsat as the weakly identified case (running), and C18 as the
+  clearly identified one (clean solver, about C14+unsat's cost per gradient and less
+  ridge-like). C20 adds nothing over C18, and C20+unsat little, at 1.8-3x the cost. An exact
+  ridge on C12 would hit the same stiff band as C8. C18 was submitted uncapped on 2026-09-27
+  with its chain-ladder solver settings, rtol 1e-5 (C14+unsat's config has 1e-3); new noisy
+  data in `Data/Tier1_rates/Chain_C18/`, generated at rtol 1e-8.
+- **The C8 runs' segments.** The dense run's first segment stopped at 7.4 h, at step 15,
+  because its next 5-step chunk would not fit the 11.5 h budget; it was resubmitted. The two are identical until the
+  dense run's first mass-matrix update at warmup step 100 (then 150 and 250, BlackJAX's schedule
+  for 300 steps). Both should reach the 24 A100-h cap before then. On C14+unsat (3-9 min per
+  step, at step 130) warmup should end on Sunday afternoon at about the cap; finishing needs
+  ~55 A100-h. Decided 2026-09-27: the C8 pair is stopped and C14+unsat runs uncapped (section
+  2, R3 notes). Superseded the same day: with `max_steps` 1000 neither C8 run reached the cap
+  by step 100, and the dense one finished at 19.3 A100-h. C14+unsat diagonal is now estimated at
+  ~63 A100-h (status above).
+
+---
+
+### Stage 3 (2026-09-27): all 34 finished
+
+R2, R6's three fits and R4's other 30 replicates, 254 A100-h in all (planned ~290). Details
+and the day's notes are in section 3; this is the summary.
+
+| Run | z | Contraction | Draws | A100-h |
+|---|---|---|---|---|
+| R2: C14+unsat, `a1` / `c3` / `a2` | +0.77 / +0.66 / −1.47 | 0.9986 / 0.9881 / 0.9951 | 700 | 16.7 |
+| R6 (b): split, standard data, `a1` / `c3s` / `c3l` | −0.06 / −1.58 / +0.09 | 0.9991 / 0.9899 / 0.9946 | 400 | 6.5 |
+| R6 (c): grouped, 1:3 data, `a1` / `c3` | −0.13 / none (no single truth) | 0.9991 / 0.9956 | 500 | 6.6 |
+| R6 (c): split, 1:3 data, `a1` / `c3s` / `c3l` | −0.05 / −1.61 / −0.19 | 0.9991 / 0.9902 / 0.9861 | 400 | 8.3 |
+
+- **R2, the main fit.** Finished ~19:50. Truth inside every 95% interval: `a1` 1.036, `c3`
+  1.098, `a2` 0.890. Converged at 600 draws, finalized at 700, no divergences. Its confirmation
+  check at 700 failed (`a1` r-hat 1.0102) and was ignored by the older code its last segment ran
+  on, so it is not yet finished under the three-pass rule (section 3). It was reopened at
+  22:30 with up to 1000 more draws, like the other three; its numbers and Figs 2 and 6/6b are
+  redrawn when it finalizes. Correlations `c3`-`a2`
+  −0.82, `a1`-`a2` −0.61, `a1`-`c3` +0.52. In prior-standardised units the loosest direction
+  (mostly `c3` against `a2`) keeps 1.6% of the prior variance and the other two 0.07% and 0.14%
+  (`identifiability.json`), so no parameter is weakly identified. Fig 2's final panel is `posterior_vs_truth_C14+unsat_a1c3a2.png`. R2
+  unblocks Figs 2, 6/6b, 7 and 8.
+- **Fig 9 on the main fit.** Sampled contraction against the expected-information prediction
+  for the Tier-1 design (Stage 0 item 8): 0.9986 / 0.9881 / 0.9951 against 0.9986 / 0.9902 /
+  0.9957. In posterior sd that is 1.00x, 1.10x and 1.06x the prediction: `a1` matches, `c3`
+  and `a2` are 10% and 6% wider. So the zero-cost prediction holds to about 10% in sd on the model
+  Fig 9 is drawn on. Its three-parameter rates-only cell is still unsampled.
+- **R6, Fig 5.** The split model reads the ratio: `c3l`/`c3s` 1.21 [0.92, 1.62] on the standard
+  data, and 3.53 [2.44, 4.96] on the 1:3 data, with P(ratio > 1) = 1.00. The grouped fit on the
+  1:3 data settles on a compromise, `c3` 1.277 [1.09, 1.48], that excludes both 1 and 3; `a1` is
+  unaffected, and the misfit shows only in data space (3 of 23 points outside the 95% predictive
+  interval). PSIS-LOO, grouped minus split: +0.2 ± 1.4 on the standard data, −23.8 ± 11.8 on the
+  1:3 data (2.0 SE; the Pareto-k caveat is in section 3). R6's new compute was 21.4 A100-h
+  against ~87 planned. Fig 5 is drafted (`grouping_test.png`).
+- **R4, Fig 3: SBC.** All 40 replicates finished (284 A100-h: pilot 69, the other 30 215).
+  - sbc022, the most extreme replicate: truth `a1` 0.48 / `c3` 0.75, posterior `a1` 0.197 ±
+    0.070 (z −3.66) and `c3` 0.652 (z −2.82). Its posterior has two peaks: `a1` 0.17 / `c3` 0.66
+    (log-likelihood −9.1) and `a1` 0.41 / `c3` 0.73 (−13.3), by the truth. The data match the
+    truth (residuals at the truth within ±2.2 sd). A fine grid posterior puts 5.3% of the mass in
+    the minor peak; the chains put 7.2% of their draws there. The truth is at quantile 0.992 of
+    the grid posterior (0.984 of the draws), inside the 99% interval. So the sampler handled a
+    two-peak posterior correctly and the truth fell in its tail. z misleads on a posterior like
+    this, so the confidently-wrong flag now reads the posterior's own quantiles
+    (`recovery_report.py`: truth outside the central 99% interval with contraction > 0.5; it was
+    |z| > 2). sbc022 was left out of Fig 3 while this was checked and is back in.
+  - On all 40: z sd 1.07 (`a1`, p 0.50 against 1) and 1.11 (`c3`, p 0.33). Coverage at 50 / 90 /
+    95%, from the central posterior intervals as Fig 3 plots it: 24 / 35 / 36 of 40 (`a1`) and
+    26 / 34 / 36 (`c3`); from the log-scale z: 24 / 35 / 37 and 25 / 33 / 36. KS on the rank
+    quantiles p 0.23 and 0.78. ECDF difference against a simultaneous 95% band (Säilynoja et al.
+    2022): p 0.33 and 0.67; the same on the log-likelihood (Modrák et al. 2023): p 0.37. Binned
+    chi-square: `a1` p 0.035 (a central hump), `c3` p 0.19.
+  - The confidently-wrong flag fires once in 80 parameter checks: sbc035's `c3` (truth 5.53,
+    median 3.34, quantile 0.998). At the 99% level 0.8 are expected by chance.
+  - The extreme ranks cluster at low `a1`: for the 10 replicates with `a1` truth below 0.5 the
+    mean |2q − 1| is 0.58, against 0.36 for the other 30 (0.50 expected; Spearman p 0.03). That
+    is where the posterior is widest and least Gaussian (sbc018, sbc022). Two follow-ups are on
+    hold (2026-09-27): rerunning those 10 with 8 chains, and extending to 100 replicates.
+  - The earlier over-coverage (z sd 0.62 at 22 replicates) came from which replicates finished
+    first. sbc029 was reopened under the three-pass rule and finalized at 700 draws (`c3` z −1.61).
 
 ## 5. Code status
 
@@ -496,7 +896,7 @@ Fourteen runs have finished (R0 and 13 of Stage 2's 29), and every one has the t
 - `make_c3_split_variant.py`: R6's reaction variant, with an exact-equivalence check
 - `check_model_vs_data.py`: pre-flight (model vs. clean data, noise z, logp/gradient)
 - `multimodality_toy.py`: 3.1's known-answer toy
-- `recovery_report.py`: per run and parameter, z, shrinkage (natural and log scale) and
+- `recovery_report.py`: per run and parameter, z and posterior contraction (log scale for LogNormal parameters, natural scale kept for reference) and
   50/90/95% coverage, scored against each run's recorded truth
 - `tier1.sbatch`, `convergence_and_warmup.py`
 - initial-rate, C16-equivalent and mole-fraction observables in
@@ -508,30 +908,37 @@ Fourteen runs have finished (R0 and 13 of Stage 2's 29), and every one has the t
 - `forward_model.py`: the batched forward solver shared by Figs 7-9. It is compiled once, so
   it takes any scaling values and initial conditions, and it loads posterior draws.
 - `expected_information_grid.py` (Fig 9), `posterior_morris.py` (Fig 7),
-  `posterior_ratio_response.py` (Fig 8), `identifiability_report.py` (Figs 6/6b: shrinkage,
+  `posterior_ratio_response.py` (Fig 8), `identifiability_report.py` (Figs 6/6b: contraction,
   correlations, prior-standardised covariance eigen-directions), and `plot_tier1_drafts.py`
   for their drafts
 - `sbc.py` (Fig 3): `generate` draws truths from the prior and builds each replicate's data and
   config. `ranks` scores finished runs (rank histograms, a uniformity test, coverage and a draft
   figure). `selftest` checks the rank code on a known answer.
 
-- `submit_stage2.sh`: Stage 2's 29 submissions, with the R0 gate
+- `submit_stage2.sh`: Stage 2's 33 runs and Stage 3's (groups R2, R6 and R4b), with the R0 gate
 - `tier1_status.py`: one line per run, joining Slurm on both clusters with each run's
   checkpoint and log (state, GPU, progress and rate, last convergence check, A100-h used and
   estimated, finish time, preemptions). It logs every queued run's estimated start.
 - `cost_estimate.py`: the A100-h estimates (appendix B), and how far Slurm's estimated starts
   have been from the actual starts, by how far ahead each estimate was made
+- `predict_identifiability.py`: Figs 6/6b's answer predicted at the truth from the Fisher
+  information (contraction, correlation, eigen-directions), to set beside the sampled one
+- `sbc_width_check.py`: each SBC posterior's sd against the Laplace (Fisher) sd at its truth,
+  with the z-scores and Mahalanobis distances, to tell a mis-sized posterior from chance
 - `postprocess.py`: pull, score and redraw every finished run in one command;
   `tier1_result_figures.py` for the Fig 2 and 4 drafts and the R7 and R8 checks
 - Run figures, drawn by `tier1.sbatch` once a run finalizes (all in `Utilities/`):
   `plot_convergence_trajectory.py` (convergence, chain mixing, sampler energy, LOO),
-  `plot_trace_diagnostics.py` (prior vs. posterior and traces), `plot_predictive_check.py`
+  `plot_trace_diagnostics.py` (prior vs. posterior and traces, and the joint posterior), `plot_predictive_check.py`
   (predictive checks, with a Tier-1 layout), and `plot_run_summary.py`, which combines them
   into `run_summary.png`. Each is titled "<run> — <section>", and its file is named after
   the section.
 
-Nothing in the plan's to-build list remains. Figs 6/6b wait on R2 and R3, Figs 7 and 8 on R2's
-posterior, and Fig 3 on the R4 fits.
+Nothing in the plan's to-build list remains. R2 and R4 have finished, so Figs 7 and 8 can be run
+on R2's posterior, and Fig 3 is drafted on all 40 replicates (`job_files/tier1/sbc_ranks.png`,
+with three alternative forms in `Results/Tier1/figures/`: `sbc_ecdf.png`, `sbc_coverage.png` and
+`sbc_recovery.png`). Figs 6/6b have R2's panel
+(`identifiability.png` in its run folder) and wait on R3's C14+unsat and C18 runs.
 
 ---
 
@@ -548,7 +955,7 @@ This is decided with every Tier-1 draft in hand. The default:
 | Figs 6/6b | yes, free from the Tier-2 fit | real-data identifiability |
 | Fig 7 | yes (primary evidence), forward solves only | |
 | Fig 8 | yes (primary evidence) | Tier 1 gives an attenuated preview only |
-| Fig 9 | only the cells the real data allow; if R7 shows the information ranking predicts sampled shrinkage, Tier 2 uses the information analysis only | |
+| Fig 9 | only the cells the real data allow; if R7 shows the information ranking predicts sampled contraction, Tier 2 uses the information analysis only | |
 | SI tolerance / `target_accept` | one check on the Tier-2 fit, if budget allows | |
 
 The Tier-2 core is therefore **one three-parameter fit** of the full model to the real data,
@@ -567,8 +974,8 @@ are old data and are not used (outline 2.8).
   0.777-0.780 against the 0.8 target. The first sampling block's mean is within 0.12 sd of
   the rest, r-hat moves ≤ 0.004 when that block is dropped, and there are zero divergences.
   Step sizes scatter 8-10x across chains; with per-chain adaptation that means each chain
-  reaches the same acceptance by a different route. Not yet validated at three parameters,
-  hence the R2 warmup check.
+  reaches the same acceptance by a different route. At three parameters, R2's acceptance over
+  the last 50 warmup steps was 0.777, and it converged on the same 300 steps (section 3).
 - **A minimum of 3 chains.** One stranded chain out of four must not block a run. Two or more
   triggers a rerun.
 
@@ -577,8 +984,11 @@ are old data and are not used (outline 2.8).
 `tier1/cost_estimate.py` rebuilds every estimate from the measured runs; the monitor reruns it
 every 30 minutes (section 2). Every condition is solved to 720 s, the latest save time.
 
-**A run's cost**, in A100-equivalent hours (GPU wall time x its speed factor, H100 NVL 1.37 and
-A100 1.00, as the sampler counts its cap):
+**A run's cost**, in A100-equivalent hours (GPU wall time x its speed factor, H100 NVL 1.37,
+H200 1.23 and A100 1.00, as the sampler counts its cap). The H200 factor was measured on
+2026-09-27 (C8 `a1`+`c3` sampling: 1.62 s per leapfrog step against 1.99 on an A100-40GB, over
+740 and 1460 chunks); before then H200 time counted at 1.00, so segments run on H200 before
+that date are undercounted by about 20%:
 
 startup (0.2 h per 11.5 h segment) + 300 warmup steps x s/step + draws x s/draw + finalize and
 figures
@@ -592,28 +1002,57 @@ figures
 - **s/draw before a run samples:** its warmup s/step x the sampling-to-warmup ratio of runs that
   have done both (0.65 on R0).
 - **Draws to finish:** the median over finalized runs (800 on R0), x 2.24 for three parameters.
-- **Finalize:** 3.4 s per draw on R0 (46 min for 800), scaled to other systems by warmup cost.
-  The figures after it are a 0.1 h placeholder until a Stage-2 run measures them.
+- **Finalize:** measured per draw on the finished runs of each system (R0: 3.4 s per draw, 46 min
+  for 800), scaled to other systems by warmup cost. The recovery report and figures after it
+  are timed to the job's end in sacct.
 
-**Measured so far** (Sat 2026-09-26 20:45):
+**Measured so far** (Sun 2026-09-27 21:53, `cost_estimate.json`; R3's running rates from
+`tier1_status.py` at 22:00):
 
 | | s per warmup step | s per draw | Whole run, A100-h |
 |---|---|---|---|
-| C8 `a1`+`c3`, fixed truth (R0, R5 noise and +1/+2 sd, R8 ta0.95; 7 finished) | 17-24 | 10.9-16.9 | 3.5-5.7 |
-| C8 `a1`+`c3`, SBC pilot (5 finished) | 22-42 | 11.4-13.9 | 4.0-7.0 |
-| C14+unsat `a1`+`c3` (R1, R7 profile) | 39-40 | 25-26 | 6.4-7.2 |
-| C14+unsat `d1`+`d2` (R3, in warmup) | ~320 | | 24 (cap) |
-| C8 `d1`+`d2` (R3, in warmup) | ~1600, on the ridge | | 24 (cap) |
+| C8 `a1`+`c3`, fixed truth (R0, R5, R8; 15 finished) | 19.5-36.3 | 13.1-25.5 | 3.5-7.6 |
+| C8 `a1`+`c3`, SBC (40 finished) | 21.3-78.6 | 11.4-30.7 | 3.8-16.3 |
+| C14+unsat `a1`+`c3` (R1, R7, R6 (c) grouped; 4 finished) | 38-46 | 25-28 | 6.5-9.8 |
+| C14+unsat `a1`+`c3`+`a2` (R2) | 66.6 | 51.3 | 16.7 |
+| C14+unsat `a1`+`c3s`+`c3l` (R6 split; 2 finished) | 50.0-51.6 | 26.2-29.5 | 6.5-8.3 |
+| C14+unsat `d1`+`d2` (R3, running) | diagonal ~290; dense 314 before its first update, ~38 after | diagonal ~174 (~3 min) | ~63 diagonal, ~38 dense (est.) |
+| C18 `d1`+`d2` (R3, in warmup) | diagonal ~225; dense ~263 before its first update | | ~60 diagonal, ~52 dense (est.) |
+| C8 `d1`+`d2` (R3) | 120-4900 on the ridge at `max_steps` 20000; ~24 after the dense run's first update | 15.5 (dense) | 19.3 dense; diagonal capped at 24.6 |
 
-The finished two-parameter runs took 400-800 draws, median 500. Sampling costs 0.61x a warmup
-step per draw (25 runs).
+The 60 finished two-parameter runs took 400-1700 draws, median 600; the three three-parameter
+runs 400-700. Sampling costs 0.57x a warmup step per draw. Recovery report and figures after
+finalize: 0.02 h, from the job end in sacct.
 
-**Three parameters** (not yet measured): `a1`+`c3`+`a2` costs ~3.0x per warmup step and ~3.5x per
-draw relative to `a1`+`c3`, and needs 2.24x the draws (pilot medians). On C14+unsat at R1's rates
-that is ~119 s per step, ~88 s per draw and ~1100 draws: ~40 A100-h.
+**Three parameters** (measured 2026-09-27). The pilot medians put `a1`+`c3`+`a2` at ~3.0x per
+warmup step and ~3.5x per draw relative to `a1`+`c3`, with 2.24x the draws. On C14+unsat at R1's
+rates that was ~119 s per step, ~88 s per draw and ~1100 draws: ~40 A100-h. R2 measured 66.6 s
+per step (1.68x R1), 51.3 s per draw (2.04x) and 700 draws (1.75x): 16.7 A100-h. R6's split
+trio ran at 1.26-1.30x per step, 1.04-1.17x per draw and 1.0x the draws of R1: 21.4 A100-h for R6's three fits against ~87 estimated. So the estimates from
+the pilot factors were 2.4x too high for R2 and 4x for R6.
 
 **Systems not yet measured** (C20+unsat) are scaled from the nearest measured one by cost per
 draw ∝ reactions^1.21, fitted on the C6/C10/C14 pilots (C14+unsat to C20+unsat: 1.85x).
+
+Measured cost per leapfrog step (A100-seconds, median over checkpoint chunks, 2026-09-27). The
+reaction-count rule leaves out tolerance: C18 and C20+unsat run at `rtol` 1e-5, C8 and
+C14+unsat at 1e-3.
+
+| System | `rtol` | Tier-1 design | Chain ladder (`a1`, time series + profile) |
+|---|---|---|---|
+| C8 | 1e-3 | 1.96 (`a1`+`c3`), 2.20 (`d1`+`d2` dense) | |
+| C14+unsat | 1e-3 | 3.97 (`a1`+`c3`), 4.10 (`a1`+`c3`+`a2`), 4.70 (`d1`+`d2`) | 4.40 |
+| C18 | 1e-5 | 9.85 (`d1`+`d2`) | 7.92 |
+| C18+unsat | 1e-5 | | 11.90 |
+| C20+unsat | 1e-5 | | 13.23 |
+
+So C20+unsat costs ~3.0x C14+unsat per leapfrog (ladder), or ~14 s from C18's Tier-1 cost and
+the ladder's C18 to C20+unsat ratio (1.67x). An `a1`+`c3`+`a2` fit on C20+unsat with R2's
+leapfrog budget (~4600 in warmup, ~12 per draw, ~650 draws: ~12k) would need ~12-14 s x 12k
+= ~40-50 A100-h, or ~30-35 h of H100 time: three segments plus queue gaps, 2-3 days. Unknown:
+whether its posterior needs more leapfrogs per draw than R2's, and whether a looser `rtol`
+passes the pre-flight accuracy check (the main lever on cost). Its solver steps across the
+prior would need the same scan as the others first.
 
 All runs are resumable across the 12 h cluster limit; a longer run just means more segments.
 
@@ -664,6 +1103,29 @@ the data, and > 10-15 means jointly unidentifiable (Brun et al.).
   These are what the ratiometric strategy predicts on, and they would resemble the ME1
   GC/MS experiments. Add them only if 3.5 or 3.6 needs them.
 
+**How Fig 9's predictions are calculated** (`expected_information_grid.py`). This is the
+Bayesian D-optimal design calculation for a normal linear model (Chaloner & Verdinelli 1995,
+§2.1-2.2), applied to the model linearized at the truth, the normal approximation their §4.2
+uses for nonlinear models. No sampling is needed; a grid takes 6-8 min on a CPU.
+1. **Sensitivities.** Solve the model at the true parameters and again with each parameter
+   scaled by e^±0.001. Central differences give every data point's sensitivity to
+   log(parameter), J = ∂y/∂log θ; a step of 3x that agrees to 10⁻⁴ relative.
+2. **Noise.** Each point gets the data's own noise model, σ = 10% of its value plus the floor.
+3. **Fisher information:** F = Jᵀ W J, with W = diag(1/σ²).
+4. **Prior and posterior.** On log θ the prior is Normal with sd ln(10)/1.96 = 1.175 (the
+   LogNormal with 95% in [0.1, 10]), precision I/1.175². The linear-Gaussian posterior
+   covariance is Σ = (F + I/1.175²)⁻¹, Chaloner & Verdinelli's σ²(nM + R)⁻¹.
+5. **Scores.** Predicted contraction per parameter, 1 − Σⱼⱼ / 1.175², comparable with
+   `recovery_report.py`'s log-scale contraction. Expected information gain, ½ log(det prior
+   covariance / det Σ) nats, their eq. 4 up to a constant; divided by the number of points it
+   gives Fig 9's value per measurement.
+6. **Cells.** Repeated for every measurement set × timing, and for the Tier-1 design's own
+   parts (time series, profile, rates, all three), which are R7's predictions.
+
+The approximation is local and linear: exact for a posterior that is Gaussian in log θ, and it
+misses skew or curvature away from the truth. That is where R7's rates-only `c3` departs from
+it (section 4).
+
 ---
 
 ## References: what Tier-1 decisions rest on
@@ -675,10 +1137,15 @@ in `paper_outline.md`. Entries marked [verify] need their details checked before
 - Vehtari A, Gelman A, Simpson D, Carpenter B, Bürkner P-C (2021). Rank-normalization, folding,
   and localization: an improved R̂ for assessing convergence of MCMC. *Bayesian Analysis*
   16(2):667-718. → The stopping rule: rank-normalised split r-hat ≤ 1.01 and bulk ESS ≥ 50 per
-  split chain (400 at 4 chains), held for 2 consecutive checks; 4 chains (Appendix A).
+  split chain (400 at 4 chains), held on three consecutive checks 100 draws apart (two, then a
+  confirmation block; from 2026-09-27, section 0); 4 chains (Appendix A).
 - Hoffman MD, Gelman A (2014). The No-U-Turn Sampler: adaptively setting path lengths in
   Hamiltonian Monte Carlo. *JMLR* 15:1593-1623. → NUTS with dual-averaging step-size
   adaptation; `target_accept` 0.8, and 0.95 as the R8 check.
+- Schad DJ, Betancourt M, Vasishth S (2021). Toward a principled Bayesian workflow in cognitive
+  science. *Psychological Methods* 26(1):103-126 (arXiv:1904.12765). Eqs. 4-5, the posterior
+  z-score and posterior contraction (1 − posterior variance / prior variance): the scores in
+  `recovery_report.py`, on log(x) for the LogNormal groups (adopted 2026-09-27).
 - Talts S, Betancourt M, Simpson D, Vehtari A, Gelman A (2018). Validating Bayesian inference
   algorithms with simulation-based calibration. arXiv:1804.06788. → R4's design: truths drawn
   from the fit's own prior, ranks of the truth among L = 99 thinned draws, uniformity test.
@@ -699,10 +1166,13 @@ in `paper_outline.md`. Entries marked [verify] need their details checked before
 - Betancourt M (2016). Diagnosing suboptimal cotangent disintegrations in Hamiltonian Monte
   Carlo. arXiv:1604.00695. → The BFMI caution floor of 0.3 in the energy diagnostic.
 - Chaloner K, Verdinelli I (1995). Bayesian experimental design: a review. *Statistical
-  Science* 10(3):273-304; and Lindley DV (1956). On a measure of the information provided by
-  an experiment. *Annals of Mathematical Statistics* 27(4):986-1005. → Fig 9's
-  expected-information grid (Gaussian/Laplace approximation to the information gain), which
-  picked R7's cells.
+  Science* 10(3):273-304 (doi:10.1214/ss/1177009939); and Lindley DV (1956). On a measure of
+  the information provided by an experiment. *Annals of Mathematical Statistics*
+  27(4):986-1005. → Fig 9's expected-information grid, which picked the data design and R7's
+  cells: the normal linear model's posterior covariance σ²(nM + R)⁻¹ and expected Shannon
+  information (Chaloner & Verdinelli §2.1-2.2, Bayes D-optimality), applied through the
+  normal approximation with the Fisher information that their §4.2 uses for nonlinear models
+  (appendix D spells out the steps).
 
 **Internal evidence** (recorded in this plan or the named file)
 - Chain count and warmup length: the chain-count study on C12 (Appendix A;
