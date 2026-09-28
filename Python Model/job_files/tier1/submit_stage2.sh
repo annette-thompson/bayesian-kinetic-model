@@ -11,9 +11,10 @@
 #
 # Guard: the plan holds Stage 2 until R0 has been inspected, so this refuses to submit until R0
 # ("Tier1 C8 - a1c3") has finalized (posterior_samples_pm.nc exists). --force skips that check.
-# A run is skipped when it has already finalized, when its config is missing, or when a job with
-# its name is already queued or running on either cluster, so rerunning this resubmits only the
-# runs that stopped at the wall clock (they resume from their checkpoints).
+# A run is skipped when it has already finalized (and was not reopened), when its config is
+# missing, or when a job with its name is already queued or running on either cluster, so
+# rerunning this resubmits only the runs that stopped at the wall clock (they resume from their
+# checkpoints).
 set -uo pipefail
 type module >/dev/null 2>&1 || source /etc/profile >/dev/null 2>&1
 BASE=/projects/anth4580/Bayesian
@@ -89,7 +90,10 @@ for g in $ORDER; do
   for run in "${runs[@]}"; do
     [[ -n "$run" ]] || continue
     slug="tier1_$(echo "${run#Tier1 }" | sed 's/ - /_/g; s/ /_/g')"
-    if [[ -e "$RESULTS/$run/posterior_samples_pm.nc" ]]; then
+    # A reopened run keeps its earlier posterior file until it finalizes again, so a checkpoint
+    # still in warmup or sampling means the run is not finished.
+    if [[ -e "$RESULTS/$run/posterior_samples_pm.nc" ]] &&
+       ! grep -qE '"phase": *"(warmup|sampling)"' "$RESULTS/$run/checkpoint/checkpoint_meta.json" 2>/dev/null; then
       echo "skip  $g  $run  (finalized)"; n_skip=$((n_skip + 1)); continue
     fi
     if [[ ! -r "$RESULTS/$run/solver_params.json" ]]; then

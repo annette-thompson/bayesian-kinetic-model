@@ -112,7 +112,7 @@ def main():
     ap.add_argument("--posterior")
     ap.add_argument("--key", default=None)
     ap.add_argument("--config")
-    ap.add_argument("--draws", type=int, default=4000, help="posterior draws used, thinned evenly")
+    ap.add_argument("--draws", type=int, default=4000, help="posterior draws used, thinned evenly (every draw when the run has fewer)")
     ap.add_argument("--out", default=None)
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args()

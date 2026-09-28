@@ -216,6 +216,12 @@ def rate(rows, phase, open_until=None, every=5):
     if len(r) < 2:
         return None, None
     dts = [b["t"] - a["t"] for a, b in zip(r, r[1:])]
+    # An interval far longer than the usual one is a segment boundary (queue wait, preemption,
+    # reopening): measure from the rows after the last one, once the new segment has two.
+    usual = sorted(dts)[len(dts) // 2]
+    cut = max([i + 1 for i, d in enumerate(dts) if d > 5 * usual] or [0])
+    if len(r) - cut >= 2:
+        r, dts = r[cut:], dts[cut:]
     dsteps = r[-1][key] - r[0][key]
     span = r[-1]["t"] - r[0]["t"]
     dts.sort()
@@ -225,6 +231,17 @@ def rate(rows, phase, open_until=None, every=5):
         dsteps += every
     per = span / dsteps if dsteps > 0 else None
     return per, gap
+
+
+def is_finalized(run_dir, meta=None):
+    """A posterior file, and a checkpoint that is not mid-run. A finished run reopened for more
+    draws (tier1.sbatch's third argument) keeps its earlier posterior_samples_pm.nc until it
+    finalizes again, so the file alone does not mean the run is done."""
+    if not os.path.exists(os.path.join(run_dir, "posterior_samples_pm.nc")):
+        return False
+    if meta is None:
+        meta = read_json(os.path.join(run_dir, "checkpoint", "checkpoint_meta.json")) or {}
+    return meta.get("phase") not in ("warmup", "sampling")
 
 
 def winner_log(slug):
@@ -256,16 +273,20 @@ def earlier_check(slug):
     return None
 
 
-def log_facts(text, run):
+def log_facts(text, run, post_checks=1):
+    """Facts from a job log. The pass streak is shown against every check the stopping rule needs:
+    the log's k/N counts the N convergence checks, and post_checks confirmation checks follow."""
     facts = {}
     checks = re.findall(r"r_hat/ESS check at (\d+) sampling draws: r_hat=([\d.]+) ess_bulk=([\d.]+).*?\| "
                         r"(FAIL|pass) streak (\d+)/(\d+)", text)
     if checks:
         n, rh, ess, _, k, need = checks[-1]
-        facts["check"] = "r-hat %s ESS %.0f @%s (%s/%s)" % (rh, float(ess), n, k, need)
+        facts["check"] = "r-hat %s ESS %.0f @%s (%s/%d)" % (rh, float(ess), n, k, int(need) + post_checks)
     m = re.findall(r"gpu=([^|\n]+)", text)
     if m:
         facts["gpu"] = m[-1].strip().replace("NVIDIA ", "")
+    if "==> Reopened" in text:
+        facts["reopened"] = True
     if re.search(r"^Traceback|^\w*Error: ", text, re.M):
         err = re.findall(r"^(\w*Error: .*)$", text, re.M)
         facts["error"] = (err[-1] if err else "Traceback in log")[:70]
@@ -318,13 +339,23 @@ def describe(run, jobs, preempt, now):
     status = read_json(os.path.join(run_dir, "checkpoint", "status.json")) or {}
     cfg = read_json(os.path.join(run_dir, "solver_params.json")) or {}
     cap = (cfg.get("posterior_sampling") or {}).get("max_total_hours")
-    finalized = os.path.exists(os.path.join(run_dir, "posterior_samples_pm.nc"))
     rows = progress(run_dir)
     mine = jobs.get(slug, [])
     running = [j for j in mine if j["state"] in ("RUNNING", "COMPLETING")]
     pending = [j for j in mine if j["state"] == "PENDING"]
     log_path, text = winner_log(slug)
-    facts = log_facts(text, run)
+    facts = log_facts(text, run, (cfg.get("posterior_sampling") or {}).get("post_convergence_checks", 1))
+    nc = os.path.join(run_dir, "posterior_samples_pm.nc")
+    has_posterior = os.path.exists(nc)
+    finalized = is_finalized(run_dir, meta)
+    job_start = now.timestamp() - parse_elapsed(running[0]["elapsed"]) * 3600 if running else None
+    # A job running on a run whose posterior predates it has reopened the run (its checkpoint
+    # still reads "done" until the new segment's first checkpoint write).
+    if finalized and job_start and os.path.getmtime(nc) < job_start:
+        finalized = False
+    meta_t = (dt.datetime.strptime(meta["updated"][:19], "%Y-%m-%dT%H:%M:%S").timestamp()   # python3.6 on the
+              if meta.get("updated") else None)                                             # cluster: no fromisoformat
+    just_reopened = bool(job_start and meta_t and meta_t < job_start and facts.get("reopened"))
     if "check" not in facts:
         check = earlier_check(slug)
         if check:
@@ -335,6 +366,8 @@ def describe(run, jobs, preempt, now):
         notes.append("preempted %dx" % preempt[slug])
     if status.get("stranded_chains"):
         notes.append("stranded chains %s" % status["stranded_chains"])
+    if has_posterior and not finalized:
+        notes.append("reopened; the earlier posterior file stays until it finalizes again")
 
     phase = meta.get("phase")
     if phase == "warmup":
@@ -369,7 +402,9 @@ def describe(run, jobs, preempt, now):
         seg_left = max(SEGMENT_H - elapsed, 0)
         speed_now = meta.get("gpu_speed_vs_a100") or 1.0
         where = "%s %s %s, %s left" % (j["cluster"], j["node"], gpu, hms(seg_left))
-        state = "FINALIZING" if phase == "done" else "RUNNING"
+        state = "FINALIZING" if phase == "done" and not just_reopened else "RUNNING"
+        if just_reopened:
+            prog = "reopened, resuming at %s draws" % meta.get("sampling_done", "?")
         if rows:
             since = (now - dt.datetime.fromtimestamp(rows[-1]["t"])).total_seconds() / 60.0
             limit = max(STALL_FLOOR_MIN, STALL_FACTOR * (gap or 0) / 60.0)

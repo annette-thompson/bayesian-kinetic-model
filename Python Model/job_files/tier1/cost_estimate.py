@@ -70,7 +70,8 @@ STAGES = [("Stage 1", lambda g, r: g == "R0"),
           ("Stage 3", lambda g, r: g in ("R2", "R6") or (g == "R4" and _sbc(r) >= 10))]
 
 sys.path.insert(0, HERE)
-from tier1_status import cluster_env, group_of, parse_time, progress, read_json, sh, slug_of, slurm_jobs  # noqa: E402
+from tier1_status import (cluster_env, group_of, is_finalized, parse_time, progress, read_json, sh,  # noqa: E402
+                          slug_of, slurm_jobs)
 
 
 def _sbc(run):
@@ -134,7 +135,10 @@ def measure(run, running=False, now=None, job_ends=None):
              warmup_done=meta.get("warmup_done", 0), sampling_done=meta.get("sampling_done", 0),
              phase=meta.get("phase"), n_draws=meta.get("n_draws"), max_draws=ps.get("draws"),
              segments=status.get("n_invocations", 1 if meta else 0), gpu=meta.get("gpu"),
-             finalized=os.path.exists(os.path.join(d, "posterior_samples_pm.nc")))
+             finalized=is_finalized(d, meta))
+    # Reopened for more draws: its earlier posterior file stays until it finalizes again, and its
+    # n_draws is a ceiling, not the final count a converged run sets.
+    m["reopened"] = os.path.exists(os.path.join(d, "posterior_samples_pm.nc")) and not m["finalized"]
     m["key"] = (m["system"], "+".join(m["params"]))
     m["pool"] = not VARIANT.search(run)
     m["sbc"] = "_sbc" in run
@@ -254,11 +258,13 @@ def estimate(m, rates):
     if m["phase"] == "done":
         # Sampled everything; only finalize is left.
         draws, db = m["sampling_done"], "sampled"
-    elif m["n_draws"] and m["max_draws"] and m["n_draws"] < m["max_draws"]:
+    elif m["n_draws"] and m["max_draws"] and m["n_draws"] < m["max_draws"] and not m["reopened"]:
         # Converged: the sampler has set its final count (the confirmation blocks).
         draws, db = m["n_draws"], "converged"
     elif m["sampling_done"]:
         draws = max(draws, int(math.ceil((m["sampling_done"] + MIN_EXTRA_DRAWS) / 100.0)) * 100)
+        if m["reopened"] and m["n_draws"]:
+            draws = min(draws, m["n_draws"])
     for label, b in (("warmup", wb), ("draw", sb), ("draws", db)):
         bases.append("%s %s" % (label, b))
     if warm is None or samp is None:

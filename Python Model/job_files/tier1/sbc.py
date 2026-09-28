@@ -119,34 +119,39 @@ def summarize(rank_rows, cover_rows, L, bins):
     return out
 
 
+PARAM_COLOR = {"a1": "tab:blue", "c3": "tab:green"}   # as tier1_result_figures.py
+
+
 def plot(summary, n, L, bins, path, excluded=None):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    ink, muted, grid_c, blue, band = "#0b0b0b", "#52514e", "#e4e3df", "#2a78d6", "#e4e3df"
-    fig, axes = plt.subplots(1, len(PARAMS), figsize=(4.2 * len(PARAMS), 3.2), dpi=150, sharey=True)
+    from matplotlib.lines import Line2D
+    sys.path.insert(0, str(PROJECT / "Utilities"))
+    from inference_plotting import THRESHOLD_STYLE, _apply_plot_style, place_suptitle
+    _apply_plot_style()
+    fig, axes = plt.subplots(1, len(PARAMS), figsize=(7.5 * len(PARAMS), 5.8), sharey=True, squeeze=False)
     lo, hi = stats.binom.ppf([0.005, 0.995], n, 1 / bins)   # 99% band for one bin's count
-    for ax, p in zip(np.atleast_1d(axes), PARAMS):
+    for ax, p in zip(axes[0], PARAMS):
         s = summary[p]
-        x = np.arange(bins)
-        ax.axhspan(lo, hi, color=band, zorder=0, lw=0)
-        ax.axhline(n / bins, color=muted, lw=1, zorder=1)
-        ax.bar(x, s["bin_counts"], width=0.86, color=blue, zorder=2)
-        ax.set_title(f"{p}   chi-square p = {s['p_uniform']:.2f}", fontsize=10, color=ink, loc="left")
-        ax.set_xticks([0, bins - 1], ["low", "high"])
-        ax.set_xlabel(f"rank of truth among {L} posterior draws ({bins} bins)", fontsize=9, color=muted)
-        for side in ("top", "right"):
-            ax.spines[side].set_visible(False)
-        ax.tick_params(colors=muted, labelsize=8)
-        ax.grid(axis="y", color=grid_c, lw=0.6)
-        ax.set_axisbelow(True)
-    np.atleast_1d(axes)[0].set_ylabel(f"replicates (of {n})", fontsize=9, color=muted)
-    title = "SBC rank histograms (shaded: 99% range for a uniform bin)"
+        ax.axhspan(lo, hi, color="0.94", zorder=0, lw=0)
+        for edge in (lo, hi):
+            ax.axhline(edge, zorder=1, **THRESHOLD_STYLE)
+        ax.axhline(n / bins, color="0.35", lw=1.2, zorder=1)
+        ax.bar(np.arange(bins), s["bin_counts"], width=0.86, color=PARAM_COLOR.get(p, "tab:blue"), zorder=2)
+        ax.set_title(f"{p}: Chi-Square p = {s['p_uniform']:.2f}")
+        ax.set_xticks([0, bins - 1], ["Low", "High"])
+        ax.set_xlabel(f"Rank of Truth Among {L} Draws ({bins} Bins)")
+    axes[0][0].set_ylabel(f"Replicates (of {n})")
+    fig.tight_layout(rect=(0, 0.1, 1, 1))
+    fig.legend([Line2D([], [], **THRESHOLD_STYLE), Line2D([], [], color="0.35", lw=1.2)],
+               ["99% Range for a Uniform Bin", "Expected Count"], loc="upper center", bbox_to_anchor=(0.5, 0.08), ncol=2)
+    title = f"Tier1 C8 SBC ({n} Replicates) — Rank Histograms"
     if excluded:
-        title += "; excluded: " + ", ".join(f"sbc{int(i):03d}" for i in excluded)
-    fig.suptitle(title, fontsize=10, color=ink, x=0.01, ha="left")
-    fig.tight_layout()
-    fig.savefig(path)
+        title += " (Excluded: " + ", ".join(f"sbc{int(i):03d}" for i in excluded) + ")"
+    place_suptitle(fig, title)
+    fig.savefig(path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
     return path
 
 

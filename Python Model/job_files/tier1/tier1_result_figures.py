@@ -522,7 +522,8 @@ def fig2_main(run=MAIN_FIT):
 def fig4_prior():
     """Companion to fig4's prior-shift column: each shifted prior against its posterior (default
     start). Left, the full range with each curve scaled to a peak of 1, so a prior 4 sd away and a
-    posterior 20x narrower show on one axis; right, the posteriors' own densities near the truth."""
+    posterior 20x narrower show on one axis; right, the posteriors' own densities near the truth
+    (per unit of the parameter, unscaled, each with area 1), on one x and y range for every row."""
     import arviz as az
     from scipy.stats import gaussian_kde
     runs = [r for _, r in SHIFT]
@@ -566,10 +567,15 @@ def fig4_prior():
         axes[row, 0].set_xticks(ticks, [f"{t:,g}" if t >= 1 else f"{t:g}" for t in ticks])
         axes[row, 0].set_ylim(0, 1.08)
         axes[row, 0].set_ylabel(f"{p}: Density (Scaled to Peak 1)")
-        axes[row, 1].set_ylabel("Posterior Density")
+        axes[row, 1].set_ylabel("Posterior Density (Unscaled)")
         axes[row, 1].set_ylim(bottom=0)
-        lo_z = min(a for a, _ in zoom[row]); hi_z = max(b for _, b in zoom[row])
+    # One x and y range down the right column, so the parameters' posteriors compare directly.
+    lo_z = min(a for spans in zoom.values() for a, _ in spans)
+    hi_z = max(b for spans in zoom.values() for _, b in spans)
+    top = max(axes[row, 1].get_ylim()[1] for row in range(len(params)))
+    for row in range(len(params)):
         axes[row, 1].set_xlim(lo_z, hi_z)
+        axes[row, 1].set_ylim(0, top)
     axes[0, 0].set_title("Priors (Dashed) and Posteriors (Filled)")
     axes[0, 1].set_title("Posteriors Near the Truth")
     axes[-1, 0].set_xlabel("Parameter Value")
@@ -966,9 +972,86 @@ def r8():
     return _save(fig, "settings_check.png")
 
 
+OBJECTIVE_TITLE = {"total_production": "Total Production", "avg_chain_length": "Average Chain Length",
+                   "unsat_fraction": "Unsaturated Fraction"}
+POINT_STYLE = {"color": "0.2", "marker": "D", "markersize": 8, "linestyle": "none"}
+
+
+def fig7(path=HERE / "posterior_morris.json"):
+    """Fig 7 (outline 3.4): Morris mu* per enzyme at the point estimate (every scaling group at its
+    no-op value, which at Tier 1 is also the truth) against its spread over the posterior draws,
+    per objective; enzymes in point-estimate rank order, with how often each keeps its rank."""
+    d = json.loads(Path(path).read_text())
+    objs = d["objectives"]
+    _apply_plot_style()
+    fig, axes = plt.subplots(1, len(objs), figsize=(6.2 * len(objs), 6.4), squeeze=False)
+    for ax, (name, v) in zip(axes[0], objs.items()):
+        rows = v["enzymes"]                                   # sorted by point-estimate rank
+        y = np.arange(len(rows))[::-1]
+        for yi, r in zip(y, rows):
+            lo, hi = r["mu_star_posterior_5_95"]
+            ax.plot([lo, hi], [yi, yi], color=FIT_COLOR, linewidth=3, solid_capstyle="round")
+            if r["p_same_rank"] < 0.995:
+                ax.annotate(f"rank kept {r['p_same_rank']:.0%}", (hi, yi), xytext=(8, 0), textcoords="offset points",
+                            va="center", fontsize=PLOT_FONT_SIZE - 4, color="0.35")
+        ax.plot([r["mu_star_posterior_median"] for r in rows], y, "o", color=FIT_COLOR, markersize=8)
+        ax.plot([r["mu_star_point"] for r in rows], y, **POINT_STYLE, markerfacecolor="none", markeredgewidth=1.8)
+        ax.set_yticks(y, [r["enzyme"] for r in rows])
+        ax.set_xscale("log")
+        ax.set_xlabel("Morris μ*")
+        ax.set_title(f"{OBJECTIVE_TITLE.get(name, name)}\nRank Correlation with Point Estimate ≥ {v['spearman_vs_point_min']:.2f}")
+        ax.margins(x=0.25)
+    from matplotlib.lines import Line2D
+    handles = [Line2D([], [], color=FIT_COLOR, marker="o", linewidth=3, markersize=8),
+               Line2D([], [], **POINT_STYLE, markerfacecolor="none", markeredgewidth=1.8)]
+    names = [f"Posterior ({d['n_draws']} Draws): Median, 5-95%", "Point Estimate (= Truth at Tier 1)"]
+    fig.tight_layout(rect=(0, 0.08, 1, 1))
+    fig.legend(handles, names, loc="upper center", bbox_to_anchor=(0.5, 0.06), ncol=2)
+    place_suptitle(fig, f"{MAIN_FIT} — Enzyme Sensitivity Across the Posterior")
+    return _save(fig, "enzyme_sensitivity.png")
+
+
+def fig8(path=HERE / "posterior_ratio_response.json"):
+    """Fig 8 (outline 3.5): average chain length against the (FabF, FabB) : TesA ratio, holding
+    the three enzymes' geometric mean fixed, over the posterior draws and at the point estimate;
+    and each draw's slope per decade of ratio."""
+    d = json.loads(Path(path).read_text())
+    ratios = np.asarray(d["ratios"])
+    curves = np.array([r["avg_chain_length"] for r in d["draws"]])
+    slopes = np.array([r["slope_per_decade"] for r in d["draws"]])
+    point = d["point_estimate"]
+    _apply_plot_style()
+    fig, axes = plt.subplots(1, 2, figsize=(15, 6.4), gridspec_kw={"width_ratios": [1.4, 1]})
+    ax = axes[0]
+    lo, med, hi = np.percentile(curves, [5, 50, 95], axis=0)
+    ax.fill_between(ratios, lo, hi, color=FIT_COLOR, alpha=0.25, linewidth=0)
+    ax.plot(ratios, med, color=FIT_COLOR, linewidth=2.5)
+    ax.plot(ratios, point["avg_chain_length"], color="0.2", linestyle="--", linewidth=1.8)
+    ax.set_xscale("log")
+    ax.set_xlabel("(FabF, FabB) : TesA, Relative to Baseline")
+    ax.set_ylabel("Average Chain Length (Carbons)")
+    s = d["summary"]
+    ax.set_title(f"Chain Length Rises with the Ratio in {s['fraction_positive_slope']:.0%} of Draws")
+    ax = axes[1]
+    ax.hist(slopes, bins=12, color=FIT_COLOR, alpha=0.7, edgecolor="white")
+    ax.axvline(point["slope_per_decade"], color="0.2", linestyle="--", linewidth=1.8)
+    ax.set_xlabel("Slope (Carbons per Decade of Ratio)")
+    ax.set_ylabel("Posterior Draws")
+    a, b, c = s["slope_per_decade_5_50_95"]
+    ax.set_title(f"Slope {b:.2f} [{a:.2f}, {c:.2f}]")
+    from matplotlib.lines import Line2D
+    handles = [Line2D([], [], color=FIT_COLOR, linewidth=6, alpha=0.5),
+               Line2D([], [], color="0.2", linestyle="--", linewidth=1.8)]
+    names = [f"Posterior ({d['n_draws']} Draws): Median, 5-95%", "Point Estimate (= Truth at Tier 1)"]
+    fig.tight_layout(rect=(0, 0.08, 1, 1))
+    fig.legend(handles, names, loc="upper center", bbox_to_anchor=(0.5, 0.06), ncol=2)
+    place_suptitle(fig, f"{MAIN_FIT} — Ratiometric Strategy Across the Posterior")
+    return _save(fig, "ratio_strategy.png")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("figure", choices=["fig2", "fig2_main", "fig3_options", "fig4", "fig4_fit", "fig4_prior", "fig4_si", "fig5", "r7", "r8", "all"])
+    ap.add_argument("figure", choices=["fig2", "fig2_main", "fig3_options", "fig4", "fig4_fit", "fig4_prior", "fig4_si", "fig5", "fig7", "fig8", "r7", "r8", "all"])
     ap.add_argument("run", nargs="?", default="Tier1 C14+unsat - a1c3", help="fig2's run (default R1)")
     a = ap.parse_args()
     if a.figure in ("fig2", "all"):
@@ -987,6 +1070,10 @@ def main():
         fig4_si()
     if a.figure in ("fig5", "all"):
         fig5()
+    if a.figure in ("fig7", "all"):
+        fig7()
+    if a.figure in ("fig8", "all"):
+        fig8()
     if a.figure in ("r7", "all"):
         r7()
     if a.figure in ("r8", "all"):

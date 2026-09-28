@@ -40,7 +40,8 @@ ENZYMES = ("FabD", "FabH", "FabG", "FabZ", "FabI", "FabF", "FabA", "FabB", "TesA
 
 
 def posterior_draws(source, params, n, key=None):
-    """n parameter sets ({param: value}) thinned evenly from a pooled posterior.
+    """n parameter sets ({param: value}) thinned evenly from a pooled posterior (all of them when n
+    is larger than the pool).
 
     source is a run's posterior_samples_pm.nc (stranded chains already excluded at finalize),
     or a JSON written by job_files/export_posterior_series.py, with key "<set>/<system>"
@@ -58,6 +59,9 @@ def posterior_draws(source, params, n, key=None):
             entry = entry[part]
         pooled = {p: np.asarray(entry["params"][p]).ravel() for p in params}
     size = len(next(iter(pooled.values())))
+    # Asking for more draws than the pool holds would repeat some (linspace rounds onto the same
+    # index): take every draw instead.
+    n = min(n, size)
     idx = np.linspace(0, size - 1, n).round().astype(int)
     return [{p: float(pooled[p][i]) for p in params} for i in idx]
 
