@@ -1049,9 +1049,106 @@ def fig8(path=HERE / "posterior_ratio_response.json"):
     return _save(fig, "ratio_strategy.png")
 
 
+R3_PAIRS = [("C8", "Tier1 C8 - d1d2 - dense", "Tier1 C8 - d1d2"),
+            ("C14+unsat", "Tier1 C14+unsat - d1d2 - dense", "Tier1 C14+unsat - d1d2"),
+            ("C18", "Tier1 C18 - d1d2 - dense", "Tier1 C18 - d1d2")]
+R3_SIGMA = math.log(10.0) / 1.959964   # prior sd of 12*d1 and of d2 (build_tier1_configs.py)
+MASS_COLOR = {"Diagonal": "0.55", "Dense": "tab:blue"}
+
+
+def _ellipse(V, lam, level=5.991, n=400):
+    th = np.linspace(0, 2 * np.pi, n)
+    return V @ (np.sqrt(level * np.asarray(lam))[:, None] * np.vstack([np.cos(th), np.sin(th)]))
+
+
+def r3_dense():
+    """R3 with the dense mass matrix: each system's d1 + d2 posterior in prior-standardised units
+    (12*d1 and d2 over their prior sd) against the prior and the expected-information prediction,
+    and the compute each dense run took against its diagonal twin's (cost_estimate.py)."""
+    import arviz as az
+    cost = json.loads((OUT / "cost_estimate.json").read_text())
+    rows = {r["run"]: r for r in cost["runs"]}
+    _apply_plot_style()
+    fig = plt.figure(figsize=(21, 13.5))
+    gs = fig.add_gridspec(2, 3, height_ratios=[1.25, 1], hspace=0.42)
+    th = np.linspace(0, 2 * np.pi, 400)
+    missing = []
+    for col, (system, dense, diag) in enumerate(R3_PAIRS):
+        ax = fig.add_subplot(gs[0, col])
+        ax.plot(np.sqrt(5.991) * np.cos(th), np.sqrt(5.991) * np.sin(th), color="0.55", linestyle="--", linewidth=1.5)
+        pred_path = RESULTS / diag / "identifiability_predicted.json"
+        pred = json.loads(pred_path.read_text()) if pred_path.exists() else None
+        if pred:
+            V = np.array([[e["direction"]["d1"], e["direction"]["d2"]] for e in pred["eigen"]]).T
+            pts = _ellipse(V, [e["variance_left"] for e in pred["eigen"]])
+            ax.fill(pts[0], pts[1], color="0.2", alpha=0.15, linewidth=0)
+            ax.plot(pts[0], pts[1], color="0.2", linewidth=1.5)
+        post = RESULTS / dense / "posterior_samples_pm.nc"
+        ident = RESULTS / dense / "identifiability.json"
+        lines = []
+        if post.exists():
+            p = az.from_netcdf(post).posterior
+            u = 12.0 * np.asarray(p["d1"].values, float).ravel() / R3_SIGMA
+            v = np.asarray(p["d2"].values, float).ravel() / R3_SIGMA
+            idx = np.random.default_rng(0).choice(len(u), size=min(1500, len(u)), replace=False)
+            ax.scatter(u[idx], v[idx], s=7, alpha=0.3, color=MASS_COLOR["Dense"], linewidths=0, rasterized=True)
+            if ident.exists():
+                d = json.loads(ident.read_text())
+                loose, tight = max(d["eigen"], key=lambda e: e["variance_left"]), min(d["eigen"], key=lambda e: e["variance_left"])
+                ploose = max(pred["eigen"], key=lambda e: e["variance_left"])["variance_left"] if pred else None
+                ptight = min(pred["eigen"], key=lambda e: e["variance_left"])["variance_left"] if pred else None
+                lines = [f"Loose Direction: {loose['variance_left']:.0%} Left" + (f" (Pred. {ploose:.0%})" if pred else ""),
+                         f"Tight Direction: {tight['variance_left']:.2%} Left" + (f" (Pred. {ptight:.2%})" if pred else "")]
+        else:
+            missing.append(dense)
+            ax.text(0.5, 0.8, "Dense Run Finalizing", transform=ax.transAxes, ha="center", va="center", color="0.4")
+        ax.plot(0, 0, marker="*", markersize=20, color="firebrick", markeredgecolor="white", linestyle="none")
+        if lines:
+            ax.text(0.03, 0.03, "\n".join(lines), transform=ax.transAxes, ha="left", va="bottom", fontsize=PLOT_FONT_SIZE - 3,
+                    bbox={"facecolor": "white", "alpha": 0.85, "edgecolor": "none"})
+        ax.set_aspect("equal"); ax.set_xlim(-3.2, 3.2); ax.set_ylim(-3.2, 3.2)
+        ax.set_xlabel("12 d1 / Prior Sd"); ax.set_ylabel("d2 / Prior Sd"); ax.set_title(system)
+    ax = fig.add_subplot(gs[1, :])
+    x = np.arange(len(R3_PAIRS)); w = 0.36
+    for k, (system, dense, diag) in enumerate(R3_PAIRS):
+        for off, (label, run) in zip((-w / 2, w / 2), (("Diagonal", diag), ("Dense", dense))):
+            r = rows.get(run)
+            if not r:
+                continue
+            # Whole-run totals (compute, finalize and figures), as the status table shows them. A
+            # capped run is drawn to what it would have needed without the cap.
+            done = not r["capped"] and (r["finalized"] or r["total"] - r["used"] < 0.05 * r["total"])
+            height = r["total"] if done else r["used"]
+            ax.bar(x[k] + off, height, width=w * 0.92, color=MASS_COLOR[label])
+            top = r["total"] if done else (r["need"] if r["capped"] else r["total"])
+            if not done:
+                ax.bar(x[k] + off, top - r["used"], bottom=r["used"], width=w * 0.92, color="white",
+                       edgecolor=MASS_COLOR[label], hatch="//", linewidth=1.2)
+            note = (f"{r['total']:.1f}" if done else
+                    f"{r['used']:.1f} Used; Hit Its Cap\n(~{r['need']:.0f} Needed)" if r["capped"] else
+                    f"{r['used']:.1f} Used\n(~{r['total']:.0f} Est.)")
+            ax.text(x[k] + off, top + 1.0, note, ha="center", va="bottom", fontsize=PLOT_FONT_SIZE - 3)
+    ax.set_xticks(x, [s for s, _, _ in R3_PAIRS])
+    ax.set_ylabel("A100-Hours")
+    ax.set_title("Compute: Dense vs Diagonal Mass Matrix (Measured; Hatched = Still to Run or Cut Off)")
+    ax.set_ylim(0, max(max(r["need"] if r["capped"] else r["total"] for r in rows.values() if r["run"] in
+                           {p for trio in R3_PAIRS for p in trio[1:]}) * 1.25, 10))
+    from matplotlib.lines import Line2D
+    handles = [Line2D([], [], color="0.2", linewidth=6, alpha=0.3), Line2D([], [], color="0.55", linestyle="--"),
+               Line2D([], [], marker="o", color=MASS_COLOR["Dense"], alpha=0.6, linestyle="none", markersize=7),
+               Line2D([], [], marker="*", markersize=16, color="firebrick", markeredgecolor="white", linestyle="none"),
+               plt.Rectangle((0, 0), 1, 1, color=MASS_COLOR["Diagonal"]), plt.Rectangle((0, 0), 1, 1, color=MASS_COLOR["Dense"])]
+    names = ["Predicted Posterior (95%)", "Prior (95%)", "Posterior Draws (Dense)", "Truth", "Diagonal", "Dense"]
+    fig.subplots_adjust(bottom=0.12, top=0.93)
+    legend = fig.legend(handles, names, loc="upper center", bbox_to_anchor=(0.5, 0.065), ncol=6)
+    _footnote(fig, missing, legend)
+    place_suptitle(fig, "R3 d1 + d2 — Dense Mass Matrix: Posterior on the Ridge, and Compute")
+    return _save(fig, "d1d2_dense_mass_matrix.png")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("figure", choices=["fig2", "fig2_main", "fig3_options", "fig4", "fig4_fit", "fig4_prior", "fig4_si", "fig5", "fig7", "fig8", "r7", "r8", "all"])
+    ap.add_argument("figure", choices=["fig2", "fig2_main", "fig3_options", "fig4", "fig4_fit", "fig4_prior", "fig4_si", "fig5", "fig7", "fig8", "r3_dense", "r7", "r8", "all"])
     ap.add_argument("run", nargs="?", default="Tier1 C14+unsat - a1c3", help="fig2's run (default R1)")
     a = ap.parse_args()
     if a.figure in ("fig2", "all"):
@@ -1074,6 +1171,8 @@ def main():
         fig7()
     if a.figure in ("fig8", "all"):
         fig8()
+    if a.figure in ("r3_dense", "all"):
+        r3_dense()
     if a.figure in ("r7", "all"):
         r7()
     if a.figure in ("r8", "all"):

@@ -849,9 +849,10 @@ def plot_joint_posterior(
     max_points: int = 2000,
 ) -> dict[str, Any]:
     """Pairwise joint posterior (a corner plot): each parameter's marginal on the diagonal and
-    the draws of every pair below it, on log axes, with the posterior mean, the truth where it
-    is known, and each pair's correlation on log scale. Shows the skew, curvature and
-    correlation that per-parameter marginals hide."""
+    the draws of every pair below it, with the posterior mean, the truth where it is known, and
+    each pair's correlation. Positive parameters are drawn and correlated on log axes; one whose
+    draws reach zero or below (the additive d-type groups, Normal priors) on linear axes. Shows
+    the skew, curvature and correlation that per-parameter marginals hide."""
     _apply_plot_style()
     from matplotlib.lines import Line2D
 
@@ -861,14 +862,18 @@ def plot_joint_posterior(
     total = len(draws[free_params[0]])
     idx = np.random.default_rng(0).choice(total, size=min(max_points, total), replace=False)
     means = {p: float(np.mean(draws[p])) for p in free_params}
-    truth = {p: float(truth[p]) for p in free_params if truth and p in truth and truth[p] > 0}
+    logp = {p: bool(np.all(draws[p] > 0)) for p in free_params}
+    scaled = {p: (np.log if logp[p] else (lambda v: v)) for p in free_params}
+    truth = {p: float(truth[p]) for p in free_params
+             if truth and p in truth and (truth[p] > 0 or not logp[p])}
     limits = {}
     for p in free_params:
-        lo, hi = np.log10(np.quantile(draws[p], [0.001, 0.999]))
+        fwd, back = (np.log10, lambda v: 10 ** v) if logp[p] else ((lambda v: v), (lambda v: v))
+        lo, hi = fwd(np.quantile(draws[p], [0.001, 0.999]))
         if p in truth:
-            lo, hi = min(lo, np.log10(truth[p])), max(hi, np.log10(truth[p]))
+            lo, hi = min(lo, fwd(truth[p])), max(hi, fwd(truth[p]))
         pad = 0.08 * (hi - lo) if hi > lo else 0.05
-        limits[p] = (10 ** (lo - pad), 10 ** (hi + pad))
+        limits[p] = (back(lo - pad), back(hi + pad))
 
     panel = 5.0 if n <= 2 else 4.2
     fig, axes = plt.subplots(n, n, figsize=(panel * n, panel * n), squeeze=False)
@@ -878,10 +883,11 @@ def plot_joint_posterior(
             if j > i:
                 ax.set_visible(False)
                 continue
-            ax.set_xscale("log")
+            if logp[pj]:
+                ax.set_xscale("log")
             ax.set_xlim(*limits[pj])
             if i == j:
-                x, dens = _kde_curve(draws[pi], log_x=True)
+                x, dens = _kde_curve(draws[pi], log_x=logp[pi])
                 ax.fill_between(x, dens / dens.max(), color="tab:blue", alpha=0.55)
                 ax.plot(x, dens / dens.max(), color="tab:blue", linewidth=1.5)
                 ax.axvline(means[pi], color="black", linestyle="--", linewidth=1.5)
@@ -891,7 +897,8 @@ def plot_joint_posterior(
                 ax.set_ylabel("Normalized Density", fontsize=PLOT_FONT_SIZE)
                 ax.set_title(pi, fontsize=PLOT_FONT_SIZE)
             else:
-                ax.set_yscale("log")
+                if logp[pi]:
+                    ax.set_yscale("log")
                 ax.set_ylim(*limits[pi])
                 ax.scatter(draws[pj][idx], draws[pi][idx], s=8, alpha=0.3, color="tab:blue", linewidths=0,
                            rasterized=True)
@@ -899,15 +906,17 @@ def plot_joint_posterior(
                 if pj in truth and pi in truth:
                     ax.plot(truth[pj], truth[pi], marker="*", markersize=18, color="firebrick",
                             markeredgecolor="white", linestyle="none")
-                r = float(np.corrcoef(np.log(draws[pj]), np.log(draws[pi]))[0, 1])
+                r = float(np.corrcoef(scaled[pj](draws[pj]), scaled[pi](draws[pi]))[0, 1])
                 ax.text(0.04, 0.96, f"r = {r:+.2f}", transform=ax.transAxes, ha="left", va="top",
                         fontsize=PLOT_FONT_SIZE, bbox={"facecolor": "white", "alpha": 0.85, "edgecolor": "none"})
                 if j == 0:
                     ax.set_ylabel(pi, fontsize=PLOT_FONT_SIZE)
-                _plain_ticks_if_narrow_log(ax, "y")
+                if logp[pi]:
+                    _plain_ticks_if_narrow_log(ax, "y")
             if i == n - 1:
                 ax.set_xlabel(pj, fontsize=PLOT_FONT_SIZE)
-            _plain_ticks_if_narrow_log(ax, "x")
+            if logp[pj]:
+                _plain_ticks_if_narrow_log(ax, "x")
             ax.tick_params(labelsize=PLOT_FONT_SIZE)
 
     handles = [
@@ -920,7 +929,9 @@ def plot_joint_posterior(
     fig.tight_layout(rect=(0.0, 0.06, 1.0, 1.0))
     fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, 0.05), ncol=len(handles),
                fontsize=PLOT_FONT_SIZE, frameon=True)
-    note = "Correlation r on log scale."
+    note = ("Correlation r on log scale." if all(logp.values()) else
+            "Correlation r on the axes' scale." if not any(logp.values()) else
+            "Correlation r on log scale for the positive parameters, linear for the rest.")
     fig.text(0.5, 0.0, note, ha="center", va="top", fontsize=PLOT_FONT_SIZE - 2, color="0.35")
     place_suptitle(fig, _diagnostic_title("joint", system_name))
 
