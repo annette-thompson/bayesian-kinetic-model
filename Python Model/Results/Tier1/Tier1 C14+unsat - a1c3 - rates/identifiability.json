@@ -1,0 +1,55 @@
+{
+ "params": [
+  "a1",
+  "c3"
+ ],
+ "scale": {
+  "a1": "log",
+  "c3": "log"
+ },
+ "contraction": {
+  "a1": 0.9929378765880804,
+  "c3": 0.9305950082534512
+ },
+ "weakly_identified": [],
+ "posterior_sd": {
+  "a1": 0.09872684283283667,
+  "c3": 0.3095016375163258
+ },
+ "prior_sd": {
+  "a1": 1.174809900159668,
+  "c3": 1.174809900159668
+ },
+ "correlation": [
+  [
+   1.0,
+   0.3209455354006304
+  ],
+  [
+   0.3209455354006304,
+   1.0
+  ]
+ ],
+ "eigen": [
+  {
+   "variance_left": 0.006262533690793255,
+   "contraction_along": 0.9937374663092068,
+   "direction": {
+    "a1": 0.993727873899799,
+    "c3": -0.11182536668656796
+   }
+  },
+  {
+   "variance_left": 0.07020458146767539,
+   "contraction_along": 0.9297954185323246,
+   "direction": {
+    "a1": 0.11182536668656796,
+    "c3": 0.993727873899799
+   }
+  }
+ ],
+ "posterior": "/Users/annettethompson/Projects/Bayesian Kinetic Model/Python Model/Results/Tier1/Tier1 C14+unsat - a1c3 - rates/posterior_samples_pm.nc",
+ "key": null,
+ "config": "/Users/annettethompson/Projects/Bayesian Kinetic Model/Python Model/Results/Tier1/Tier1 C14+unsat - a1c3 - rates/solver_params.json",
+ "n_draws": 4000
+}
