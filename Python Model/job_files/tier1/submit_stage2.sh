@@ -41,7 +41,7 @@ GROUP[R4b]="$(for i in $(seq 10 39); do printf 'Tier1 C8_sbc%03d - a1c3|' "$i"; 
 declare -A NICE_OF
 NICE_OF[R4b]=25000
 GROUP[R7]="Tier1 C14+unsat - a1c3 - profile|Tier1 C14+unsat - a1c3 - rates"
-GROUP[R2]="Tier1 C14+unsat - a1c3a2"
+GROUP[R2]="Tier1 C14+unsat - a1c3a2|Tier1 C14+unsat - a1c3a2 - dense"
 GROUP[R6]="Tier1 C14+unsat - a1c3sc3l"
 # R6 (c): the 1:3 off-grouping data, fit with the grouped and the split model.
 GROUP[R6]+="|Tier1 C14+unsat+c3split_c3l3 - a1c3|Tier1 C14+unsat+c3split_c3l3 - a1c3sc3l"

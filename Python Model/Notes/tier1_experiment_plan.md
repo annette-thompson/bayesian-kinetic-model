@@ -856,6 +856,11 @@ and the day's notes are in section 3; this is the summary.
   0.9957. In posterior sd that is 1.00x, 1.08x and 1.05x the prediction: `a1` matches, `c3`
   and `a2` are 8% and 5% wider. So the zero-cost prediction holds to about 10% in sd on the model
   Fig 9 is drawn on. Its three-parameter rates-only cell is still unsampled.
+- **R2 dense twin (added 2026-09-28).** The main fit rerun with a dense mass matrix and nothing
+  else changed (`Tier1 C14+unsat - a1c3a2 - dense`: same seed, data, tolerances, stopping rule
+  and uncapped compute; `build_tier1_configs.py` plan_runs, group R2 in `submit_stage2.sh`), to
+  see whether the answer depends on the metric where the pairs are most correlated (`c3`-`a2`
+  r = −0.81). Compare posterior means and sds against R2 in Monte Carlo error units, as R8 does.
 - **Figs 7 and 8 (outline 3.4-3.5), 2026-09-28.** Forward solves over 50 draws of R2's final
   posterior at the scripts' defaults, on the cluster (`tier1/posterior_figs.sbatch`, submitted by
   `tier1/wait_then_fig78.sbatch` once R2's new posterior was written; 5 minutes on one GPU, no
@@ -955,10 +960,11 @@ and the day's notes are in section 3; this is the summary.
   the section.
 
 Nothing in the plan's to-build list remains. R2 and R4 have finished; Figs 7 and 8 are drawn from
-R2's posterior (`Results/Tier1/figures/enzyme_sensitivity.png`, `ratio_strategy.png`), and Fig 3 is drafted on all 40 replicates (`job_files/tier1/sbc_ranks.png`,
-with three alternative forms in `Results/Tier1/figures/`: `sbc_ecdf.png`, `sbc_coverage.png` and
-`sbc_recovery.png`). Figs 6/6b have R2's panel
-(`identifiability.png` in its run folder) and wait on R3's C14+unsat and C18 runs.
+R2's posterior (`Results/Tier1/figures/enzyme_sensitivity.png`, `ratio_strategy.png`), and Fig 3 is drafted on all 40 replicates (`sbc_ranks.png`,
+with three alternative forms: `sbc_ecdf.png`, `sbc_coverage.png` and `sbc_recovery.png`). Figs
+6/6b have R2's panel (`identifiability_C14+unsat_a1c3a2.png`) and wait on R3's C14+unsat and C18
+runs. Every figure outside a run folder's run_summary set is in `Results/Tier1/figures/` (the
+Morris screen's in `Results/Sensitivity Screen/figures/`); job_files holds code and data only.
 
 ---
 
