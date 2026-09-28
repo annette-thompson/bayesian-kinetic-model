@@ -25,6 +25,7 @@
 _die() { echo "Error: $*" >&2; exit 1; }
 RUN="${1:?run directory name, e.g. \"Tier1 C8 - a1c3\"}"
 MAXH="${2:-11.5}"   # per-segment wall budget, under the 12:15 SLURM limit
+EXTRA_DRAWS="${3:-}"  # optional: reopen a finished run for up to this many more draws (see below)
 BASE="/projects/anth4580/Bayesian"
 SOLVER_PARAMS="$BASE/Results/Tier1/$RUN/solver_params.json"
 [[ -r "$SOLVER_PARAMS" ]] || _die "config not found: $SOLVER_PARAMS (run build_tier1_configs.py)"
@@ -46,8 +47,11 @@ export MKL_NUM_THREADS=${SLURM_CPUS_PER_TASK}
 export EQX_ON_ERROR=nan
 
 echo "==> $RUN | node=$(hostname) | gpu=$GPU_MODEL | cluster=${SLURM_CLUSTER_NAME:-blanca}"
+# EXTRA_DRAWS (third argument; an argument because --export=NONE drops the environment): reopen a
+# finished run for more draws. A run whose last confirmation check failed resumes under the
+# current stopping rule, with this as its ceiling.
 time python -u "$BASE/Utilities/inference_runner.py" \
-    --solver_params_file "$SOLVER_PARAMS" --max_hours "$MAXH"
+    --solver_params_file "$SOLVER_PARAMS" --max_hours "$MAXH" ${EXTRA_DRAWS:+--extra_draws "$EXTRA_DRAWS"}
 
 # Recovery is the point of Tier 1, so report it as soon as the run has a posterior. Harmless
 # while still mid-run: the script skips runs that have not finalized yet.

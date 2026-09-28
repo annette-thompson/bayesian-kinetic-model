@@ -20,7 +20,9 @@
 #
 # Usage:
 #   gpu_submit.sh [--time HH:MM:SS | --a100_hours H] [--cpus N] [--mem M] [--name NAME]
-#                 [--blanca_only | --alpine_only] [--a100_only] -- <sbatch script> [args...]
+#                 [--nice N] [--blanca_only | --alpine_only] [--a100_only] -- <sbatch script> [args...]
+# --nice N lowers the job's priority by N (sbatch --nice) on both clusters: for bulk work
+# that should wait behind this user's other jobs, e.g. the SBC replicates.
 # Prints "blanca <jobid>" / "alpine <jobid>" and records them in gpu_claims/<token>.jobs.
 set -uo pipefail
 # Called from inside jobs too, where the module function may not be inherited.
@@ -31,7 +33,7 @@ BLANCA_SLOWEST=1.00     # A100; with --a100_only too
 ALPINE_SLOWEST=1.00
 ALPINE_MAX_S=$((24 * 3600))
 
-TIME=""; A100_H=""; CPUS=8; MEM=""; NAME=""; WHERE=both; A100_ONLY=0
+TIME=""; A100_H=""; CPUS=8; MEM=""; NAME=""; NICE=""; WHERE=both; A100_ONLY=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --time) TIME="$2"; shift 2 ;;
@@ -39,6 +41,7 @@ while [[ $# -gt 0 ]]; do
     --cpus) CPUS="$2"; shift 2 ;;
     --mem) MEM="$2"; shift 2 ;;
     --name) NAME="$2"; shift 2 ;;
+    --nice) NICE="$2"; shift 2 ;;
     --blanca_only) WHERE=blanca; shift ;;
     --a100_only) A100_ONLY=1; shift ;;
     --alpine_only) WHERE=alpine; shift ;;
@@ -74,6 +77,7 @@ mkdir -p "$CLAIMS"
 COMMON=(--parsable --nodes=1 --ntasks=1 --cpus-per-task="$CPUS" --comment="twin:$TOKEN")
 [[ -n "$MEM" ]] && COMMON+=(--mem="$MEM")
 [[ -n "$NAME" ]] && COMMON+=(--job-name="$NAME")
+[[ -n "$NICE" ]] && COMMON+=(--nice="$NICE")
 
 # Test hook: GPU_SUBMIT_PROFILE=cpu_test swaps in CPU partitions so the claim/cancel
 # logic can be exercised without waiting on a GPU queue.

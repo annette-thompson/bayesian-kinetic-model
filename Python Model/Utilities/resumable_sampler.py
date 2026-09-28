@@ -68,6 +68,10 @@ _STAT_NAMES = list(_STAT_SPECS)
 # slower card gets proportionally more wall time for the same cap.
 GPU_SPEED_VS_A100 = (
     ("H100 NVL", 1.37),
+    # Tier-1 sampling, 2026-09-27: 1.62 s per leapfrog step on H200 NVL against 1.99 on
+    # A100-40GB (C8 a1+c3, median over 740 and 1460 five-step chunks); H100 NVL measured
+    # 1.43 the same way, matching its entry.
+    ("H200", 1.23),
     ("MIG 3g.40gb", 0.90),
     ("A100", 1.00),
     ("V100-SXM2", 0.67),
@@ -708,9 +712,11 @@ class ResumableSampler:
             convergence is detected, instead of stopping immediately -- a
             bare-minimum-draws stop can leave too few draws for downstream
             diagnostics (e.g. az.loo needs >=5 tail draws) to be numerically
-            stable. The extension only fires once (guarded by
-            converged_early); after that the normal "reached n_draws target"
-            path below finalizes the run.
+            stable. Every check inside that extension must pass too: a failure
+            revokes convergence and restores the draw ceiling, and the streak
+            starts over. So a run stops only when its last
+            convergence_consecutive_checks + post_convergence_checks checks all
+            pass, at the "reached n_draws target" path below.
             """
             if self._spec.rhat_threshold is None or ckpt["phase"] != "sampling":
                 return False
@@ -747,11 +753,25 @@ class ResumableSampler:
             if need > 1:
                 msg += f" | {'pass' if passed else 'FAIL'} streak {streak}/{need}"
             print(msg)
+            if ckpt["converged_early"] and not passed:
+                # A check inside the post-convergence block failed. The stop is revoked and the
+                # draw ceiling restored, so the run stops only once the streak AND a whole
+                # passing block have been seen again: every saved posterior passes the rule at
+                # its own length, i.e. its last need + post_convergence_checks checks all pass
+                # (decided 2026-09-27; before, a failure here was logged and ignored).
+                ckpt["converged_early"] = False
+                # a run that first converged under the older code stored no ceiling: use the spec's
+                ckpt["n_draws"] = ckpt.get("n_draws_ceiling", max(int(self._spec.n_draws), ckpt["n_draws"]))
+                print(f"==> Confirmation check FAILED at {n} sampling draws -- convergence revoked, "
+                      f"continuing (draw ceiling {ckpt['n_draws']})")
+                self._write_checkpoint(ckpt)
+                return False
             if converged and not ckpt["converged_early"]:
                 ckpt["converged_early"] = True
                 ckpt["converged_at_draws"] = n
                 extra = self._spec.post_convergence_checks * self._spec.rhat_check_every
                 if extra > 0:
+                    ckpt.setdefault("n_draws_ceiling", ckpt["n_draws"])
                     ckpt["n_draws"] = n + extra
                     print(f"==> Converged at {n} sampling draws -- running {extra} more "
                           f"for stable downstream diagnostics before finalizing at {ckpt['n_draws']}")
@@ -765,6 +785,14 @@ class ResumableSampler:
 
         if extra_draws:
             ckpt["n_draws"] += int(extra_draws)
+            if ckpt.get("converged_early") and ckpt.get("consecutive_passes", 1) == 0:
+                # Finalized under the older rule with a failed confirmation check: reopen under
+                # the current one, which stops as soon as the rule holds (extra_draws is the
+                # ceiling), instead of running a fixed extra count.
+                ckpt["converged_early"] = False
+                ckpt["n_draws_ceiling"] = ckpt["n_draws"]
+                print(f"==> Reopened: the last confirmation check failed; continuing until it holds "
+                      f"(ceiling {ckpt['n_draws']} draws)")
             # Reactivate a finished run so "that wasn't enough, run longer" keeps
             # the same chain (tuned metric already frozen in the checkpoint).
             if ckpt["phase"] == "done" and ckpt["sampling_done"] < ckpt["n_draws"]:
