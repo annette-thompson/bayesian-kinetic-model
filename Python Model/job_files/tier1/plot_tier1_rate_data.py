@@ -61,7 +61,7 @@ ax.grid(alpha=0.3)
 
 fig.suptitle(f"Tier-1 rate design — {a.system}  (synthetic, noise = 10% + floor)", y=0.99)
 fig.tight_layout(rect=(0, 0, 1, 0.95))
-out = a.out or (PROJECT / a.root / f"tier1_rate_design_{a.system}.png")
+out = a.out or (PROJECT / "Results" / "Tier1" / "figures" / f"tier1_rate_design_{a.system}.png")
 fig.savefig(out, dpi=160)
 print(f"wrote {out}")
 print(f"\nA. rates (uM C16/min):")

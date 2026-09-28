@@ -11,9 +11,10 @@ Steps:
   2. recovery        recovery_report.py over every finished run; the table is printed and the
                      full result written to Results/Tier1/figures/recovery.json
   3. identifiability identifiability_report.py for each finished R0-R3, R6 or R7 run that has
-                     no identifiability.json yet, then the Fig 6/6b draft
-                     (plot_tier1_drafts.py fig6) next to it
-  4. sbc             sbc.py ranks on the finished SBC replicates (sbc_ranks.json and .png)
+                     no identifiability.json yet, then the Fig 6/6b draft (plot_tier1_drafts.py
+                     fig6) as Results/Tier1/figures/identifiability_<run>.png
+  4. sbc             sbc.py ranks on the finished SBC replicates (sbc_ranks.json here, the
+                     figure in Results/Tier1/figures)
   5. figures         tier1_result_figures.py all (Figs 2 and 4, the R7 and R8 checks)
 
 Each step runs in its own process (the laptop's jaxlib aborts when a second model is compiled

@@ -4,7 +4,8 @@ information), in the same style as tier1_result_figures.py.
   python plot_tier1_drafts.py fig6 [identifiability.json]
   python plot_tier1_drafts.py fig9 [expected_information_grid.json]
 
-Each writes a PNG next to its JSON. Figs 7 and 8 are tier1_result_figures.py fig7 / fig8; Fig 3's
+Each writes its PNG to Results/Tier1/figures (Fig 6 as identifiability_<run>.png, Fig 9 under its
+JSON's name); the JSON stays where it is. Figs 7 and 8 are tier1_result_figures.py fig7 / fig8; Fig 3's
 rank histogram comes from sbc.py ranks.
 """
 import json
@@ -18,6 +19,7 @@ import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 
 HERE = Path(__file__).resolve().parent
+FIGURES = HERE.parent.parent / "Results" / "Tier1" / "figures"
 sys.path.insert(0, str(HERE.parent.parent / "Utilities"))
 from inference_plotting import PLOT_FONT_SIZE, THRESHOLD_STYLE, _apply_plot_style, place_suptitle  # noqa: E402
 
@@ -57,7 +59,9 @@ def heatmap(ax, values, rows, cols, fmt, title, signed=False):
     return im
 
 
-def _save(fig, out):
+def _save(fig, name):
+    FIGURES.mkdir(parents=True, exist_ok=True)
+    out = FIGURES / name
     fig.savefig(out, dpi=300, bbox_inches="tight")
     plt.close(fig)
     return out
@@ -92,7 +96,8 @@ def fig6(path):
              "of the posterior covariance with each parameter scaled by its prior sd; each row's squares sum to 1.",
              ha="center", va="top", fontsize=PLOT_FONT_SIZE - 4, color="0.35")
     place_suptitle(fig, f"{run} — Identifiability")
-    return _save(fig, Path(path).with_suffix(".png"))
+    slug = Path(d["posterior"]).parent.name.replace("Tier1 ", "").replace(" - ", "_").replace(" ", "_")
+    return _save(fig, f"identifiability_{slug}" + (f"_{d['key'].replace('/', '_')}" if d.get("key") else "") + ".png")
 
 
 def fig9(path):
@@ -114,7 +119,7 @@ def fig9(path):
              f"per point over {t1['n_points']} points, mean contraction {t1['mean_contraction']:.4f}.",
              ha="center", va="top", fontsize=PLOT_FONT_SIZE - 4, color="0.35")
     place_suptitle(fig, f"{d['system']} ({' + '.join(d['params'])}) — Expected Information by Measurement")
-    return _save(fig, Path(path).with_suffix(".png"))
+    return _save(fig, Path(path).stem + ".png")
 
 
 if __name__ == "__main__":

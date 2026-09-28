@@ -37,6 +37,7 @@ from scipy import stats
 
 HERE = Path(__file__).resolve().parent
 PROJECT = HERE.parent.parent
+FIGURES = PROJECT / "Results" / "Tier1" / "figures"   # figures live here; the rank data stays in job_files
 MANIFEST = HERE / "sbc_manifest.json"
 SYSTEM, PARAMS = "C8", ("a1", "c3")
 PRIOR_SIGMA = math.log(10.0) / stats.norm.ppf(0.975)   # 1.1748099, as _fit_prior solves it
@@ -181,7 +182,8 @@ def ranks(L, bins):
     out = {"L": L, "bins": bins, "replicates_used": used, "pending_or_failed": pending,
            "excluded": excluded, "params": summary}
     (HERE / "sbc_ranks.json").write_text(json.dumps(out, indent=1) + "\n")
-    fig = plot(summary, len(used), L, bins, HERE / "sbc_ranks.png", sorted(excluded, key=int))
+    FIGURES.mkdir(parents=True, exist_ok=True)
+    fig = plot(summary, len(used), L, bins, FIGURES / "sbc_ranks.png", sorted(excluded, key=int))
     for p in PARAMS:
         s = summary[p]
         print(f"{p}: chi-square p = {s['p_uniform']:.3f}; coverage " + ", ".join(f"{k} {v:.2f}" for k, v in s["coverage"].items()))
