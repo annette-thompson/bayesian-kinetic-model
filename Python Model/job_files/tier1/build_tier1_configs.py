@@ -198,6 +198,11 @@ def plan_runs():
         # changed, to see whether the answer depends on it where the pairs are most correlated
         # (c3-a2 r = -0.81).
         ("R2", dict(system="C14+unsat", params=["a1", "c3", "a2"], dense=True, tag="dense", max_total_hours=None)),
+        # R9 (added 2026-09-28): a first four-parameter fit, the main trio plus b3 (third in the
+        # sensitivity screen on all three objectives), with the dense metric, to measure a
+        # four-parameter cost and identifiability before choosing Tier 2's parameters. Capped at
+        # 60 A100-h (~3x R2) in case it stalls like the a1+c2 pilot.
+        ("R9", dict(system="C14+unsat", params=["a1", "c3", "a2", "b3"], dense=True, tag="dense", max_total_hours=60.0)),
         # The C8 pair resumed with max_steps 1000 (dense 2026-09-27 05:07, diagonal 14:30): a
         # runaway solve fails fast and is rejected instead of stalling the lockstep chains.
         ("R3", dict(system="C8", params=["d1", "d2"], max_steps=1000)),

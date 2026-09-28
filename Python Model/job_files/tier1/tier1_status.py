@@ -68,6 +68,7 @@ GROUPS = [                 # (id, pattern on the run name), first match wins
     ("R3", r"d1d2"),
     ("R7", r"a1c3 - (profile|rates)$"),
     ("R6", r"c3split|a1c3sc3l"),
+    ("R9", r"a1c3a2b3"),
     ("R2", r"C14\+unsat - a1c3a2( - dense)?$"),
     ("R1", r"C14\+unsat - a1c3$"),
     ("R0", r"^Tier1 C8 - a1c3$"),

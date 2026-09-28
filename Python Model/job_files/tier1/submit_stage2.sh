@@ -48,7 +48,9 @@ GROUP[R2]="Tier1 C14+unsat - a1c3a2|Tier1 C14+unsat - a1c3a2 - dense"
 GROUP[R6]="Tier1 C14+unsat - a1c3sc3l"
 # R6 (c): the 1:3 off-grouping data, fit with the grouped and the split model.
 GROUP[R6]+="|Tier1 C14+unsat+c3split_c3l3 - a1c3|Tier1 C14+unsat+c3split_c3l3 - a1c3sc3l"
-ORDER="R1 R4 R5 R3 R8 R7 R2 R6 R4b R4c"
+# R9: the first four-parameter fit (added 2026-09-28).
+GROUP[R9]="Tier1 C14+unsat - a1c3a2b3 - dense"
+ORDER="R1 R4 R5 R3 R8 R7 R2 R9 R6 R4b R4c"
 
 DRY=0; FORCE=0; ONLY=""
 while [[ $# -gt 0 ]]; do

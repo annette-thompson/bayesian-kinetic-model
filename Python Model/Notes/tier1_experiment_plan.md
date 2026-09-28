@@ -869,6 +869,13 @@ and the day's notes are in section 3; this is the summary.
   0.9957. In posterior sd that is 1.00x, 1.08x and 1.05x the prediction: `a1` matches, `c3`
   and `a2` are 8% and 5% wider. So the zero-cost prediction holds to about 10% in sd on the model
   Fig 9 is drawn on. Its three-parameter rates-only cell is still unsampled.
+- **R9: a first four-parameter fit (added 2026-09-28).** `a1`+`c3`+`a2`+`b3` on C14+unsat with the
+  dense metric (`Tier1 C14+unsat - a1c3a2b3 - dense`, capped at 60 A100-h, ~3x R2). `b3` is third
+  in the sensitivity screen on all three objectives (77 / 69 / 75% of the leader), and `b3`+`c1`
+  is among the best-separated pairs; quads score 5-7.5 on the collinearity index against ~2 for
+  trios, so identifiability is the open question. It measures the four-parameter cost and
+  identifiability that the outline asks for before Tier 2's parameters are chosen; `f` is the
+  alternative fourth if Tier 2 leans on the unsaturated fraction.
 - **SBC to 100 replicates, and a second-engine check (added 2026-09-28).** Replicates 40-99
   (`sbc.py generate --start 40 --n 60`; truths from the same seeded scheme, data seed = index) run
   as group R4c at nice 25000, like R4b: ~426 A100-h at the first 40's measured mean of 7.1 (median
