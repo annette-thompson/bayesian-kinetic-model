@@ -686,17 +686,18 @@ z and contraction are on log scale here (see the note on scores above the table)
   R0's standardized noise at a different truth (its z, +0.84 / −0.39, echoes R0's +0.89 / −0.34). That is
   harmless for SBC, since the noise is drawn independently of the truth.
 - **R3 with the dense mass matrix, 2026-09-28** (`Results/Tier1/figures/d1d2_dense_mass_matrix.png`,
-  `tier1_result_figures.py r3_dense`). All three dense runs finished sampling; none of the
-  diagonal twins has. Posterior in prior-standardised units against the expected-information
-  prediction: C8, loose direction 98% of prior variance left (predicted 100%), tight 0.18%
-  (0.17%), per-parameter contraction 0.51 / 0.51; C14+unsat, loose 67% (67%), tight 0.14%
-  (0.11%), contraction 0.67 / 0.66, `d1` z −0.92, `d2` +1.05; C18 predicted loose 6.6%, tight
-  0.06% (correlation −0.98), sampled posterior still finalizing. So the pair separates as the
-  network grows, as predicted, and the dense fits match the prediction. Compute (whole-run,
-  `cost_estimate.py`): dense 19.3 / 16.1 / ~20.0 A100-h on C8 / C14+unsat / C18; diagonal C8 hit
-  its 24.6 A100-h cap in warmup (~79 needed), C14+unsat 51.5 used of ~67, C18 34.2 of ~62. The
-  run-summary plots had failed on these runs (the joint posterior put the signed `d` parameters
-  on log axes); `inference_plotting.plot_joint_posterior` now uses linear axes for them.
+  `tier1_result_figures.py r3_dense`). All three dense runs have finished; none of the diagonal
+  twins has. Posterior in prior-standardised units against the expected-information prediction:
+  C8, loose direction 98% of prior variance left (predicted 100%), tight 0.18% (0.17%),
+  per-parameter contraction 0.51 / 0.51; C14+unsat, loose 67% (67%), tight 0.14% (0.11%),
+  contraction 0.67 / 0.66, `d1` z −0.92, `d2` +1.05; C18, loose 8% (7%), tight 0.07% (0.06%),
+  contraction 0.97 / 0.95, `d1` z −1.39, `d2` +1.56, truth inside both 95% intervals. So the pair
+  separates as the network grows, as predicted, and the dense fits match the prediction.
+  Compute (whole-run, `cost_estimate.py`): dense 19.3 / 16.1 / 21.4 A100-h on C8 / C14+unsat / C18;
+  diagonal C8 hit its 24.6 A100-h cap in warmup (25.4 used, ~83 needed), C14+unsat 51.8 used of
+  ~67, C18 34.2 of ~64. The run-summary plots had failed on these runs (the joint posterior put the
+  signed `d` parameters on log axes); `inference_plotting.plot_joint_posterior` now uses linear
+  axes for them.
 - **R3 on the ridge** (`Results/Tier1/figures/r3_step_size_and_cost.png`). On C8, warmup steps
   took 2 to 82 min each. Trees stayed modest (depth at most 8; 240-350 leapfrog steps per
   5-step chunk on the slowest chain), and step sizes followed almost the same history as on
