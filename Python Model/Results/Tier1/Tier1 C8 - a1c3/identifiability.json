@@ -8,13 +8,13 @@
   "c3": "log"
  },
  "contraction": {
-  "a1": 0.9980283512212689,
-  "c3": 0.9971342111986298
+  "a1": 0.9980253580849717,
+  "c3": 0.9971452986632695
  },
  "weakly_identified": [],
  "posterior_sd": {
-  "a1": 0.052165379923945834,
-  "c3": 0.0628911720384561
+  "a1": 0.05220496072578203,
+  "c3": 0.06276939415237419
  },
  "prior_sd": {
   "a1": 1.174809900159668,
@@ -23,33 +23,33 @@
  "correlation": [
   [
    1.0,
-   0.4490685309655571
+   0.4443622312054449
   ],
   [
-   0.4490685309655571,
+   0.4443622312054448,
    0.9999999999999998
   ]
  ],
  "eigen": [
   {
-   "variance_left": 0.0012614239606565509,
-   "contraction_along": 0.9987385760393435,
+   "variance_left": 0.001271562587805799,
+   "contraction_along": 0.9987284374121942,
    "direction": {
-    "a1": 0.8325581255287783,
-    "c3": -0.5539376929005708
+    "a1": 0.8321481697282348,
+    "c3": -0.5545533550686977
    }
   },
   {
-   "variance_left": 0.003576013619444823,
-   "contraction_along": 0.9964239863805552,
+   "variance_left": 0.003557780663953009,
+   "contraction_along": 0.996442219336047,
    "direction": {
-    "a1": 0.5539376929005708,
-    "c3": 0.8325581255287783
+    "a1": 0.5545533550686977,
+    "c3": 0.8321481697282348
    }
   }
  ],
  "posterior": "/Users/annettethompson/Projects/Bayesian Kinetic Model/Python Model/Results/Tier1/Tier1 C8 - a1c3/posterior_samples_pm.nc",
  "key": null,
  "config": "/Users/annettethompson/Projects/Bayesian Kinetic Model/Python Model/Results/Tier1/Tier1 C8 - a1c3/solver_params.json",
- "n_draws": 4000
+ "n_draws": 3200
 }

@@ -1,0 +1,347 @@
+{
+ "system": "C14+unsat",
+ "posterior": "Results/Tier1/Tier1 C14+unsat - a1c3a2/posterior_samples_pm.nc",
+ "key": null,
+ "params": [
+  "a1",
+  "c3",
+  "a2"
+ ],
+ "n_draws": 50,
+ "r": 20,
+ "span": 10.0,
+ "seed": 0,
+ "tolerance": [
+  0.001,
+  1e-07
+ ],
+ "enzymes": [
+  "FabD",
+  "FabH",
+  "FabG",
+  "FabZ",
+  "FabI",
+  "FabF",
+  "FabA",
+  "FabB",
+  "TesA"
+ ],
+ "objectives": {
+  "total_production": {
+   "enzymes": [
+    {
+     "enzyme": "FabH",
+     "mu_star_point": 21.00467700784435,
+     "rank_point": 1,
+     "mu_star_posterior_median": 21.154907679652915,
+     "mu_star_posterior_5_95": [
+      20.544994588322396,
+      21.822991154828276
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabF",
+     "mu_star_point": 9.564399113012097,
+     "rank_point": 2,
+     "mu_star_posterior_median": 9.582448485982745,
+     "mu_star_posterior_5_95": [
+      8.834855420127361,
+      10.256088678186972
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabZ",
+     "mu_star_point": 7.596848028077541,
+     "rank_point": 3,
+     "mu_star_posterior_median": 7.518617157421162,
+     "mu_star_posterior_5_95": [
+      6.935424928103644,
+      8.093666265508768
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "TesA",
+     "mu_star_point": 3.7597469267720265,
+     "rank_point": 4,
+     "mu_star_posterior_median": 3.6243949946889407,
+     "mu_star_posterior_5_95": [
+      3.3853036912979864,
+      3.8600548068225136
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabI",
+     "mu_star_point": 3.459340725148875,
+     "rank_point": 5,
+     "mu_star_posterior_median": 3.346974397242791,
+     "mu_star_posterior_5_95": [
+      3.025830417120193,
+      3.581560612881887
+     ],
+     "p_same_rank": 0.74
+    },
+    {
+     "enzyme": "FabA",
+     "mu_star_point": 3.3368420081776753,
+     "rank_point": 6,
+     "mu_star_posterior_median": 3.2921378838118702,
+     "mu_star_posterior_5_95": [
+      3.0636685451452346,
+      3.494171299475319
+     ],
+     "p_same_rank": 0.74
+    },
+    {
+     "enzyme": "FabB",
+     "mu_star_point": 1.0680416591393451,
+     "rank_point": 7,
+     "mu_star_posterior_median": 1.0965274956864688,
+     "mu_star_posterior_5_95": [
+      1.0270359780681946,
+      1.1623203616417015
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabG",
+     "mu_star_point": 0.7367644912620224,
+     "rank_point": 8,
+     "mu_star_posterior_median": 0.6619947140674163,
+     "mu_star_posterior_5_95": [
+      0.5509855634361889,
+      0.7608039453932631
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabD",
+     "mu_star_point": 0.5094654177728153,
+     "rank_point": 9,
+     "mu_star_posterior_median": 0.49594519579469964,
+     "mu_star_posterior_5_95": [
+      0.48212623684073364,
+      0.5137096134116033
+     ],
+     "p_same_rank": 1.0
+    }
+   ],
+   "spearman_vs_point_median": 1.0,
+   "spearman_vs_point_min": 0.9833333333333333
+  },
+  "avg_chain_length": {
+   "enzymes": [
+    {
+     "enzyme": "TesA",
+     "mu_star_point": 1.668374082568548,
+     "rank_point": 1,
+     "mu_star_posterior_median": 1.634349695653488,
+     "mu_star_posterior_5_95": [
+      1.5915168508542394,
+      1.6797897846022296
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabF",
+     "mu_star_point": 1.5686790010944114,
+     "rank_point": 2,
+     "mu_star_posterior_median": 1.5365503955868622,
+     "mu_star_posterior_5_95": [
+      1.5060579027381729,
+      1.5771470049562912
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabH",
+     "mu_star_point": 0.674027620987246,
+     "rank_point": 3,
+     "mu_star_posterior_median": 0.6484477219811222,
+     "mu_star_posterior_5_95": [
+      0.6179327777410735,
+      0.6800338197982013
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabB",
+     "mu_star_point": 0.25560969563278196,
+     "rank_point": 4,
+     "mu_star_posterior_median": 0.2550026892147298,
+     "mu_star_posterior_5_95": [
+      0.24974227045763506,
+      0.2614068454358181
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabD",
+     "mu_star_point": 0.11975167402580982,
+     "rank_point": 5,
+     "mu_star_posterior_median": 0.11293244234486188,
+     "mu_star_posterior_5_95": [
+      0.10139054319302118,
+      0.1222138778950023
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabZ",
+     "mu_star_point": 0.07032284652142165,
+     "rank_point": 6,
+     "mu_star_posterior_median": 0.06766092718783048,
+     "mu_star_posterior_5_95": [
+      0.059338228297117775,
+      0.0754705407523132
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabI",
+     "mu_star_point": 0.04803637706848875,
+     "rank_point": 7,
+     "mu_star_posterior_median": 0.04797197659507767,
+     "mu_star_posterior_5_95": [
+      0.04456658063658289,
+      0.05192073337377237
+     ],
+     "p_same_rank": 0.24
+    },
+    {
+     "enzyme": "FabA",
+     "mu_star_point": 0.04774812996886091,
+     "rank_point": 8,
+     "mu_star_posterior_median": 0.048310182411704566,
+     "mu_star_posterior_5_95": [
+      0.044980942195800906,
+      0.052121152045208806
+     ],
+     "p_same_rank": 0.24
+    },
+    {
+     "enzyme": "FabG",
+     "mu_star_point": 0.008844011557823385,
+     "rank_point": 9,
+     "mu_star_posterior_median": 0.007690113326121078,
+     "mu_star_posterior_5_95": [
+      0.00621473677610785,
+      0.009211353719403934
+     ],
+     "p_same_rank": 1.0
+    }
+   ],
+   "spearman_vs_point_median": 0.9833333333333333,
+   "spearman_vs_point_min": 0.9833333333333333
+  },
+  "unsat_fraction": {
+   "enzymes": [
+    {
+     "enzyme": "FabB",
+     "mu_star_point": 0.2664483283527211,
+     "rank_point": 1,
+     "mu_star_posterior_median": 0.2736141958714249,
+     "mu_star_posterior_5_95": [
+      0.2662481443677233,
+      0.2797972533188844
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabI",
+     "mu_star_point": 0.15949561977064602,
+     "rank_point": 2,
+     "mu_star_posterior_median": 0.16098256413625056,
+     "mu_star_posterior_5_95": [
+      0.158696508494038,
+      0.16343082172641393
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabZ",
+     "mu_star_point": 0.09537962531921082,
+     "rank_point": 3,
+     "mu_star_posterior_median": 0.10012263811087045,
+     "mu_star_posterior_5_95": [
+      0.0950849971748288,
+      0.10559599750490119
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabH",
+     "mu_star_point": 0.08709258142735428,
+     "rank_point": 4,
+     "mu_star_posterior_median": 0.08795817233524095,
+     "mu_star_posterior_5_95": [
+      0.08655549899324815,
+      0.0891809473026618
+     ],
+     "p_same_rank": 0.96
+    },
+    {
+     "enzyme": "FabA",
+     "mu_star_point": 0.07992063521016504,
+     "rank_point": 5,
+     "mu_star_posterior_median": 0.0833514864895763,
+     "mu_star_posterior_5_95": [
+      0.07965910416687443,
+      0.08675457351537105
+     ],
+     "p_same_rank": 0.96
+    },
+    {
+     "enzyme": "FabF",
+     "mu_star_point": 0.04661963816598609,
+     "rank_point": 6,
+     "mu_star_posterior_median": 0.04716347797538572,
+     "mu_star_posterior_5_95": [
+      0.04537942498358093,
+      0.04933712980952136
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "TesA",
+     "mu_star_point": 0.038949163670559034,
+     "rank_point": 7,
+     "mu_star_posterior_median": 0.03915679507517959,
+     "mu_star_posterior_5_95": [
+      0.03685545293368241,
+      0.04206479309711892
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabD",
+     "mu_star_point": 0.03403396253086145,
+     "rank_point": 8,
+     "mu_star_posterior_median": 0.03332481955854825,
+     "mu_star_posterior_5_95": [
+      0.030313650550014875,
+      0.03525949379332855
+     ],
+     "p_same_rank": 1.0
+    },
+    {
+     "enzyme": "FabG",
+     "mu_star_point": 0.0012137679673393878,
+     "rank_point": 9,
+     "mu_star_posterior_median": 0.0011486685290055074,
+     "mu_star_posterior_5_95": [
+      0.00099294280340203,
+      0.001250815500046241
+     ],
+     "p_same_rank": 1.0
+    }
+   ],
+   "spearman_vs_point_median": 1.0,
+   "spearman_vs_point_min": 0.9833333333333333
+  }
+ },
+ "seconds": 121.1
+}

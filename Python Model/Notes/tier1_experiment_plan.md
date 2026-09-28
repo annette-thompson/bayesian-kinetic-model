@@ -80,9 +80,9 @@ That is five unique initial conditions, so five ODE solves per gradient evaluati
   their checkpoints under the new rule (`tier1.sbatch "<run>" 11.5 1000`: the third argument is
   the extra-draw ceiling; an environment variable does not reach the job, which runs with
   --export=NONE, and the first attempt was a no-op for that reason), so every run finishes
-  under the same rule. R2 is a fourth case, not yet reopened: its last segment started at
-  ~14:30 on the older code, and its confirmation check at 700 draws failed (`a1` r-hat 1.0102)
-  and was ignored (section 3). The rule lives in resumable_sampler.py (a failed confirmation
+  under the same rule. R2 was a fourth case: its last segment started at ~14:30 on the older
+  code, and its confirmation check at 700 draws failed (`a1` r-hat 1.0102) and was ignored. It
+  was reopened the same way at 22:30 and finalized at 1000 draws on 2026-09-28 (section 3). The rule lives in resumable_sampler.py (a failed confirmation
   revokes the stop); the configs are unchanged, since their stopping keys are in the resume
   signature.
 - At least 3 chains must remain after stranded-chain exclusion.
@@ -437,10 +437,11 @@ finished: R2 (~19:50 on 2026-09-27), R6's three fits and R4's other 30 replicate
     finalized at 700, no divergences, 16.7 A100-h by `cost_estimate.py` (plan estimate ~40). Its
     confirmation check at 700 failed (`a1` r-hat 1.0102 against 1.01, 18:32). Its last segment
     started at ~14:30 on the older code, so the failure was logged and ignored, as in the three
-    runs reopened earlier (section 0). It has not been reopened, so it has not yet finished under
-    the three-pass rule. Truth inside every 95% interval: `a1` 1.036 (log z +0.77), `c3` 1.098 (+0.66), `a2` 0.890 (-1.47);
-    contraction 0.9986 / 0.9881 / 0.9951. Correlations: `c3`-`a2` -0.82, `a1`-`a2` -0.61, `a1`-`c3`
-    +0.52, so `a2` trades off against both. Unblocks Figs 2, 6/6b, 7 and 8. Fig 9 comparison in
+    runs reopened earlier (section 0). Reopened at 22:30, it passed the checks at 800, 900
+    and 1000 draws (r-hat 1.0094, 1.0069, 1.0054) and finalized at 1000 on 2026-09-28 04:44,
+    21.5 A100-h in all. Final: truth inside every 95% interval, `a1` 1.036 (log z +0.79), `c3`
+    1.099 (+0.68), `a2` 0.889 (-1.49); contraction 0.9986 / 0.9885 / 0.9953. Correlations: `c3`-`a2`
+    -0.81, `a1`-`a2` -0.61, `a1`-`c3` +0.51, so `a2` trades off against both. Unblocks Figs 2, 6/6b, 7 and 8. Fig 9 comparison in
     section 4.
   - R6 (c), the split model on the 1:3 data (13:45): `c3s` 0.835 (truth 1, z -1.61), `c3l`
     2.95 (truth 3, z -0.19), `a1` 0.999; contraction 0.990 / 0.986 / 0.999; 8.3 A100-h. It
@@ -834,7 +835,7 @@ and the day's notes are in section 3; this is the summary.
 
 | Run | z | Contraction | Draws | A100-h |
 |---|---|---|---|---|
-| R2: C14+unsat, `a1` / `c3` / `a2` | +0.77 / +0.66 / −1.47 | 0.9986 / 0.9881 / 0.9951 | 700 | 16.7 |
+| R2: C14+unsat, `a1` / `c3` / `a2` | +0.79 / +0.68 / −1.49 | 0.9986 / 0.9885 / 0.9953 | 1000 | 21.5 |
 | R6 (b): split, standard data, `a1` / `c3s` / `c3l` | −0.06 / −1.58 / +0.09 | 0.9991 / 0.9899 / 0.9946 | 400 | 6.5 |
 | R6 (c): grouped, 1:3 data, `a1` / `c3` | −0.13 / none (no single truth) | 0.9991 / 0.9956 | 500 | 6.6 |
 | R6 (c): split, 1:3 data, `a1` / `c3s` / `c3l` | −0.05 / −1.61 / −0.19 | 0.9991 / 0.9902 / 0.9861 | 400 | 8.3 |
@@ -843,17 +844,34 @@ and the day's notes are in section 3; this is the summary.
   1.098, `a2` 0.890. Converged at 600 draws, finalized at 700, no divergences. Its confirmation
   check at 700 failed (`a1` r-hat 1.0102) and was ignored by the older code its last segment ran
   on, so it is not yet finished under the three-pass rule (section 3). It was reopened at
-  22:30 with up to 1000 more draws, like the other three; its numbers and Figs 2 and 6/6b are
-  redrawn when it finalizes. Correlations `c3`-`a2`
-  −0.82, `a1`-`a2` −0.61, `a1`-`c3` +0.52. In prior-standardised units the loosest direction
-  (mostly `c3` against `a2`) keeps 1.6% of the prior variance and the other two 0.07% and 0.14%
+  22:30 with up to 1000 more draws, like the other three, and finalized at 1000 on 2026-09-28
+  04:44 (21.5 A100-h in all): `a1` z +0.79, `c3` +0.68, `a2` −1.49, contraction 0.9986 / 0.9885 /
+  0.9953, within 0.02 z of the 700-draw answer. Figs 2 and 6 are redrawn. Correlations `c3`-`a2`
+  −0.81, `a1`-`a2` −0.61, `a1`-`c3` +0.51. In prior-standardised units the loosest direction
+  (mostly `c3` against `a2`) keeps 1.5% of the prior variance and the other two 0.08% and 0.15%
   (`identifiability.json`), so no parameter is weakly identified. Fig 2's final panel is `posterior_vs_truth_C14+unsat_a1c3a2.png`. R2
   unblocks Figs 2, 6/6b, 7 and 8.
 - **Fig 9 on the main fit.** Sampled contraction against the expected-information prediction
-  for the Tier-1 design (Stage 0 item 8): 0.9986 / 0.9881 / 0.9951 against 0.9986 / 0.9902 /
-  0.9957. In posterior sd that is 1.00x, 1.10x and 1.06x the prediction: `a1` matches, `c3`
-  and `a2` are 10% and 6% wider. So the zero-cost prediction holds to about 10% in sd on the model
+  for the Tier-1 design (Stage 0 item 8): 0.9986 / 0.9885 / 0.9953 against 0.9986 / 0.9902 /
+  0.9957. In posterior sd that is 1.00x, 1.08x and 1.05x the prediction: `a1` matches, `c3`
+  and `a2` are 8% and 5% wider. So the zero-cost prediction holds to about 10% in sd on the model
   Fig 9 is drawn on. Its three-parameter rates-only cell is still unsampled.
+- **Figs 7 and 8 (outline 3.4-3.5), 2026-09-28.** Forward solves over 50 draws of R2's final
+  posterior at the scripts' defaults, on the cluster (`tier1/posterior_figs.sbatch`, submitted by
+  `tier1/wait_then_fig78.sbatch` once R2's new posterior was written; 5 minutes on one GPU, no
+  failed solves). Fig 7 (`enzyme_sensitivity.png`): the Morris ranking of the nine enzymes at the
+  point estimate (= the truth at Tier 1) holds across the posterior. The top targets keep their
+  rank in every draw: FabH, FabF, FabZ for total production; TesA, FabF for chain length; FabB, FabI
+  for unsaturated fraction. Only near-tied pairs trade places (FabI/FabA in 26% and 76% of draws
+  on total production and chain length, FabH/FabA in 4% on unsaturated fraction); rank correlation
+  with the point estimate at least 0.98 in every draw. Fig 8 (`ratio_strategy.png`): raising
+  (FabF, FabB) against TesA at a fixed geometric mean lengthens the chains in all 50 draws, 10.2 to
+  13.8 carbons over 0.1-10x, slope 1.73 [1.68, 1.78] carbons per decade (point estimate 1.76). The
+  optimisation half (the enzyme levels giving the longest and shortest chains) is uninformative as
+  built: unconstrained over 0.1-10x each, every draw picks the same corners (FabF 10x, FabB and TesA
+  0.1x for the longest; FabF and FabB 0.1x, TesA 10x for the shortest). It needs the constraint
+  Mains et al. 2022 used (asked at the 2026-09-28 meeting). The posterior is tight (each parameter
+  known to 4-13%), so agreement is the expected Tier-1 outcome; Tier 2 is the real test.
 - **R6, Fig 5.** The split model reads the ratio: `c3l`/`c3s` 1.21 [0.92, 1.62] on the standard
   data, and 3.53 [2.44, 4.96] on the 1:3 data, with P(ratio > 1) = 1.00. The grouped fit on the
   1:3 data settles on a compromise, `c3` 1.277 [1.09, 1.48], that excludes both 1 and 3; `a1` is
@@ -908,9 +926,11 @@ and the day's notes are in section 3; this is the summary.
 - `forward_model.py`: the batched forward solver shared by Figs 7-9. It is compiled once, so
   it takes any scaling values and initial conditions, and it loads posterior draws.
 - `expected_information_grid.py` (Fig 9), `posterior_morris.py` (Fig 7),
-  `posterior_ratio_response.py` (Fig 8), `identifiability_report.py` (Figs 6/6b: contraction,
-  correlations, prior-standardised covariance eigen-directions), and `plot_tier1_drafts.py`
-  for their drafts
+  `posterior_ratio_response.py` (Fig 8; both run on the cluster by `posterior_figs.sbatch`, and
+  `wait_then_fig78.sbatch` submits it once a run's new posterior is written),
+  `identifiability_report.py` (Figs 6/6b: contraction, correlations, prior-standardised covariance
+  eigen-directions), and `plot_tier1_drafts.py` for Figs 6 and 9 (Figs 7 and 8 are
+  `tier1_result_figures.py fig7` / `fig8`)
 - `sbc.py` (Fig 3): `generate` draws truths from the prior and builds each replicate's data and
   config. `ranks` scores finished runs (rank histograms, a uniformity test, coverage and a draft
   figure). `selftest` checks the rank code on a known answer.
@@ -934,8 +954,8 @@ and the day's notes are in section 3; this is the summary.
   into `run_summary.png`. Each is titled "<run> — <section>", and its file is named after
   the section.
 
-Nothing in the plan's to-build list remains. R2 and R4 have finished, so Figs 7 and 8 can be run
-on R2's posterior, and Fig 3 is drafted on all 40 replicates (`job_files/tier1/sbc_ranks.png`,
+Nothing in the plan's to-build list remains. R2 and R4 have finished; Figs 7 and 8 are drawn from
+R2's posterior (`Results/Tier1/figures/enzyme_sensitivity.png`, `ratio_strategy.png`), and Fig 3 is drafted on all 40 replicates (`job_files/tier1/sbc_ranks.png`,
 with three alternative forms in `Results/Tier1/figures/`: `sbc_ecdf.png`, `sbc_coverage.png` and
 `sbc_recovery.png`). Figs 6/6b have R2's panel
 (`identifiability.png` in its run folder) and wait on R3's C14+unsat and C18 runs.
@@ -1027,9 +1047,9 @@ finalize: 0.02 h, from the job end in sacct.
 **Three parameters** (measured 2026-09-27). The pilot medians put `a1`+`c3`+`a2` at ~3.0x per
 warmup step and ~3.5x per draw relative to `a1`+`c3`, with 2.24x the draws. On C14+unsat at R1's
 rates that was ~119 s per step, ~88 s per draw and ~1100 draws: ~40 A100-h. R2 measured 66.6 s
-per step (1.68x R1), 51.3 s per draw (2.04x) and 700 draws (1.75x): 16.7 A100-h. R6's split
+per step (1.68x R1), 51.1 s per draw (2.04x) and, after its reopening, 1000 draws (2.5x): 21.5 A100-h. R6's split
 trio ran at 1.26-1.30x per step, 1.04-1.17x per draw and 1.0x the draws of R1: 21.4 A100-h for R6's three fits against ~87 estimated. So the estimates from
-the pilot factors were 2.4x too high for R2 and 4x for R6.
+the pilot factors were 1.9x too high for R2 and 4x for R6.
 
 **Systems not yet measured** (C20+unsat) are scaled from the nearest measured one by cost per
 draw ∝ reactions^1.21, fitted on the C6/C10/C14 pilots (C14+unsat to C20+unsat: 1.85x).
