@@ -34,7 +34,7 @@
     "chains": 4,
     "target_accept": 0.8,
     "random_seed": 42,
-    "is_mass_matrix_diagonal": true,
+    "is_mass_matrix_diagonal": false,
     "rhat_threshold": 1.01,
     "ess_per_split_chain": 50,
     "min_chains_for_convergence": 3,
@@ -46,7 +46,7 @@
   },
   "ODE_solver": {
     "solver_name": "Kvaerno5",
-    "max_steps": 20000,
+    "max_steps": 1000,
     "dt0": 1e-06,
     "stepsize_controller": "PIDController"
   },
@@ -189,7 +189,7 @@
       "Reactions/EC_FAS_ME1/C14+unsat/FabA.yaml",
       "Reactions/EC_FAS_ME1/C14+unsat/FabB.yaml"
     ],
-    "results_save_dir": "Results/Tier1/Tier1 C14+unsat - d1d2",
+    "results_save_dir": "Results/Tier1/Tier1 C14+unsat - d1d2 - dense",
     "prior_samples_file": "prior_samples_pm.nc",
     "posterior_samples_file": "posterior_samples_pm.nc",
     "trace_plot_file": "trace_plot.png"

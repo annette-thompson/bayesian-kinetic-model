@@ -51,7 +51,7 @@
     "stepsize_controller": "PIDController"
   },
   "ODE_stepsize_controller": {
-    "rtol": 0.001,
+    "rtol": 1e-05,
     "atol": 1e-07,
     "pcoeff": 0.4,
     "icoeff": 0.3,
@@ -60,9 +60,9 @@
   "calculation_module": "Calculation Files/Full_FAS/FA_conc.py",
   "datasets": [
     {
-      "name": "timeseries_Chain_C14+unsat",
+      "name": "timeseries_Chain_C18",
       "dataset_type": "timeseries",
-      "data_file": "Data/Tier1_rates/Chain_C14+unsat/time_vs_conc.csv",
+      "data_file": "Data/Tier1_rates/Chain_C18/time_vs_conc.csv",
       "observables": {
         "C16 Equivalents (uM)": "C16 Equivalents (uM)"
       },
@@ -92,9 +92,9 @@
       }
     },
     {
-      "name": "profile_Chain_C14+unsat",
+      "name": "profile_Chain_C18",
       "dataset_type": "endpoint",
-      "data_file": "Data/Tier1_rates/Chain_C14+unsat/init_vs_final_conc.csv",
+      "data_file": "Data/Tier1_rates/Chain_C18/init_vs_final_conc.csv",
       "observables": {
         "C4_FA (uM)": "C4_FA (uM)",
         "C6_FA (uM)": "C6_FA (uM)",
@@ -102,8 +102,8 @@
         "C10_FA (uM)": "C10_FA (uM)",
         "C12_FA (uM)": "C12_FA (uM)",
         "C14_FA (uM)": "C14_FA (uM)",
-        "C12_FA_unsat (uM)": "C12_FA_unsat (uM)",
-        "C14_FA_unsat (uM)": "C14_FA_unsat (uM)"
+        "C16_FA (uM)": "C16_FA (uM)",
+        "C18_FA (uM)": "C18_FA (uM)"
       },
       "noise_model": "column",
       "noise_params": {
@@ -114,8 +114,8 @@
           "C10_FA (uM)": "C10_FA (uM)_sigma",
           "C12_FA (uM)": "C12_FA (uM)_sigma",
           "C14_FA (uM)": "C14_FA (uM)_sigma",
-          "C12_FA_unsat (uM)": "C12_FA_unsat (uM)_sigma",
-          "C14_FA_unsat (uM)": "C14_FA_unsat (uM)_sigma"
+          "C16_FA (uM)": "C16_FA (uM)_sigma",
+          "C18_FA (uM)": "C18_FA (uM)_sigma"
         }
       },
       "enabled": true,
@@ -141,9 +141,9 @@
       "init_cond_overrides": {}
     },
     {
-      "name": "rates_Chain_C14+unsat",
+      "name": "rates_Chain_C18",
       "dataset_type": "endpoint",
-      "data_file": "Data/Tier1_rates/Chain_C14+unsat/init_vs_rate.csv",
+      "data_file": "Data/Tier1_rates/Chain_C18/init_vs_rate.csv",
       "observables": {
         "Initial Rate (uM C16 Equivalents/min)": "Initial Rate (uM C16 Equivalents/min)"
       },
@@ -179,17 +179,17 @@
   "path_base": "../../..",
   "output_paths": {
     "reactions_source": [
-      "Reactions/EC_FAS_ME1/C14+unsat/FabD.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/FabH.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/FabG.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/FabZ.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/FabI.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/TesA.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/FabF.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/FabA.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/FabB.yaml"
+      "Reactions/EC_FAS_ME1/C18/FabD.yaml",
+      "Reactions/EC_FAS_ME1/C18/FabH.yaml",
+      "Reactions/EC_FAS_ME1/C18/FabG.yaml",
+      "Reactions/EC_FAS_ME1/C18/FabZ.yaml",
+      "Reactions/EC_FAS_ME1/C18/FabI.yaml",
+      "Reactions/EC_FAS_ME1/C18/TesA.yaml",
+      "Reactions/EC_FAS_ME1/C18/FabF.yaml",
+      "Reactions/EC_FAS_ME1/C18/FabA.yaml",
+      "Reactions/EC_FAS_ME1/C18/FabB.yaml"
     ],
-    "results_save_dir": "Results/Tier1/Tier1 C14+unsat - d1d2",
+    "results_save_dir": "Results/Tier1/Tier1 C18 - d1d2",
     "prior_samples_file": "prior_samples_pm.nc",
     "posterior_samples_file": "posterior_samples_pm.nc",
     "trace_plot_file": "trace_plot.png"
@@ -208,7 +208,6 @@
     "d1": 0.0,
     "d2": 0.0,
     "e": 1.0,
-    "f": 1.0,
     "x1": 1.0,
     "x2": 1.0,
     "x3": 1.0,
@@ -228,7 +227,6 @@
     "d1": 0.0,
     "d2": 0.0,
     "e": 1.0,
-    "f": 1.0,
     "x1": 1.0,
     "x2": 1.0,
     "x3": 1.0,

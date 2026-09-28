@@ -2,24 +2,30 @@
   "free_kinetic_params": [
     {
       "rxn_name": null,
-      "param_name": "d1",
+      "param_name": "a1",
       "prior_dist_params": {
-        "distribution": "Normal",
-        "lower": -0.19188209108283716,
-        "upper": 0.19188209108283716,
+        "distribution": "LogNormal",
+        "lower": 10.98635963981644,
+        "upper": 1098.635963981644,
         "mass": 0.95,
-        "sample_scale": 12.0
+        "fixed_stat": [
+          "median",
+          109.86359639816439
+        ]
       }
     },
     {
       "rxn_name": null,
-      "param_name": "d2",
+      "param_name": "c3",
       "prior_dist_params": {
-        "distribution": "Normal",
-        "lower": -2.302585092994046,
-        "upper": 2.302585092994046,
+        "distribution": "LogNormal",
+        "lower": 10.98635963981644,
+        "upper": 1098.635963981644,
         "mass": 0.95,
-        "sample_scale": 1.0
+        "fixed_stat": [
+          "median",
+          109.86359639816439
+        ]
       }
     }
   ],
@@ -42,11 +48,11 @@
     "convergence_consecutive_checks": 2,
     "post_convergence_checks": 1,
     "checkpoint_every_steps": 5,
-    "max_total_hours": null
+    "max_total_hours": 24.0
   },
   "ODE_solver": {
     "solver_name": "Kvaerno5",
-    "max_steps": 20000,
+    "max_steps": 1000,
     "dt0": 1e-06,
     "stepsize_controller": "PIDController"
   },
@@ -60,9 +66,9 @@
   "calculation_module": "Calculation Files/Full_FAS/FA_conc.py",
   "datasets": [
     {
-      "name": "timeseries_Chain_C14+unsat",
+      "name": "timeseries_Chain_C8",
       "dataset_type": "timeseries",
-      "data_file": "Data/Tier1_rates/Chain_C14+unsat/time_vs_conc.csv",
+      "data_file": "Data/Tier1_rates/Chain_C8/time_vs_conc.csv",
       "observables": {
         "C16 Equivalents (uM)": "C16 Equivalents (uM)"
       },
@@ -92,30 +98,20 @@
       }
     },
     {
-      "name": "profile_Chain_C14+unsat",
+      "name": "profile_Chain_C8",
       "dataset_type": "endpoint",
-      "data_file": "Data/Tier1_rates/Chain_C14+unsat/init_vs_final_conc.csv",
+      "data_file": "Data/Tier1_rates/Chain_C8/init_vs_final_conc.csv",
       "observables": {
         "C4_FA (uM)": "C4_FA (uM)",
         "C6_FA (uM)": "C6_FA (uM)",
-        "C8_FA (uM)": "C8_FA (uM)",
-        "C10_FA (uM)": "C10_FA (uM)",
-        "C12_FA (uM)": "C12_FA (uM)",
-        "C14_FA (uM)": "C14_FA (uM)",
-        "C12_FA_unsat (uM)": "C12_FA_unsat (uM)",
-        "C14_FA_unsat (uM)": "C14_FA_unsat (uM)"
+        "C8_FA (uM)": "C8_FA (uM)"
       },
       "noise_model": "column",
       "noise_params": {
         "column_mapping": {
           "C4_FA (uM)": "C4_FA (uM)_sigma",
           "C6_FA (uM)": "C6_FA (uM)_sigma",
-          "C8_FA (uM)": "C8_FA (uM)_sigma",
-          "C10_FA (uM)": "C10_FA (uM)_sigma",
-          "C12_FA (uM)": "C12_FA (uM)_sigma",
-          "C14_FA (uM)": "C14_FA (uM)_sigma",
-          "C12_FA_unsat (uM)": "C12_FA_unsat (uM)_sigma",
-          "C14_FA_unsat (uM)": "C14_FA_unsat (uM)_sigma"
+          "C8_FA (uM)": "C8_FA (uM)_sigma"
         }
       },
       "enabled": true,
@@ -141,9 +137,9 @@
       "init_cond_overrides": {}
     },
     {
-      "name": "rates_Chain_C14+unsat",
+      "name": "rates_Chain_C8",
       "dataset_type": "endpoint",
-      "data_file": "Data/Tier1_rates/Chain_C14+unsat/init_vs_rate.csv",
+      "data_file": "Data/Tier1_rates/Chain_C8/init_vs_rate.csv",
       "observables": {
         "Initial Rate (uM C16 Equivalents/min)": "Initial Rate (uM C16 Equivalents/min)"
       },
@@ -179,17 +175,17 @@
   "path_base": "../../..",
   "output_paths": {
     "reactions_source": [
-      "Reactions/EC_FAS_ME1/C14+unsat/FabD.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/FabH.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/FabG.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/FabZ.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/FabI.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/TesA.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/FabF.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/FabA.yaml",
-      "Reactions/EC_FAS_ME1/C14+unsat/FabB.yaml"
+      "Reactions/EC_FAS_ME1/C8/FabD.yaml",
+      "Reactions/EC_FAS_ME1/C8/FabH.yaml",
+      "Reactions/EC_FAS_ME1/C8/FabG.yaml",
+      "Reactions/EC_FAS_ME1/C8/FabZ.yaml",
+      "Reactions/EC_FAS_ME1/C8/FabI.yaml",
+      "Reactions/EC_FAS_ME1/C8/TesA.yaml",
+      "Reactions/EC_FAS_ME1/C8/FabF.yaml",
+      "Reactions/EC_FAS_ME1/C8/FabA.yaml",
+      "Reactions/EC_FAS_ME1/C8/FabB.yaml"
     ],
-    "results_save_dir": "Results/Tier1/Tier1 C14+unsat - d1d2",
+    "results_save_dir": "Results/Tier1/Tier1 C8 - a1c3 - prior+4sd - cap1000",
     "prior_samples_file": "prior_samples_pm.nc",
     "posterior_samples_file": "posterior_samples_pm.nc",
     "trace_plot_file": "trace_plot.png"
@@ -208,7 +204,6 @@
     "d1": 0.0,
     "d2": 0.0,
     "e": 1.0,
-    "f": 1.0,
     "x1": 1.0,
     "x2": 1.0,
     "x3": 1.0,
@@ -228,7 +223,6 @@
     "d1": 0.0,
     "d2": 0.0,
     "e": 1.0,
-    "f": 1.0,
     "x1": 1.0,
     "x2": 1.0,
     "x3": 1.0,

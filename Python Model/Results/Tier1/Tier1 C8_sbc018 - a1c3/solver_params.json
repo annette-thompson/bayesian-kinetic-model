@@ -52,7 +52,7 @@
   },
   "ODE_solver": {
     "solver_name": "Kvaerno5",
-    "max_steps": 20000,
+    "max_steps": 1000,
     "dt0": 1e-06,
     "stepsize_controller": "PIDController"
   },
