@@ -869,6 +869,22 @@ and the day's notes are in section 3; this is the summary.
   0.9957. In posterior sd that is 1.00x, 1.08x and 1.05x the prediction: `a1` matches, `c3`
   and `a2` are 8% and 5% wider. So the zero-cost prediction holds to about 10% in sd on the model
   Fig 9 is drawn on. Its three-parameter rates-only cell is still unsampled.
+- **Parameter screen, all 18 groups (2026-09-28; `parameter_screen.py`, `parameter_screen_C20+unsat.json`
+  / `.npz`, `Results/Tier1/figures/parameter_screen_C20+unsat.png`).** The linear-Gaussian
+  posterior with every scaling group free on C20+unsat, Tier-1 design, at the ME1 solution: 37
+  batched solves (6.7 min on an H200). With all 18 free, most groups keep contraction 0.6-0.7
+  (`d1` 0.96; `b3` 0.47, `b1` 0.44, `x4` 0.21, `b2` 0.20, `e` 0.13, `c4` 0.12; `x2`, `x3` 0), against
+  0.99+ for `a1`, `c3`, `a2` in a trio fit with the rest fixed: the trio's precision is conditional
+  on its partners being held at the solution. Each trio member has one: `a2`-`c2` r 0.95,
+  `c3`-`a3` 0.91, `a1`-`b3` −0.72 (and `b1`-`f` 0.73). The major predictions stay well
+  determined all-free (3-7% sd; FabF and FabZ on total production 22% and 13%). The uncertainty
+  they do have is spread thin: no group carries more than 11% (`f`, `b1` 11%, `c3` 9%, `e` 8%,
+  `a3` 7%), the trio shows 24% of it, + `b3` 32%, + `b3`, `c2`, `a3` 41%; the best 5-set 49%
+  (`b1`+`c1`+`c3`+`e`+`x1`), the best 8-set 70%. No block structure to exploit: one 15-group block
+  at |r| > 0.2, and the |r| > 0.5 pairs vary 4-100x more with the rest free than fixed; only `x2`,
+  `x3` (unconstrained, carry nothing) and `c4` separate cleanly. The Tier-1 design has 29 points
+  under 5 conditions; the real ME1 design (11 rate conditions, 14 GC/MS profiles, a time course)
+  should be screened the same way before Tier 2's parameters are chosen.
 - **R9: a first four-parameter fit (added 2026-09-28).** `a1`+`c3`+`a2`+`b3` on C14+unsat with the
   dense metric (`Tier1 C14+unsat - a1c3a2b3 - dense`, capped at 60 A100-h, ~3x R2). `b3` is third
   in the sensitivity screen on all three objectives (77 / 69 / 75% of the leader), and `b3`+`c1`
@@ -876,6 +892,13 @@ and the day's notes are in section 3; this is the summary.
   trios, so identifiability is the open question. It measures the four-parameter cost and
   identifiability that the outline asks for before Tier 2's parameters are chosen; `f` is the
   alternative fourth if Tier 2 leans on the unsaturated fraction.
+  Predicted at the truth (`identifiability_predicted.json`): contraction `a1` 0.967, `c3` 0.987,
+  `a2` 0.987, `b3` 0.936; `a1`-`b3` correlation −0.98, and the loosest direction (`b3` up with
+  `a1` down) keeps 10.8% of the prior variance, against 1.6% for R2's loosest. That near-ridge
+  is the point of the test, not a cost: it is the kind of trade-off a point estimate hides, one
+  (`a1`, `b3`) pair reported where the data support a near-line of them. The sampled posterior
+  shows whether it is a continuous ridge or separate solutions; Figs 7 and 8 rerun on R9's
+  posterior show whether moving along it changes the engineering conclusions.
 - **SBC to 100 replicates, and a second-engine check (added 2026-09-28).** Replicates 40-99
   (`sbc.py generate --start 40 --n 60`; truths from the same seeded scheme, data seed = index) run
   as group R4c at nice 25000, like R4b: ~426 A100-h at the first 40's measured mean of 7.1 (median

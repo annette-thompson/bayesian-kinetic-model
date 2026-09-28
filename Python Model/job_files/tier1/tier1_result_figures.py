@@ -1146,9 +1146,111 @@ def r3_dense():
     return _save(fig, "d1d2_dense_mass_matrix.png")
 
 
+SCREEN_TRIO = ("a1", "c3", "a2")
+
+
+def screen_analysis(path=HERE / "parameter_screen_C20+unsat.npz", max_size=8):
+    """From parameter_screen.py's matrices: the all-free posterior, which groups carry the
+    uncertainty of the major predictions (the three objectives, the ratio slope, and each
+    objective's three largest enzyme effects), and the best subset of each size by how much of
+    that uncertainty it shows with the other groups held at the solution."""
+    import itertools
+    z = np.load(path)
+    groups, names = [str(g) for g in z["groups"]], [str(n) for n in z["predictions"]]
+    F, G, sd0, val = z["F"], z["G"], z["prior_sd"], z["prediction_values"]
+    Sigma = np.linalg.inv(F + np.diag(1 / sd0 ** 2))
+    major = [0, 1, 2, len(names) - 1]
+    for k, obj in enumerate(("total_production", "avg_chain_length", "unsat_fraction")):
+        idx = [i for i, n in enumerate(names) if n.startswith(f"d {obj} /") and not n.endswith("ratio")]
+        major += sorted(idx, key=lambda i: -abs(val[i]))[:3]
+    Gm = G[major]
+    v_full = np.einsum("pi,ij,pj->p", Gm, Sigma, Gm)
+
+    def v_known(idx):
+        rest = [i for i in range(len(groups)) if i not in idx]
+        S = Sigma[np.ix_(rest, rest)] - Sigma[np.ix_(rest, idx)] @ np.linalg.solve(Sigma[np.ix_(idx, idx)], Sigma[np.ix_(idx, rest)])
+        return np.einsum("pi,ij,pj->p", Gm[:, rest], S, Gm[:, rest])
+
+    def captured(S):
+        idx = [groups.index(g) for g in S]
+        SS = np.linalg.inv(F[np.ix_(idx, idx)] + np.diag(1 / sd0[idx] ** 2))
+        return float(np.mean(np.einsum("pi,ij,pj->p", Gm[:, idx], SS, Gm[:, idx]) / v_full))
+
+    carries = {g: float(np.mean((v_full - v_known([i])) / v_full)) for i, g in enumerate(groups)}
+    best = {}
+    for k in range(1, max_size + 1):
+        best[k] = max(((captured(S), S) for S in itertools.combinations(groups, k)), key=lambda t: t[0])
+    trio_idx = [groups.index(g) for g in SCREEN_TRIO]
+    trio_S = np.linalg.inv(F[np.ix_(trio_idx, trio_idx)] + np.diag(1 / sd0[trio_idx] ** 2))
+    return {"groups": groups, "Sigma": Sigma, "sd0": sd0, "F": F, "names": names, "major": major,
+            "contraction": 1 - np.diag(Sigma) / sd0 ** 2,
+            "trio_contraction": dict(zip(SCREEN_TRIO, 1 - np.diag(trio_S) / sd0[trio_idx] ** 2)),
+            "carries": carries, "best": best, "captured": captured,
+            "sd_major": {names[m]: (float(val[m]), float(np.sqrt(vf))) for m, vf in zip(major, v_full)}}
+
+
+def fig_screen(path=HERE / "parameter_screen_C20+unsat.npz"):
+    """The parameter screen (parameter_screen.py) on one figure."""
+    r = screen_analysis(path)
+    groups, con = r["groups"], r["contraction"]
+    _apply_plot_style()
+    fig = plt.figure(figsize=(22, 15))
+    gs = fig.add_gridspec(2, 2, hspace=0.45, wspace=0.25)
+    order = list(np.argsort(-con))
+    ax = fig.add_subplot(gs[0, 0])
+    x = np.arange(len(groups))
+    ax.bar(x, con[order], color="tab:blue", width=0.7)
+    for g, c in r["trio_contraction"].items():
+        ax.plot(order.index(groups.index(g)), c, marker="D", color="0.15", markersize=10, linestyle="none")
+    ax.axhline(0.5, **THRESHOLD_STYLE)
+    ax.set_xticks(x, [groups[i] for i in order])
+    ax.set_ylim(0, 1.05)
+    ax.set_ylabel("Posterior Contraction")
+    ax.set_title("Contraction With All 18 Groups Free")
+    ax = fig.add_subplot(gs[0, 1])
+    items = sorted(r["carries"].items(), key=lambda kv: -kv[1])
+    ax.bar(range(len(items)), [v for _, v in items], color="tab:purple", width=0.7)
+    ax.set_xticks(range(len(items)), [g for g, _ in items])
+    ax.set_ylabel("Share of Prediction Variance")
+    ax.set_title("Which Groups Carry the Prediction Uncertainty")
+    ax = fig.add_subplot(gs[1, 0])
+    Sigma = r["Sigma"]
+    corr = Sigma / np.sqrt(np.outer(np.diag(Sigma), np.diag(Sigma)))
+    im = ax.imshow(corr[np.ix_(order, order)], cmap="RdBu", vmin=-1, vmax=1)
+    ax.set_xticks(x, [groups[i] for i in order], fontsize=PLOT_FONT_SIZE - 4)
+    ax.set_yticks(x, [groups[i] for i in order], fontsize=PLOT_FONT_SIZE - 4)
+    ax.grid(False)
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.02, label="Posterior Correlation")
+    ax.set_title("Posterior Correlation, All Groups Free")
+    ax = fig.add_subplot(gs[1, 1])
+    ks = sorted(r["best"])
+    ax.plot(ks, [r["best"][k][0] for k in ks], "o-", color="tab:blue", linewidth=2.2, markersize=9)
+    for k in ks:
+        ax.annotate("+".join(r["best"][k][1]), (k, r["best"][k][0]), xytext=(0, 10), textcoords="offset points",
+                    ha="center", fontsize=PLOT_FONT_SIZE - 7, rotation=20)
+    refs = [("a1+c3+a2 (R2)", SCREEN_TRIO), ("+ b3 (R9)", SCREEN_TRIO + ("b3",)),
+            ("+ Partners b3, c2, a3", SCREEN_TRIO + ("b3", "c2", "a3"))]
+    for (label, S), m in zip(refs, ("D", "s", "^")):
+        ax.plot(len(S), r["captured"](S), marker=m, color="0.15", markersize=11, linestyle="none", label=label)
+    ax.set_xlabel("Groups Free (Others Held at the Solution)")
+    ax.set_ylabel("Share of Prediction Variance Shown")
+    ax.set_ylim(0, 1.0)
+    ax.set_title("Best Subset of Each Size")
+    from matplotlib.lines import Line2D
+    handles = [plt.Rectangle((0, 0), 1, 1, color="tab:blue"),
+               Line2D([], [], marker="D", color="0.15", linestyle="none", markersize=10),
+               Line2D([], [], **THRESHOLD_STYLE), Line2D([], [], marker="o", color="tab:blue", markersize=9)]
+    names_ = ["All 18 Free", "a1+c3+a2 Only (Others Fixed)", "Weakly Identified Below 0.5", "Best Subset"]
+    h2, l2 = ax.get_legend_handles_labels()
+    fig.subplots_adjust(bottom=0.1, top=0.93)
+    fig.legend(handles + h2, names_ + l2, loc="upper center", bbox_to_anchor=(0.5, 0.055), ncol=4)
+    place_suptitle(fig, "C20+unsat (All 18 Scaling Groups, Tier-1 Design) — Parameter Screen")
+    return _save(fig, "parameter_screen_C20+unsat.png")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("figure", choices=["fig2", "fig2_main", "fig3_options", "fig4", "fig4_fit", "fig4_prior", "fig4_si", "fig5", "fig7", "fig8", "r3_dense", "r7", "r8", "all"])
+    ap.add_argument("figure", choices=["fig2", "fig2_main", "fig3_options", "fig4", "fig4_fit", "fig4_prior", "fig4_si", "fig5", "fig7", "fig8", "r3_dense", "screen", "r7", "r8", "all"])
     ap.add_argument("run", nargs="?", default="Tier1 C14+unsat - a1c3", help="fig2's run (default R1)")
     a = ap.parse_args()
     if a.figure in ("fig2", "all"):
@@ -1173,6 +1275,8 @@ def main():
         fig8()
     if a.figure in ("r3_dense", "all"):
         r3_dense()
+    if a.figure in ("screen", "all"):
+        fig_screen()
     if a.figure in ("r7", "all"):
         r7()
     if a.figure in ("r8", "all"):
