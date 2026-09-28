@@ -2,6 +2,7 @@
 Case, µM, 16 pt, legends below the axes, "<run> — <title>" titles).
 
   python tier1_result_figures.py fig2 "Tier1 C14+unsat - a1c3"  # posterior vs truth (Fig 2 fallback)
+  python tier1_result_figures.py fig2_main  # Fig 2 for the main fit (R2): posteriors, pairs, predictive fit
   python tier1_result_figures.py fig4     # robustness to noise level and prior shift (R0 + R5)
   python tier1_result_figures.py fig4_fit    # with fig4: data vs fitted curve at each noise level
   python tier1_result_figures.py fig4_prior  # with fig4: each shifted prior against its posterior
@@ -26,6 +27,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+from scipy import stats
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent.parent / "Utilities"))
@@ -348,6 +350,71 @@ def _fitted_predictions(runs, n_draws=FIT_DRAWS):
     return preds, truth, exps
 
 
+FIT_ROWS = [("timeseries", "Time Series", "Time (min)", "C16 Equivalents (µM)"),
+            ("profile", "Product Profile (12 min)", "Chain Length", "Concentration (µM)"),
+            ("rates", "Initial Rates", "Condition", "Initial Rate (µM C16 Equivalents/min)")]
+OBS_COLOR, FIT_COLOR = "tab:orange", "tab:blue"
+
+
+def _profile_label(column):
+    """'C12_FA_unsat (uM)' -> 'C12:1', 'C8_FA (uM)' -> 'C8'."""
+    name = column.split(" (")[0]
+    return name.replace("_FA_unsat", ":1").replace("_FA", "")
+
+
+def _draw_fit(axes_by_kind, exp, pred, truth, ylabels=True):
+    """One run's data against its fitted curve (posterior draws through the model, no measurement
+    noise) and the noise-free truth, one axis per dataset kind. Returns the largest fit-vs-truth
+    error and the median 95%-band half-width, both in % of the truth."""
+    from forward_model import CONDITIONS
+    sigma_all = np.asarray(exp.observed_sigma, float).ravel()
+    lo_all, med_all, hi_all = np.percentile(pred, [2.5, 50, 97.5], axis=0)
+    kinds = [k for k, *_ in FIT_ROWS]
+    offset = 0
+    for ds in exp.datasets:
+        n = int(np.size(ds.observed_values))
+        sl = slice(offset, offset + n)
+        offset += n
+        kind = next(k for k in kinds if k in ds.name)
+        ax = axes_by_kind[kind]
+        meta = FIT_ROWS[kinds.index(kind)]
+        obs = np.ravel(np.asarray(ds.observed_values, float))
+        if kind == "timeseries":
+            x = np.asarray(ds.time_values, float) / 60.0
+            ax.fill_between(x, lo_all[sl], hi_all[sl], color=FIT_COLOR, alpha=0.25, linewidth=0)
+            ax.plot(x, med_all[sl], color=FIT_COLOR, linewidth=2)
+            ax.plot(x, truth[sl], color="0.2", linestyle="--", linewidth=1.5)
+            ax.errorbar(x, obs, yerr=sigma_all[sl], fmt="o", color=OBS_COLOR, capsize=3, markersize=6)
+        else:
+            if kind == "profile":
+                ticks = [_profile_label(m[1]) for m in ds.observables_mapping]
+            else:
+                ticks = [CONDITION_SHORT.get(nm, nm) for nm, _ in CONDITIONS][:n]
+            x = np.arange(n, dtype=float)
+            ax.bar(x, truth[sl], width=0.7, color=TRUTH_BAR, edgecolor="0.45", linewidth=1.2, zorder=1)
+            ax.errorbar(x - 0.14, obs, yerr=sigma_all[sl], fmt="o", color=OBS_COLOR, capsize=3, markersize=6,
+                        zorder=3)
+            ax.errorbar(x + 0.14, med_all[sl], yerr=[med_all[sl] - lo_all[sl], hi_all[sl] - med_all[sl]],
+                        fmt="s", color=FIT_COLOR, capsize=3, markersize=6, linewidth=2, zorder=3)
+            ax.set_xticks(x, ticks)
+            ax.set_xlim(-0.6, n - 0.4)
+        if ylabels:
+            ax.set_ylabel(meta[3])
+        ax.set_xlabel(meta[2])
+    err = np.max(np.abs(med_all - truth) / np.abs(truth)) * 100
+    half = np.median((hi_all - lo_all) / 2 / np.abs(truth)) * 100
+    return err, half
+
+
+def _fit_legend():
+    from matplotlib.lines import Line2D
+    handles = [Line2D([], [], color=OBS_COLOR, marker="o", linestyle="none", markersize=7),
+               (plt.Rectangle((0, 0), 1, 1, color=FIT_COLOR, alpha=0.25), Line2D([], [], color=FIT_COLOR, linewidth=2)),
+               (Line2D([], [], color="0.2", linestyle="--", linewidth=1.5),
+                plt.Rectangle((0, 0), 1, 1, facecolor=TRUTH_BAR, edgecolor="0.45"))]
+    return handles, ["Observed (± 1σ Noise)", "Posterior Fit (Median, 95% Interval)", "Truth (Noise-Free; Line, Bars)"]
+
+
 def fig4_fit():
     """Companion to fig4's noise column: each noise level's data against the fitted curve (posterior
     draws through the model, without measurement noise) and the noise-free truth."""
@@ -357,52 +424,13 @@ def fig4_fit():
     if not runs:
         print("No noise-level run has finalized yet.")
         return None
-    from forward_model import CONDITIONS
     preds, truth, exps = _fitted_predictions(runs)
     labels = {r: l for l, r in NOISE}
-    rows = [("timeseries", "Time Series", "Time (min)", "C16 Equivalents (µM)"),
-            ("profile", "Product Profile (12 min)", "Chain Length", "Concentration (µM)"),
-            ("rates", "Initial Rates", "Condition", "Initial Rate (µM C16 Equivalents/min)")]
     _apply_plot_style()
     fig, axes = plt.subplots(3, len(runs), figsize=(5.6 * len(runs), 14.5), squeeze=False)
-    obs_color, fit_color = "tab:orange", "tab:blue"
     for col, run in enumerate(runs):
-        exp = exps[run]
-        sigma_all = np.asarray(exp.observed_sigma, float).ravel()
-        lo_all, med_all, hi_all = np.percentile(preds[run], [2.5, 50, 97.5], axis=0)
-        offset = 0
-        for ds in exp.datasets:
-            n = int(np.size(ds.observed_values))
-            sl = slice(offset, offset + n)
-            offset += n
-            kind = next(k for k, *_ in rows if k in ds.name)
-            r = [k for k, *_ in rows].index(kind)
-            ax = axes[r, col]
-            obs = np.ravel(np.asarray(ds.observed_values, float))
-            if kind == "timeseries":
-                x = np.asarray(ds.time_values, float) / 60.0
-                ax.fill_between(x, lo_all[sl], hi_all[sl], color=fit_color, alpha=0.25, linewidth=0)
-                ax.plot(x, med_all[sl], color=fit_color, linewidth=2)
-                ax.plot(x, truth[sl], color="0.2", linestyle="--", linewidth=1.5)
-                ax.errorbar(x, obs, yerr=sigma_all[sl], fmt="o", color=obs_color, capsize=3, markersize=6)
-            else:
-                if kind == "profile":
-                    ticks = [m[1].split("_")[0] for m in ds.observables_mapping]
-                else:
-                    ticks = [CONDITION_SHORT.get(nm, nm) for nm, _ in CONDITIONS][:n]
-                x = np.arange(n, dtype=float)
-                ax.bar(x, truth[sl], width=0.7, color=TRUTH_BAR, edgecolor="0.45", linewidth=1.2, zorder=1)
-                ax.errorbar(x - 0.14, obs, yerr=sigma_all[sl], fmt="o", color=obs_color, capsize=3, markersize=6,
-                            zorder=3)
-                ax.errorbar(x + 0.14, med_all[sl], yerr=[med_all[sl] - lo_all[sl], hi_all[sl] - med_all[sl]],
-                            fmt="s", color=fit_color, capsize=3, markersize=6, linewidth=2, zorder=3)
-                ax.set_xticks(x, ticks)
-                ax.set_xlim(-0.6, n - 0.4)
-            if col == 0:
-                ax.set_ylabel(rows[r][3])
-            ax.set_xlabel(rows[r][2])
-        err = np.max(np.abs(med_all - truth) / np.abs(truth)) * 100
-        half = np.median((hi_all - lo_all) / 2 / np.abs(truth)) * 100
+        err, half = _draw_fit({k: axes[i, col] for i, (k, *_) in enumerate(FIT_ROWS)}, exps[run], preds[run], truth,
+                              ylabels=(col == 0))
         axes[0, col].set_title(f"Noise {labels[run]}")
         axes[0, col].text(0.97, 0.05, f"Fit vs truth: within {err:.1f}%\n95% band: ±{half:.1f}% (median)",
                           transform=axes[0, col].transAxes, ha="right", va="bottom", fontsize=PLOT_FONT_SIZE - 3)
@@ -410,17 +438,85 @@ def fig4_fit():
         _share_row_ylim(axes[r])
         for ax in axes[r]:
             ax.set_ylim(bottom=0)
-    from matplotlib.lines import Line2D
-    handles = [Line2D([], [], color=obs_color, marker="o", linestyle="none", markersize=7),
-               (plt.Rectangle((0, 0), 1, 1, color=fit_color, alpha=0.25), Line2D([], [], color=fit_color, linewidth=2)),
-               (Line2D([], [], color="0.2", linestyle="--", linewidth=1.5),
-                plt.Rectangle((0, 0), 1, 1, facecolor=TRUTH_BAR, edgecolor="0.45"))]
-    names = ["Observed (± 1σ Noise)", "Posterior Fit (Median, 95% Interval)", "Truth (Noise-Free; Line, Bars)"]
+    handles, names = _fit_legend()
     fig.tight_layout(rect=(0, 0.04, 1, 1))
     legend = fig.legend(handles, names, loc="upper center", bbox_to_anchor=(0.5, 0.03), ncol=3)
     _footnote(fig, missing, legend)
     place_suptitle(fig, "Tier1 C8 - a1c3 — Predictive Fit Across Noise Levels")
     return _save(fig, "robustness_predictive_fit.png")
+
+
+MAIN_FIT = "Tier1 C14+unsat - a1c3a2"
+
+
+def fig2_main(run=MAIN_FIT):
+    """Fig 2 for the main fit, three rows: A, each parameter's posterior against the truth; B, the
+    pairwise joint posteriors with their correlation; C, the fit to each dataset (as fig4_fit)."""
+    import itertools
+    import arviz as az
+    rec, missing = _scores([run])
+    if missing:
+        print(f"{run} has not finalized; nothing to draw.")
+        return None
+    rec = rec[run]
+    post = az.from_netcdf(RESULTS / run / "posterior_samples_pm.nc").posterior
+    params = list(rec["params"])
+    draws = {p: np.asarray(post[p].values, float).ravel() for p in params}
+    preds, truth_obs, exps = _fitted_predictions([run])
+    _apply_plot_style()
+    fig, axes = plt.subplots(3, 3, figsize=(21.0, 18.5), gridspec_kw={"height_ratios": [1, 1.15, 1.15]})
+    from inference_plotting import _plain_ticks_if_narrow_log
+    # A: marginals
+    for ax, p in zip(axes[0], params):
+        s, x = rec["params"][p], draws[p]
+        gx, gd = _kde_curve(x, True)
+        color = PARAM_COLOR.get(p, "tab:blue")
+        lo, hi = s["ci95"]
+        inside = (gx >= lo) & (gx <= hi)
+        ax.fill_between(gx[inside], gd[inside], color=color, alpha=0.3, linewidth=0)
+        ax.plot(gx, gd, color=color, linewidth=2.0)
+        ax.axvline(s["truth"], **TRUTH_STYLE)
+        ax.set_xscale("log")
+        _plain_ticks_if_narrow_log(ax, "x")
+        ax.set_ylim(bottom=0)
+        ax.set_title(p)
+        ax.set_xlabel("Parameter Value")
+        ax.text(0.03, 0.95, f"z = {s['z']:+.2f}\nContraction = {s['contraction']:.4f}", transform=ax.transAxes,
+                va="top", ha="left", fontsize=PLOT_FONT_SIZE - 2)
+    axes[0, 0].set_ylabel("Density")
+    # B: pairwise joint posteriors
+    idx = np.linspace(0, len(draws[params[0]]) - 1, min(1600, len(draws[params[0]]))).round().astype(int)
+    for ax, (px, py) in zip(axes[1], itertools.combinations(params, 2)):
+        x, y = draws[px], draws[py]
+        r = np.corrcoef(np.log(x), np.log(y))[0, 1]
+        ax.scatter(x[idx], y[idx], s=6, color="0.35", alpha=0.35, linewidths=0)
+        ax.plot(rec["params"][px]["truth"], rec["params"][py]["truth"], marker="*", markersize=20, color="tab:red",
+                markeredgecolor="white", markeredgewidth=1.2, linestyle="none")
+        ax.set_xscale("log"); ax.set_yscale("log")
+        _plain_ticks_if_narrow_log(ax, "x"); _plain_ticks_if_narrow_log(ax, "y")
+        ax.set_xlabel(px); ax.set_ylabel(py)
+        ax.set_title(f"{px} vs {py}")
+        ax.text(0.03, 0.95, f"r = {r:+.2f}", transform=ax.transAxes, va="top", ha="left", fontsize=PLOT_FONT_SIZE - 1)
+    # C: fit to each dataset
+    err, half = _draw_fit({k: axes[2, i] for i, (k, *_) in enumerate(FIT_ROWS)}, exps[run], preds[run], truth_obs)
+    for i, (_, title, *_r) in enumerate(FIT_ROWS):
+        axes[2, i].set_title(title)
+        axes[2, i].set_ylim(bottom=0)
+    axes[2, 0].text(0.97, 0.05, f"Fit vs truth: within {err:.1f}%\n95% band: ±{half:.1f}% (median)",
+                    transform=axes[2, 0].transAxes, ha="right", va="bottom", fontsize=PLOT_FONT_SIZE - 3)
+    for row, letter in zip(axes, "ABC"):
+        row[0].text(-0.2, 1.12, letter, transform=row[0].transAxes, fontsize=PLOT_FONT_SIZE + 6, fontweight="bold",
+                    va="bottom", ha="left")
+    from matplotlib.lines import Line2D
+    h_fit, n_fit = _fit_legend()
+    handles = [plt.Rectangle((0, 0), 1, 1, color="0.5", alpha=0.3), Line2D([], [], **TRUTH_STYLE),
+               Line2D([], [], color="0.35", marker="o", linestyle="none", markersize=5, alpha=0.6),
+               Line2D([], [], color="tab:red", marker="*", linestyle="none", markersize=14)] + h_fit
+    names = ["95% Interval", "Truth", "Posterior Draws", "Truth (Pairs)"] + n_fit
+    fig.tight_layout(rect=(0, 0.05, 1, 1), h_pad=3.0)
+    fig.legend(handles, names, loc="upper center", bbox_to_anchor=(0.5, 0.045), ncol=4)
+    place_suptitle(fig, f"{run} — Main Fit: Posterior, Correlations and Predictive Fit")
+    return _save(fig, f"main_fit_{run.replace('Tier1 ', '').replace(' - ', '_').replace(' ', '_')}.png")
 
 
 def fig4_prior():
@@ -619,6 +715,140 @@ def fig5():
     return _save(fig, "grouping_test.png")
 
 
+SBC_LOGLIK = HERE / "sbc_loglik_ranks.json"   # written by the log-likelihood test-quantity script
+
+
+def _sbc_rows():
+    """Per SBC replicate: truths, posterior median / 95% interval and quantile of the truth for each
+    parameter (recovery.json), and the log-likelihood rank if computed."""
+    man = json.loads((HERE / "sbc_manifest.json").read_text())["replicates"]
+    rec = {r["run"]: r for r in json.loads((OUT / "recovery.json").read_text())}
+    ll = json.loads(SBC_LOGLIK.read_text()) if SBC_LOGLIK.exists() else {}
+    rows = []
+    for k, e in sorted(man.items(), key=lambda kv: int(kv[0])):
+        r = rec.get(e["run"])
+        if not r or r.get("skipped"):
+            continue
+        rows.append({"i": int(k), "params": r["params"], "ll_rank": ll.get(k, {}).get("rank")})
+    return rows
+
+
+def _ecdf_band(n, z, level=0.95, sims=20000, seed=0):
+    """Simultaneous band for the ECDF of n uniform values at points z (Säilynoja et al. 2022,
+    by simulation): pointwise binomial limits at the level gamma that keeps `level` of simulated
+    ECDFs inside everywhere. Returns (lower, upper, gamma, statistic function for p-values)."""
+    rng = np.random.default_rng(seed)
+    sim = np.sort(rng.random((sims, n)), axis=1)
+    ecdf = (sim[:, :, None] <= z[None, None, :]).sum(axis=1)          # counts, sims x len(z)
+    cdf = stats.binom.cdf(ecdf, n, z[None, :]); sf = stats.binom.sf(ecdf - 1, n, z[None, :])
+    stat_sim = np.minimum(cdf, sf).min(axis=1)                          # smallest pointwise tail prob
+    gamma = float(np.quantile(stat_sim, 1 - level))
+    lo = stats.binom.ppf(gamma, n, z) / n
+    hi = stats.binom.isf(gamma, n, z) / n
+
+    def p_value(u):
+        c = (np.sort(u)[:, None] <= z[None, :]).sum(axis=0)
+        s = min(np.minimum(stats.binom.cdf(c, n, z), stats.binom.sf(c - 1, n, z)).min(), 1.0)
+        return float(np.mean(stat_sim <= s))
+    return lo, hi, gamma, p_value
+
+
+def fig3_ecdf():
+    """SBC as ECDF differences with a simultaneous 95% band: for each parameter, and for the data's
+    log-likelihood at the truth ranked among the posterior draws (a test quantity in data space,
+    Modrák et al. 2023). A curve leaving the band is miscalibration; a dome in the rank histogram is
+    a curve below zero then above it."""
+    rows = _sbc_rows()
+    quantities = [("a1", [r["params"]["a1"]["quantile_of_truth"] for r in rows]),
+                  ("c3", [r["params"]["c3"]["quantile_of_truth"] for r in rows])]
+    ll = [r["ll_rank"] for r in rows if r["ll_rank"] is not None]
+    if len(ll) == len(rows):
+        quantities.append(("Log-Likelihood at the Truth", [(v + 0.5) / 100 for v in ll]))
+    n = len(rows)
+    z = np.linspace(0.005, 0.995, 199)
+    lo, hi, _, p_value = _ecdf_band(n, z)
+    zb = np.linspace(1 / (n + 1), n / (n + 1), n)          # the band on a coarse grid draws smoothly
+    blo, bhi, _, _ = _ecdf_band(n, zb)
+    _apply_plot_style()
+    fig, axes = plt.subplots(1, len(quantities), figsize=(6.4 * len(quantities), 5.4), sharey=True)
+    for ax, (name, u) in zip(np.atleast_1d(axes), quantities):
+        u = np.asarray(u, float)
+        e = (np.sort(u)[:, None] <= z[None, :]).mean(axis=0)
+        ax.fill_between(zb, blo - zb, bhi - zb, color="0.85", linewidth=0, label="Simultaneous 95% Band")
+        ax.axhline(0, color="0.5", linewidth=1)
+        ax.step(z, e - z, where="post", color=PARAM_COLOR.get(name, "0.2"), linewidth=2.2, label="Observed")
+        ax.set_title(name)
+        ax.set_xlabel("Fractional Rank of the Truth")
+        ax.text(0.03, 0.95, f"p = {p_value(u):.2f}", transform=ax.transAxes, va="top", ha="left",
+                fontsize=PLOT_FONT_SIZE - 1)
+    np.atleast_1d(axes)[0].set_ylabel("ECDF − Uniform")
+    from matplotlib.lines import Line2D
+    handles = [plt.Rectangle((0, 0), 1, 1, color="0.85"), Line2D([], [], color="0.3", linewidth=2.2)]
+    labels = ["Simultaneous 95% Band", "Observed (Colour by Quantity)"]
+    fig.tight_layout(rect=(0, 0.08, 1, 1))
+    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(0.5, 0.06), ncol=2)
+    place_suptitle(fig, f"Tier1 C8 - a1c3 — SBC: ECDF Difference, {n} Replicates")
+    return _save(fig, "sbc_ecdf.png")
+
+
+def fig3_coverage():
+    """SBC as coverage: how often the truth falls inside each central interval, against the level."""
+    rows = _sbc_rows()
+    n = len(rows)
+    levels = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99])
+    _apply_plot_style()
+    fig, ax = plt.subplots(figsize=(7.5, 7.0))
+    band_lo = stats.binom.ppf(0.025, n, levels) / n
+    band_hi = stats.binom.ppf(0.975, n, levels) / n
+    ax.fill_between(levels, band_lo, band_hi, color="0.87", linewidth=0, label="95% Range if Calibrated")
+    ax.plot([0, 1], [0, 1], color="0.5", linewidth=1)
+    for p in ("a1", "c3"):
+        q = np.array([r["params"][p]["quantile_of_truth"] for r in rows])
+        cov = [np.mean(np.abs(q - 0.5) <= lv / 2) for lv in levels]
+        ax.plot(levels, cov, "o-", color=PARAM_COLOR[p], linewidth=2, markersize=7, label=p)
+    ax.set_xlim(0, 1); ax.set_ylim(0, 1.02)
+    ax.set_xlabel("Central Interval Level")
+    ax.set_ylabel("Share of Replicates with the Truth Inside")
+    ax.set_aspect("equal")
+    fig.tight_layout(rect=(0, 0.1, 1, 1))
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(0.5, 0.08), ncol=3)
+    place_suptitle(fig, f"Tier1 C8 - a1c3 — SBC: Coverage, {n} Replicates")
+    return _save(fig, "sbc_coverage.png")
+
+
+def fig3_recovery():
+    """Recovery across the prior: each replicate's posterior median and 95% interval against its
+    truth, open markers where the interval misses."""
+    rows = _sbc_rows()
+    _apply_plot_style()
+    fig, axes = plt.subplots(1, 2, figsize=(14.0, 6.8))
+    from inference_plotting import _plain_ticks_if_narrow_log
+    for ax, p in zip(axes, ("a1", "c3")):
+        t = np.array([r["params"][p]["truth"] for r in rows])
+        m = np.array([r["params"][p]["median"] for r in rows])
+        ci = np.array([r["params"][p]["ci95"] for r in rows])
+        inside = (ci[:, 0] <= t) & (t <= ci[:, 1])
+        color = PARAM_COLOR[p]
+        lim = [min(t.min(), ci[:, 0].min()) / 1.3, max(t.max(), ci[:, 1].max()) * 1.3]
+        ax.plot(lim, lim, color="0.5", linewidth=1, label="Posterior = Truth")
+        for mask, face, lab in ((inside, color, "Truth Inside 95%"), (~inside, "white", "Truth Outside 95%")):
+            ax.errorbar(t[mask], m[mask], yerr=[m[mask] - ci[mask, 0], ci[mask, 1] - m[mask]], fmt="o", color=color,
+                        markerfacecolor=face, markersize=7, capsize=2, linewidth=1.2, linestyle="none",
+                        label=f"{lab} ({int(mask.sum())})")
+        ax.set_xscale("log"); ax.set_yscale("log")
+        ax.set_xlim(lim); ax.set_ylim(lim)
+        for axis in (ax.xaxis, ax.yaxis):
+            axis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v:g}"))
+        ax.set_title(p)
+        ax.set_xlabel("Truth (Drawn from the Prior)")
+        ax.set_ylabel("Posterior Median and 95% Interval")
+        ax.legend(loc="upper left", fontsize=PLOT_FONT_SIZE - 3)
+    fig.tight_layout()
+    place_suptitle(fig, f"Tier1 C8 - a1c3 — SBC: Recovery Across the Prior, {len(rows)} Replicates")
+    return _save(fig, "sbc_recovery.png")
+
+
 def fig4_si():
     """SI: the prior-shift runs from the default start (the shifted prior's mean) against the same
     shifts started at the ME1 values. Identical answers mean the start does not matter."""
@@ -738,11 +968,15 @@ def r8():
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("figure", choices=["fig2", "fig4", "fig4_fit", "fig4_prior", "fig4_si", "fig5", "r7", "r8", "all"])
+    ap.add_argument("figure", choices=["fig2", "fig2_main", "fig3_options", "fig4", "fig4_fit", "fig4_prior", "fig4_si", "fig5", "r7", "r8", "all"])
     ap.add_argument("run", nargs="?", default="Tier1 C14+unsat - a1c3", help="fig2's run (default R1)")
     a = ap.parse_args()
     if a.figure in ("fig2", "all"):
         fig2(a.run)
+    if a.figure in ("fig2_main", "all"):
+        fig2_main()
+    if a.figure in ("fig3_options", "all"):
+        fig3_ecdf(); fig3_coverage(); fig3_recovery()
     if a.figure in ("fig4", "all"):
         fig4()
     if a.figure in ("fig4_fit", "all"):

@@ -19,8 +19,12 @@ truth, and is scored for fit only.
 Per parameter it reports, following Schad, Betancourt & Vasishth (2021, eqs. 4-5), on the scale
 the prior is Normal on: log(x) for the LogNormal groups, x itself for the d-type groups.
   z            (posterior mean - truth) / posterior sd. How far off the recovered value is,
-               in units of its own stated uncertainty. |z| > 2 with high contraction is the
-               dangerous case -- confidently wrong -- and is flagged.
+               in units of its own stated uncertainty. Meaningful for a roughly Gaussian
+               posterior; a bimodal or long-tailed one can give |z| > 3 with the truth still
+               inside the posterior (sbc022: z -3.66, truth at the 98.4th percentile).
+  confidently wrong  the truth outside the central 99% interval (quantile < 0.005 or
+               > 0.995) with contraction > 0.5: judged on the posterior's own quantiles, so it
+               holds for any posterior shape (until 2026-09-27 it was |z| > 2).
   contraction  posterior contraction, 1 - posterior variance / prior variance: how much of
                the prior's uncertainty the data removed (1 = pinned down, 0 = learned
                nothing). The outline's 3.3 cutoff for "weakly identified" is < 0.5. On log(x)
@@ -134,7 +138,8 @@ def score(draws, truth, prior_sd, log_prior_sd=None):
         a, b = np.percentile(flat, [lo, hi])
         out[f"covered_{lvl}"] = bool(a <= truth <= b)
     # The failure mode that would undermine the paper: a tight posterior in the wrong place.
-    out["confidently_wrong"] = bool(abs(out["z"]) > 2 and out["contraction"] > CONTRACTION_WEAK)
+    q = out["quantile_of_truth"]
+    out["confidently_wrong"] = bool((q < 0.005 or q > 0.995) and out["contraction"] > CONTRACTION_WEAK)
     return out
 
 
@@ -229,7 +234,7 @@ def main():
         print(f"  truth inside the 95% interval for every parameter: "
               f"{len(scored) - len(miss)}/{len(scored)}" + (f"  (missed: {miss})" if miss else ""))
         if bad:
-            print(f"  CONFIDENTLY WRONG (|z| > 2 with contraction > {CONTRACTION_WEAK}): {bad}")
+            print(f"  CONFIDENTLY WRONG (truth outside the 99% interval, contraction > {CONTRACTION_WEAK}): {bad}")
         weak = [(r["run"], n) for r in scored for n, p in r["params"].items()
                 if "contraction" in p and p["contraction"] < CONTRACTION_WEAK]
         if weak:

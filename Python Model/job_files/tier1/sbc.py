@@ -119,7 +119,7 @@ def summarize(rank_rows, cover_rows, L, bins):
     return out
 
 
-def plot(summary, n, L, bins, path):
+def plot(summary, n, L, bins, path, excluded=None):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -141,18 +141,27 @@ def plot(summary, n, L, bins, path):
         ax.grid(axis="y", color=grid_c, lw=0.6)
         ax.set_axisbelow(True)
     np.atleast_1d(axes)[0].set_ylabel(f"replicates (of {n})", fontsize=9, color=muted)
-    fig.suptitle("SBC rank histograms (shaded: 99% range for a uniform bin)", fontsize=10, color=ink, x=0.01, ha="left")
+    title = "SBC rank histograms (shaded: 99% range for a uniform bin)"
+    if excluded:
+        title += "; excluded: " + ", ".join(f"sbc{int(i):03d}" for i in excluded)
+    fig.suptitle(title, fontsize=10, color=ink, x=0.01, ha="left")
     fig.tight_layout()
     fig.savefig(path)
     return path
 
 
+EXCLUDE_FILE = HERE / "sbc_exclude.json"   # {replicate index: reason}, left out of the ranks until resolved
+
+
 def ranks(L, bins):
     import arviz as az
     manifest = load_manifest()
+    excluded = json.loads(EXCLUDE_FILE.read_text()) if EXCLUDE_FILE.exists() else {}
     rank_rows, cover_rows, used, pending = [], [], [], []
     for i, e in sorted(manifest["replicates"].items(), key=lambda kv: int(kv[0])):
         post = PROJECT / "Results" / "Tier1" / e["run"] / "posterior_samples_pm.nc"
+        if str(int(i)) in excluded:
+            continue
         if e.get("status") != "ready" or not post.exists():
             pending.append(int(i))
             continue
@@ -164,13 +173,15 @@ def ranks(L, bins):
         print(f"no finished SBC runs yet ({len(pending)} pending)")
         return
     summary = summarize(rank_rows, cover_rows, L, bins)
-    out = {"L": L, "bins": bins, "replicates_used": used, "pending_or_failed": pending, "params": summary}
+    out = {"L": L, "bins": bins, "replicates_used": used, "pending_or_failed": pending,
+           "excluded": excluded, "params": summary}
     (HERE / "sbc_ranks.json").write_text(json.dumps(out, indent=1) + "\n")
-    fig = plot(summary, len(used), L, bins, HERE / "sbc_ranks.png")
+    fig = plot(summary, len(used), L, bins, HERE / "sbc_ranks.png", sorted(excluded, key=int))
     for p in PARAMS:
         s = summary[p]
         print(f"{p}: chi-square p = {s['p_uniform']:.3f}; coverage " + ", ".join(f"{k} {v:.2f}" for k, v in s["coverage"].items()))
-    print(f"{len(used)} replicates used, {len(pending)} pending/failed; wrote sbc_ranks.json, {fig.name}")
+    print(f"{len(used)} replicates used, {len(pending)} pending/failed, {len(excluded)} excluded "
+          f"({', '.join(f'sbc{int(i):03d}' for i in excluded)}); wrote sbc_ranks.json, {fig.name}")
 
 
 def selftest(n=400, L=99, bins=10, seed=1):
